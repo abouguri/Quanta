@@ -12,16 +12,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   try {
     // Simple test call to Grok API
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const response = await fetch('https://api.x.ai/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-2',
-        messages: [{ role: 'user', content: 'Say hello' }],
-        stream: false,
+        model: 'grok-4.20-reasoning',
+        input: 'Say hello in one word',
       }),
     })
 

@@ -40,46 +40,23 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // Call Grok API
-    const stream = await callGrokAPI(trimmedTopic)
+    const grokOutput = await callGrokAPI(trimmedTopic)
 
-    // Read the entire stream to extract the JSON response
-    const reader = stream.getReader()
-    let fullText = ''
-
+    // Parse the JSON response from Grok
+    let summaryData: SummaryResponse
     try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fullText += new TextDecoder().decode(value)
-      }
-    } finally {
-      reader.releaseLock()
-    }
-
-    // Parse the streamed response to extract JSON chunks
-    let jsonContent = ''
-    const lines = fullText.split('\n')
-
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const jsonStr = line.slice(6).trim()
-        if (jsonStr && jsonStr !== '[DONE]') {
-          try {
-            const chunk = JSON.parse(jsonStr) as {
-              choices?: Array<{ delta?: { content?: string } }>
-            }
-            if (chunk.choices?.[0]?.delta?.content) {
-              jsonContent += chunk.choices[0].delta.content
-            }
-          } catch {
-            // Ignore parsing errors for individual chunks
-          }
-        }
+      summaryData = JSON.parse(grokOutput) as SummaryResponse
+    } catch {
+      // If Grok returns plain text, create a structured response
+      summaryData = {
+        headline: grokOutput.split('\n')[0] || 'Unable to summarize',
+        bullets: grokOutput.split('\n').slice(0, 4),
+        bottom_line: grokOutput,
+        tone: 'neutral',
+        freshness: 'just now',
+        sources: [],
       }
     }
-
-    // Parse the accumulated JSON content
-    const summaryData = JSON.parse(jsonContent) as SummaryResponse
 
     // Format as SSE message and cache it
     const sseMessage = `data: ${JSON.stringify(summaryData)}\n\n`
