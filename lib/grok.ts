@@ -29,7 +29,11 @@ export async function callGrokAPI(topic: string): Promise<string> {
       const errorText = await response.text()
       console.error(`Grok API error: ${response.status} ${response.statusText}`)
       console.error('Response body:', errorText)
+      console.error('API Key (first 20 chars):', apiKey?.substring(0, 20))
 
+      if (response.status === 403) {
+        throw new Error('Grok API error: 403 Forbidden - Your API key may be disabled, quota exceeded, or access is restricted. Check console.x.ai dashboard and billing')
+      }
       if (response.status === 410) {
         throw new Error('Grok API error: Endpoint not found - API may have changed')
       }
