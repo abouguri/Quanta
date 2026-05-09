@@ -34,6 +34,7 @@ export async function POST(request: Request): Promise<Response> {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
         },
       })
     }
@@ -41,74 +42,59 @@ export async function POST(request: Request): Promise<Response> {
     // Call Grok API
     const stream = await callGrokAPI(trimmedTopic)
 
-    // Create a passthrough that captures the response for caching
-    let fullResponse = ''
-
-    // Convert the stream to text and collect it
+    // Read the entire stream to extract the JSON response
     const reader = stream.getReader()
-    const chunks: Uint8Array[] = []
+    let fullText = ''
 
     try {
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        chunks.push(value)
+        fullText += new TextDecoder().decode(value)
       }
     } finally {
       reader.releaseLock()
     }
 
-    // Combine chunks
-    const combined = new TextEncoder().encode(
-      chunks.map((chunk) => new TextDecoder().decode(chunk)).join('')
-    )
-
-    // Parse the response to extract JSON and format as SSE
-    const responseText = new TextDecoder().decode(combined)
-    const lines = responseText.split('\n')
+    // Parse the streamed response to extract JSON chunks
+    let jsonContent = ''
+    const lines = fullText.split('\n')
 
     for (const line of lines) {
       if (line.startsWith('data: ')) {
-        const data = line.slice(6)
-        try {
-          const parsed = JSON.parse(data) as {
-            choices?: Array<{ delta?: { content?: string } }>
+        const jsonStr = line.slice(6).trim()
+        if (jsonStr && jsonStr !== '[DONE]') {
+          try {
+            const chunk = JSON.parse(jsonStr) as {
+              choices?: Array<{ delta?: { content?: string } }>
+            }
+            if (chunk.choices?.[0]?.delta?.content) {
+              jsonContent += chunk.choices[0].delta.content
+            }
+          } catch {
+            // Ignore parsing errors for individual chunks
           }
-          if (parsed.choices?.[0]?.delta?.content) {
-            fullResponse += parsed.choices[0].delta.content
-          }
-        } catch {
-          // Ignore parsing errors for individual chunks
         }
       }
     }
 
-    // Try to parse the full response as JSON
-    try {
-      const summaryData = JSON.parse(fullResponse) as SummaryResponse
-      const sseMessage = `data: ${JSON.stringify(summaryData)}\n\n`
-      fullResponse = sseMessage
+    // Parse the accumulated JSON content
+    const summaryData = JSON.parse(jsonContent) as SummaryResponse
 
-      // Cache the result
-      await setCached(cacheKey, sseMessage, CACHE_TTL_SECONDS)
+    // Format as SSE message and cache it
+    const sseMessage = `data: ${JSON.stringify(summaryData)}\n\n`
+    await setCached(cacheKey, sseMessage, CACHE_TTL_SECONDS)
 
-      return new Response(fullResponse, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-        },
-      })
-    } catch {
-      // If parsing fails, return the raw response
-      return new Response(fullResponse, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-        },
-      })
-    }
+    return new Response(sseMessage, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Summarize API error:', message)
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
