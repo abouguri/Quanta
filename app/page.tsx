@@ -1,37 +1,109 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SearchBar } from '@/components/SearchBar'
 import { CategoryChips } from '@/components/CategoryChips'
 import { SummaryCard } from '@/components/SummaryCard'
 import { SkeletonCard } from '@/components/SkeletonCard'
 import { SummaryResponse } from '@/types/summary'
 
+// Declare Puter global type
+declare const puter: {
+  ai: {
+    chat: (
+      prompt: string,
+      options: { model: string; stream?: boolean }
+    ) => Promise<{ message?: { content: string } }>
+  }
+}
+
+const SYSTEM_PROMPT = `You are a real-time news summarizer with live web access.
+
+When given a topic, search for the latest news from the past 24 hours and return ONLY a valid JSON object — no markdown, no preamble — in this exact shape:
+
+{
+  "headline": "One sentence. The single most important development right now.",
+  "bullets": [
+    "Key fact 1 — max 25 words",
+    "Key fact 2 — max 25 words",
+    "Key fact 3 — max 25 words",
+    "Key fact 4 — max 25 words"
+  ],
+  "bottom_line": "Two sentences. Plain-English takeaway for someone who has no background on this topic.",
+  "tone": "neutral" | "mixed" | "heated",
+  "freshness": "How recent is the latest source? e.g. '2 hours ago'",
+  "sources": [
+    { "title": "Source name", "url": "https://..." },
+    { "title": "Source name", "url": "https://..." },
+    { "title": "Source name", "url": "https://..." }
+  ]
+}
+
+Tone definitions:
+- neutral: factual reporting, no strong editorial angle
+- mixed: coverage varies significantly across sources
+- heated: strong language, high conflict, polarized coverage
+
+Be factual. Do not editorialize. If there is no significant news in the past 24h, say so in the headline and set tone to "neutral".`
+
 export default function Home(): React.ReactElement {
   const [topic, setTopic] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<SummaryResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [puterReady, setPuterReady] = useState(false)
+
+  // Load Puter.js script
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://js.puter.com/v2/'
+    script.onload = () => {
+      setPuterReady(true)
+    }
+    script.onerror = () => {
+      setError('Failed to load Puter.js - please refresh the page')
+    }
+    document.head.appendChild(script)
+  }, [])
 
   const handleSearch = async (searchTopic: string): Promise<void> => {
+    if (!puterReady) {
+      setError('Puter.js is still loading. Please try again in a moment.')
+      return
+    }
+
     setTopic(searchTopic)
     setLoading(true)
     setError(null)
     setResult(null)
 
     try {
-      const response = await fetch('/api/summarize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: searchTopic }),
+      const userPrompt = `${SYSTEM_PROMPT}\n\nSummarize the latest news on: ${searchTopic}`
+
+      // Call Grok via Puter.js (user-pays model)
+      const response = await puter.ai.chat(userPrompt, {
+        model: 'x-ai/grok-4-1-fast',
       })
 
-      if (!response.ok) {
-        const errorData = await response.json() as { error?: string }
-        throw new Error(errorData.error || 'Failed to fetch summary')
+      const grokOutput = response.message?.content
+
+      if (!grokOutput) {
+        throw new Error('No response from Grok')
       }
 
-      const reader = response.body?.getReader()
+      // Send to backend for parsing and caching
+      const apiResponse = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: searchTopic, grokOutput }),
+      })
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json() as { error?: string }
+        throw new Error(errorData.error || 'Failed to process summary')
+      }
+
+      const reader = apiResponse.body?.getReader()
       if (!reader) throw new Error('No response body')
 
       let buffer = ''
@@ -87,12 +159,17 @@ export default function Home(): React.ReactElement {
 
         {/* Search Bar */}
         <div className="animate-fadeInUp">
-          <SearchBar onSubmit={handleSearch} disabled={loading} />
+          <SearchBar onSubmit={handleSearch} disabled={loading || !puterReady} />
+          {!puterReady && (
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              Loading AI service...
+            </p>
+          )}
         </div>
 
         {/* Category Chips */}
         <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-          <CategoryChips onSelect={handleSearch} disabled={loading} />
+          <CategoryChips onSelect={handleSearch} disabled={loading || !puterReady} />
         </div>
 
         {/* Results */}
