@@ -6,20 +6,13 @@ const CACHE_TTL_SECONDS = 300 // 5 minutes
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as { topic?: string; grokOutput?: string }
-    const { topic, grokOutput } = body
+    const body = await request.json() as { topic?: string }
+    const { topic } = body
 
     // Validate input
     if (!topic || typeof topic !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Missing or invalid topic' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
-    if (!grokOutput || typeof grokOutput !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'Missing or invalid grok output' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -46,7 +39,10 @@ export async function POST(request: Request): Promise<Response> {
       })
     }
 
-    // Parse the Grok output
+    // Call Grok API (with your API key from env)
+    const grokOutput = await callGrokAPI(trimmedTopic)
+
+    // Parse the JSON response from Grok
     let summaryData: SummaryResponse
     try {
       summaryData = JSON.parse(grokOutput) as SummaryResponse
