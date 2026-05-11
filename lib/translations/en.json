@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "FactNews",
+    "subtitle": "Analyze news credibility, detect misinformation, and evaluate bias"
+  },
+  "input": {
+    "urlTab": "Paste URL",
+    "textTab": "Paste Text",
+    "urlPlaceholder": "https://example.com/article",
+    "textPlaceholder": "Paste article text here (min 100 characters)...",
+    "submitButton": "Analyze Credibility",
+    "analyzingButton": "Analyzing...",
+    "charactersLabel": "characters"
+  },
+  "report": {
+    "title": "Credibility Analysis",
+    "scoreExplanation": "This article scores {score}/100 on credibility. 80-100 is reliable, 60-79 is moderate, 40-59 is questionable, and below 40 has high misinformation risk.",
+    "factRisk": "Fact Risk",
+    "factRiskHint": "Higher = riskier",
+    "bias": "Bias Level",
+    "biasHint": "Higher = more biased",
+    "sensationalism": "Sensationalism",
+    "sensationalismHint": "Higher = more sensationalist",
+    "redFlags": "Red Flags",
+    "redFlagsHint": "Credibility warnings",
+    "noRedFlags": "No major red flags found",
+    "warnings": "Warnings",
+    "reliable": "Reliable",
+    "moderate": "Moderate",
+    "questionable": "Questionable",
+    "highRisk": "High Risk",
+    "source": "Source",
+    "author": "Author",
+    "published": "Published"
+  },
+  "error": {
+    "title": "Error",
+    "generic": "An error occurred. Please try again."
+  },
+  "empty": {
+    "message": "Paste a URL or article text to analyze credibility"
+  }
+}

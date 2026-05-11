@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from '@/lib/i18n'
 
 interface ArticleInputProps {
   onSubmit: (url: string | null, text: string) => void
@@ -11,6 +12,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
   const [tab, setTab] = useState<'url' | 'text'>('url')
   const [urlInput, setUrlInput] = useState('')
   const [textInput, setTextInput] = useState('')
+  const { t } = useTranslation()
 
   const handleSubmit = () => {
     if (tab === 'url' && urlInput.trim()) {
@@ -34,7 +36,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Paste URL
+          {t('input.urlTab')}
         </button>
         <button
           onClick={() => setTab('text')}
@@ -44,7 +46,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Paste Text
+          {t('input.textTab')}
         </button>
       </div>
 
@@ -54,7 +56,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
           type="url"
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          placeholder="https://example.com/article"
+          placeholder={t('input.urlPlaceholder')}
           disabled={disabled}
           className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
         />
@@ -62,7 +64,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
         <textarea
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
-          placeholder="Paste article text here (min 100 characters)..."
+          placeholder={t('input.textPlaceholder')}
           disabled={disabled}
           rows={8}
           className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
@@ -75,12 +77,12 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
         disabled={!isReady || disabled}
         className="w-full px-6 py-3 bg-gray-900 dark:bg-gray-800 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-none"
       >
-        {disabled ? 'Analyzing...' : 'Analyze Credibility'}
+        {disabled ? t('input.analyzingButton') : t('input.submitButton')}
       </button>
 
       {tab === 'text' && (
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {textInput.length} characters ({textInput.length < 100 ? 'min 100 required' : '✓'})
+          {textInput.length} {t('input.charactersLabel')} ({textInput.length < 100 ? `${t('input.textTab')} 100 required` : '✓'})
         </p>
       )}
     </div>

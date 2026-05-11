@@ -5,11 +5,14 @@ import { ArticleInput } from '@/components/ArticleInput'
 import { CredibilityReport } from '@/components/CredibilityReport'
 import { AnalysisResult } from '@/types/analysis'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { LanguageSelector } from '@/components/LanguageSelector'
+import { useTranslation } from '@/lib/i18n'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { t, language } = useTranslation()
 
   const handleAnalyze = async (url: string | null, text: string) => {
     setLoading(true)
@@ -66,17 +69,20 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
+    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10 transition-colors">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">FactNews</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Analyze news credibility, detect misinformation, and evaluate bias
+              {t('header.subtitle')}
             </p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -90,7 +96,7 @@ export default function Home() {
         {/* Error */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-600 p-4 mb-6 rounded-none">
-            <p className="font-bold text-red-900 dark:text-red-200">Error</p>
+            <p className="font-bold text-red-900 dark:text-red-200">{t('error.title')}</p>
             <p className="text-red-800 dark:text-red-300 text-sm mt-1">{error}</p>
           </div>
         )}
@@ -117,7 +123,7 @@ export default function Home() {
         {/* Empty State */}
         {!loading && !result && !error && (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">Paste a URL or article text to analyze credibility</p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">{t('empty.message')}</p>
           </div>
         )}
       </div>

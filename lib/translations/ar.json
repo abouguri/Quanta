@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "FactNews",
+    "subtitle": "حلل مصداقية الأخبار، واكتشف المعلومات المضللة، وقيّم التحيز"
+  },
+  "input": {
+    "urlTab": "الصق الرابط",
+    "textTab": "الصق النص",
+    "urlPlaceholder": "https://example.com/article",
+    "textPlaceholder": "الصق نص المقالة هنا (100 حرف على الأقل)...",
+    "submitButton": "تحليل المصداقية",
+    "analyzingButton": "جاري التحليل...",
+    "charactersLabel": "أحرف"
+  },
+  "report": {
+    "title": "تحليل المصداقية",
+    "scoreExplanation": "تحصل هذه المقالة على {score}/100 في المصداقية. 80-100 موثوقة، 60-79 معتدلة، 40-59 مشكوك فيها، وأقل من 40 لها مخاطر عالية من المعلومات المضللة.",
+    "factRisk": "مخاطر الحقائق",
+    "factRiskHint": "أعلى = أخطر",
+    "bias": "مستوى التحيز",
+    "biasHint": "أعلى = أكثر تحيزاً",
+    "sensationalism": "الحسية",
+    "sensationalismHint": "أعلى = أكثر استثارة",
+    "redFlags": "الأعلام الحمراء",
+    "redFlagsHint": "تحذيرات المصداقية",
+    "noRedFlags": "لم يتم العثور على أعلام حمراء كبيرة",
+    "warnings": "التحذيرات",
+    "reliable": "موثوقة",
+    "moderate": "معتدلة",
+    "questionable": "مشكوك فيها",
+    "highRisk": "مخاطر عالية",
+    "source": "المصدر",
+    "author": "المؤلف",
+    "published": "منشور في"
+  },
+  "error": {
+    "title": "خطأ",
+    "generic": "حدث خطأ. يرجى المحاولة مرة أخرى."
+  },
+  "empty": {
+    "message": "الصق رابط أو نص مقالة لتحليل المصداقية"
+  }
+}

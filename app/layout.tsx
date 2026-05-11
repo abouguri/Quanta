@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
+import { TranslationProvider } from '@/lib/i18n'
 
 export const metadata: Metadata = {
   title: 'FactNews — News Credibility Analyzer',
@@ -31,7 +32,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          {children}
+          <TranslationProvider>
+            {children}
+          </TranslationProvider>
         </ThemeProvider>
       </body>
     </html>
