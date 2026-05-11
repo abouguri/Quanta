@@ -72,7 +72,7 @@
     "reset": "Reset defaults",
     "confirmReset": "Reset color thresholds to defaults?"
   },
-  "empty\": {
+  "empty": {
     "message": "Paste a URL or article text to analyze credibility"
   }
 }
