@@ -1,4 +1,5 @@
 import { SYSTEM_PROMPT } from './prompts'
+import { fetchNewsArticles } from './news'
 
 export async function callGrokAPI(topic: string): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY
@@ -7,22 +8,34 @@ export async function callGrokAPI(topic: string): Promise<string> {
     throw new Error('GROQ_API_KEY environment variable is not set')
   }
 
-  const userPrompt = `${SYSTEM_PROMPT}\n\nSummarize the latest news on: ${topic}`
-
   try {
+    // Fetch real news articles first
+    const articles = await fetchNewsArticles(topic)
+
+    if (articles.length === 0) {
+      throw new Error(`No recent news found for topic: ${topic}`)
+    }
+
+    // Format articles for the prompt
+    const articlesText = articles
+      .map((article, i) => `[${i + 1}] ${article.title}\n${article.description}\nSource: ${article.source.name}\nURL: ${article.url}`)
+      .join('\n\n')
+
+    const userPrompt = `${SYSTEM_PROMPT}\n\nRecent news articles on "${topic}":\n\n${articlesText}`
+
     console.log('Calling Groq API with topic:', topic)
 
     const requestBody = {
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: `Summarize the latest news on: ${topic}` },
+        { role: 'system', content: 'You are a news summarizer. Analyze the provided articles and return a JSON summary.' },
+        { role: 'user', content: userPrompt },
       ],
       temperature: 0.3,
       max_tokens: 1500,
     }
 
-    console.log('Request body:', JSON.stringify(requestBody, null, 2))
+    console.log('Request created for topic:', topic)
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
