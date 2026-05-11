@@ -24,8 +24,8 @@ export async function callGrokAPI(topic: string): Promise<string> {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: `Summarize the latest news on: ${topic}` },
         ],
-        temperature: 0.7,
-        max_tokens: 1024,
+        temperature: 0.3,
+        max_tokens: 1500,
       }),
     })
 
