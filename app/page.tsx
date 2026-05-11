@@ -1,34 +1,32 @@
 'use client'
 
 import { useState } from 'react'
-import { SearchBar } from '@/components/SearchBar'
-import { CategoryChips } from '@/components/CategoryChips'
-import { SummaryCard } from '@/components/SummaryCard'
-import { SkeletonCard } from '@/components/SkeletonCard'
-import { SummaryResponse } from '@/types/summary'
+import { ArticleInput } from '@/components/ArticleInput'
+import { CredibilityReport } from '@/components/CredibilityReport'
+import { AnalysisResult } from '@/types/analysis'
 
-export default function Home(): React.ReactElement {
-  const [topic, setTopic] = useState('')
+export default function Home() {
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<SummaryResponse | null>(null)
+  const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSearch = async (searchTopic: string): Promise<void> => {
-    setTopic(searchTopic)
+  const handleAnalyze = async (url: string | null, text: string) => {
     setLoading(true)
     setError(null)
     setResult(null)
 
     try {
-      const response = await fetch('/api/summarize', {
+      const body = url ? { articleUrl: url } : { articleText: text }
+
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: searchTopic }),
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) {
         const errorData = await response.json() as { error?: string }
-        throw new Error(errorData.error || 'Failed to fetch summary')
+        throw new Error(errorData.error || 'Failed to analyze article')
       }
 
       const reader = response.body?.getReader()
@@ -43,15 +41,14 @@ export default function Home(): React.ReactElement {
         const chunk = new TextDecoder().decode(value)
         buffer += chunk
 
-        // Process complete SSE messages
         const lines = buffer.split('\n')
-        buffer = lines[lines.length - 1] // Keep incomplete line
+        buffer = lines[lines.length - 1]
 
         for (let i = 0; i < lines.length - 1; i++) {
           const line = lines[i]
           if (line.startsWith('data: ')) {
             try {
-              const data = JSON.parse(line.slice(6)) as SummaryResponse
+              const data = JSON.parse(line.slice(6)) as AnalysisResult
               setResult(data)
             } catch {
               // Ignore parsing errors
@@ -71,30 +68,22 @@ export default function Home(): React.ReactElement {
     <main className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-serif font-bold text-gray-900">
-                FactNews
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                Real-time news summaries
-              </p>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-3xl font-serif font-bold text-gray-900">FactsNews</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Analyze news credibility, detect misinformation, and evaluate bias
+          </p>
         </div>
       </header>
 
-      {/* Search Section */}
-      <div className="bg-gray-50 border-b border-gray-200 py-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <SearchBar onSubmit={handleSearch} disabled={loading} />
-          <CategoryChips onSelect={handleSearch} disabled={loading} />
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Input Section */}
+        <div className="mb-8">
+          <ArticleInput onSubmit={handleAnalyze} disabled={loading} />
+        </div>
+
+        {/* Error */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
             <p className="font-bold text-red-900">Error</p>
@@ -102,16 +91,33 @@ export default function Home(): React.ReactElement {
           </div>
         )}
 
-        {loading && <SkeletonCard />}
+        {/* Loading State */}
+        {loading && (
+          <div className="space-y-4">
+            <div className="h-20 bg-gray-100 animate-pulse rounded-none" />
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-none" />
+              ))}
+            </div>
+          </div>
+        )}
 
-        {result && !loading && <SummaryCard data={result} />}
+        {/* Results */}
+        {result && !loading && (
+          <div className="animate-fadeInUp">
+            <CredibilityReport result={result} />
+          </div>
+        )}
 
+        {/* Empty State */}
         {!loading && !result && !error && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Search for a topic to get started</p>
+            <p className="text-gray-500 text-lg">Paste a URL or article text to analyze credibility</p>
           </div>
         )}
       </div>
     </main>
   )
 }
+
