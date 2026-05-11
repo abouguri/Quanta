@@ -13,7 +13,7 @@ export async function callGrokAPI(topic: string): Promise<string> {
     console.log('Calling Groq API with topic:', topic)
 
     const requestBody = {
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-70b-versatile',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: `Summarize the latest news on: ${topic}` },
