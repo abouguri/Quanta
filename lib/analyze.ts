@@ -6,54 +6,73 @@ import {
 } from './prompts'
 import { AnalysisResult, RedFlag } from '@/types/analysis'
 
-async function callGroqAPI(systemPrompt: string, userMessage: string): Promise<string> {
+async function callGroqAPI(systemPrompt: string, userMessage: string, retries: number = 3): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY
 
   if (!apiKey) {
     throw new Error('GROQ_API_KEY environment variable is not set')
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage },
-        ],
-        temperature: 0.3,
-        max_tokens: 800,
-      }),
-    })
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage },
+          ],
+          temperature: 0.3,
+          max_tokens: 800,
+        }),
+      })
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error(`Groq API error: ${response.status}`)
-      console.error('Response:', errorData)
-      throw new Error(`Groq API error: ${response.status}`)
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error(`Groq API error: ${response.status}`)
+        console.error('Response:', errorData)
+        
+        // Handle rate limiting with exponential backoff
+        if (response.status === 429 && attempt < retries - 1) {
+          const waitTime = Math.pow(2, attempt) * 1000 + Math.random() * 1000
+          console.log(`Rate limited. Retrying in ${Math.round(waitTime)}ms... (attempt ${attempt + 1}/${retries})`)
+          await new Promise(resolve => setTimeout(resolve, waitTime))
+          continue
+        }
+        
+        throw new Error(`Groq API error: ${response.status}`)
+      }
+
+      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+      let output = data.choices?.[0]?.message?.content
+
+      if (!output) {
+        throw new Error('Groq API returned no output')
+      }
+
+      // Remove markdown code blocks if present
+      output = output.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
+
+      return output
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      
+      // If it's a 429 and we have retries left, the loop will continue
+      if (message.includes('429') && attempt < retries - 1) {
+        continue
+      }
+      
+      console.error('Groq API call failed:', message)
+      throw error
     }
-
-    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
-    let output = data.choices?.[0]?.message?.content
-
-    if (!output) {
-      throw new Error('Groq API returned no output')
-    }
-
-    // Remove markdown code blocks if present
-    output = output.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
-
-    return output
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Groq API call failed:', message)
-    throw error
   }
+
+  throw new Error('Groq API call failed after maximum retries')
 }
 
 export async function analyzeArticle(
