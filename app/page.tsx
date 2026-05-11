@@ -6,7 +6,10 @@ import { CredibilityReport } from '@/components/CredibilityReport'
 import { AnalysisResult } from '@/types/analysis'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
+import { CopyButton } from '@/components/CopyButton'
+import { AnalysisHistory } from '@/components/AnalysisHistory'
 import { useTranslation } from '@/lib/i18n'
+import { saveAnalysis } from '@/lib/history'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
@@ -32,11 +35,25 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json() as { error?: string }
-        throw new Error(errorData.error || 'Failed to analyze article')
+        let errorKey = 'error.generic'
+        
+        if (errorData.error?.includes('100 characters')) {
+          errorKey = 'error.textTooShort'
+        } else if (errorData.error?.includes('invalid')) {
+          errorKey = 'error.urlInvalid'
+        } else if (errorData.error?.includes('429') || errorData.error?.includes('rate limit')) {
+          errorKey = 'error.rateLimited'
+        } else if (errorData.error?.includes('fetch')) {
+          errorKey = 'error.fetchFailed'
+        } else if (errorData.error?.includes('scrape')) {
+          errorKey = 'error.scrapeFailed'
+        }
+        
+        throw new Error(t(errorKey))
       }
 
       const reader = response.body?.getReader()
-      if (!reader) throw new Error('No response body')
+      if (!reader) throw new Error(t('error.apiError'))
 
       let buffer = ''
 
@@ -56,6 +73,8 @@ export default function Home() {
             try {
               const data = JSON.parse(line.slice(6)) as AnalysisResult
               setResult(data)
+              // Save to history
+              saveAnalysis(data, url || undefined)
             } catch {
               // Ignore parsing errors
             }
@@ -63,7 +82,7 @@ export default function Home() {
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error'
+      const message = err instanceof Error ? err.message : t('error.generic')
       setError(message)
     } finally {
       setLoading(false)
@@ -117,15 +136,37 @@ export default function Home() {
 
         {/* Results */}
         {result && !loading && (
-          <div className="animate-fadeInUp">
-            <CredibilityReport result={result} />
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 justify-end">
+              <CopyButton result={result} />
+            </div>
+            <div className="animate-fadeInUp">
+              <CredibilityReport result={result} />
+            </div>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && !result && !error && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">{t('empty.message')}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400 text-lg">{t('empty.message')}</p>
+              </div>
+            </div>
+            <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
+              <AnalysisHistory />
+            </div>
+          </div>
+        )}
+
+        {/* Results with History */}
+        {result && !loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+            <div className="lg:col-span-2" />
+            <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
+              <AnalysisHistory />
+            </div>
           </div>
         )}
       </div>

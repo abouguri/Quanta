@@ -38,7 +38,29 @@
   },
   "error": {
     "title": "Error",
-    "generic": "An error occurred. Please try again."
+    "generic": "An error occurred. Please try again.",
+    "urlInvalid": "Please enter a valid URL (e.g., https://example.com)",
+    "textTooShort": "Article text must be at least 100 characters",
+    "fetchFailed": "Could not fetch the article. Try copying the text directly.",
+    "scrapeFailed": "Could not extract article content. Please paste the text directly.",
+    "analysisFailed": "Analysis failed. Try again or paste the text directly.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "apiError": "Service temporarily unavailable. Please try again later."
+  },
+  "history": {
+    "title": "Recent Analyses",
+    "empty": "No analyses yet. Analyze an article to get started.",
+    "clearAll": "Clear all",
+    "confirmClear": "Are you sure you want to delete all analyses?",
+    "justNow": "just now",
+    "minutesAgo": "{count} minutes ago",
+    "hoursAgo": "{count} hours ago",
+    "daysAgo": "{count} days ago"
+  },
+  "copy": {
+    "button": "Copy results",
+    "copied": "Copied to clipboard!",
+    "failed": "Failed to copy"
   },
   "empty": {
     "message": "Paste a URL or article text to analyze credibility"
