@@ -8,7 +8,7 @@ type Language = 'en' | 'ar'
 
 interface TranslationContextType {
   language: Language
-  t: (path: string) => string
+  t: (path: string, replacements?: Record<string, string | number>) => string
   setLanguage: (lang: Language) => void
 }
 
