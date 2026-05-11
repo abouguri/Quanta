@@ -11,6 +11,13 @@
 html {
   scroll-behavior: smooth;
   color-scheme: light;
+  /* Hide scrollbar but keep scrolling functionality */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
 html.dark {
@@ -32,20 +39,19 @@ body {
 
 /* Light mode scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 5px;
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  display: none;
 }
 
 /* Dark mode */
@@ -55,26 +61,24 @@ html.dark body {
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: #111827;
+  display: none;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 5px;
+  display: none;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  display: none;
 }
 
 /* Firefox scrollbar */
 * {
-  scrollbar-color: #d1d5db #f3f4f6;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 html.dark * {
-  scrollbar-color: #4b5563 #111827;
+  scrollbar-width: none;
 }
 
 @keyframes fadeInUp {
