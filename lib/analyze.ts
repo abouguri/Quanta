@@ -39,11 +39,14 @@ async function callGroqAPI(systemPrompt: string, userMessage: string): Promise<s
     }
 
     const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
-    const output = data.choices?.[0]?.message?.content
+    let output = data.choices?.[0]?.message?.content
 
     if (!output) {
       throw new Error('Groq API returned no output')
     }
+
+    // Remove markdown code blocks if present
+    output = output.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
 
     return output
   } catch (error) {
@@ -68,10 +71,12 @@ export async function analyzeArticle(
       FACT_RISK_PROMPT,
       `Article:\n${truncatedText}`
     )
-    const factRiskData = JSON.parse(factRiskResponse) as {
-      riskScore: number
-      issues: string[]
-      explanation: string
+    let factRiskData: { riskScore: number; issues: string[]; explanation: string }
+    try {
+      factRiskData = JSON.parse(factRiskResponse)
+    } catch {
+      console.error('Failed to parse fact risk response:', factRiskResponse.substring(0, 200))
+      factRiskData = { riskScore: 50, issues: [], explanation: 'Could not parse response' }
     }
 
     // Pass 2: Bias Detection
@@ -80,11 +85,17 @@ export async function analyzeArticle(
       BIAS_PROMPT,
       `Article:\n${truncatedText}`
     )
-    const biasData = JSON.parse(biasResponse) as {
-      biasScore: number
-      biasType: string
-      evidence: string[]
-      explanation: string
+    let biasData: { biasScore: number; biasType: string; evidence: string[]; explanation: string }
+    try {
+      biasData = JSON.parse(biasResponse)
+    } catch {
+      console.error('Failed to parse bias response:', biasResponse.substring(0, 200))
+      biasData = {
+        biasScore: 50,
+        biasType: 'unknown',
+        evidence: [],
+        explanation: 'Could not parse response',
+      }
     }
 
     // Pass 3: Sensationalism
@@ -93,11 +104,22 @@ export async function analyzeArticle(
       SENSATIONALISM_PROMPT,
       `Article:\n${truncatedText}`
     )
-    const sensationalismData = JSON.parse(sensationalismResponse) as {
+    let sensationalismData: {
       sensationalismScore: number
       patterns: string[]
       examples: string[]
       explanation: string
+    }
+    try {
+      sensationalismData = JSON.parse(sensationalismResponse)
+    } catch {
+      console.error('Failed to parse sensationalism response:', sensationalismResponse.substring(0, 200))
+      sensationalismData = {
+        sensationalismScore: 50,
+        patterns: [],
+        examples: [],
+        explanation: 'Could not parse response',
+      }
     }
 
     // Pass 4: Red Flags
@@ -106,9 +128,12 @@ export async function analyzeArticle(
       RED_FLAGS_PROMPT,
       `Article:\n${truncatedText}`
     )
-    const redFlagsData = JSON.parse(redFlagsResponse) as {
-      flags: RedFlag[]
-      count: number
+    let redFlagsData: { flags: RedFlag[]; count: number }
+    try {
+      redFlagsData = JSON.parse(redFlagsResponse)
+    } catch {
+      console.error('Failed to parse red flags response:', redFlagsResponse.substring(0, 200))
+      redFlagsData = { flags: [], count: 0 }
     }
 
     // Calculate penalty for red flags (each high flag = 10 points, medium = 5, low = 2)
