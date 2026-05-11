@@ -4,8 +4,8 @@ import { AnalysisResult } from '@/types/analysis'
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as { articleUrl?: string; articleText?: string }
-    const { articleUrl, articleText } = body
+    const body = await request.json() as { articleUrl?: string; articleText?: string; language?: string }
+    const { articleUrl, articleText, language = 'en' } = body
 
     // Validate input
     if (!articleUrl && !articleText) {
@@ -50,7 +50,7 @@ export async function POST(request: Request): Promise<Response> {
 
     // Run analysis
     console.log('Starting analysis for article')
-    const result = await analyzeArticle(trimmedText, metadata)
+    const result = await analyzeArticle(trimmedText, metadata, language)
 
     // Return as SSE stream
     const stream = new ReadableStream<Uint8Array>({

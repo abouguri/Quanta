@@ -58,9 +58,13 @@ async function callGroqAPI(systemPrompt: string, userMessage: string): Promise<s
 
 export async function analyzeArticle(
   articleText: string,
-  metadata?: { title?: string; source?: string; author?: string; publishedDate?: string }
+  metadata?: { title?: string; source?: string; author?: string; publishedDate?: string },
+  language: string = 'en'
 ): Promise<AnalysisResult> {
   const truncatedText = articleText.substring(0, 5000)
+  const languageInstruction = language === 'ar' 
+    ? 'Respond in Arabic only.' 
+    : 'Respond in English only.'
 
   try {
     console.log('Starting multi-pass analysis...')
@@ -68,7 +72,7 @@ export async function analyzeArticle(
     // Pass 1: Fact Risk
     console.log('Pass 1: Analyzing fact risk...')
     const factRiskResponse = await callGroqAPI(
-      FACT_RISK_PROMPT,
+      FACT_RISK_PROMPT + '\n' + languageInstruction,
       `Article:\n${truncatedText}`
     )
     let factRiskData: { riskScore: number; issues: string[]; explanation: string }
@@ -82,7 +86,7 @@ export async function analyzeArticle(
     // Pass 2: Bias Detection
     console.log('Pass 2: Detecting bias...')
     const biasResponse = await callGroqAPI(
-      BIAS_PROMPT,
+      BIAS_PROMPT + '\n' + languageInstruction,
       `Article:\n${truncatedText}`
     )
     let biasData: { biasScore: number; biasType: string; evidence: string[]; explanation: string }
@@ -101,7 +105,7 @@ export async function analyzeArticle(
     // Pass 3: Sensationalism
     console.log('Pass 3: Analyzing sensationalism...')
     const sensationalismResponse = await callGroqAPI(
-      SENSATIONALISM_PROMPT,
+      SENSATIONALISM_PROMPT + '\n' + languageInstruction,
       `Article:\n${truncatedText}`
     )
     let sensationalismData: {
@@ -125,7 +129,7 @@ export async function analyzeArticle(
     // Pass 4: Red Flags
     console.log('Pass 4: Identifying red flags...')
     const redFlagsResponse = await callGroqAPI(
-      RED_FLAGS_PROMPT,
+      RED_FLAGS_PROMPT + '\n' + languageInstruction,
       `Article:\n${truncatedText}`
     )
     let redFlagsData: { flags: RedFlag[]; count: number }

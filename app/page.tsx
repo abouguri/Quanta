@@ -20,7 +20,9 @@ export default function Home() {
     setResult(null)
 
     try {
-      const body = url ? { articleUrl: url } : { articleText: text }
+      const body = url 
+        ? { articleUrl: url, language } 
+        : { articleText: text, language }
 
       const response = await fetch('/api/analyze', {
         method: 'POST',
