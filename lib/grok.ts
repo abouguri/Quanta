@@ -12,27 +12,31 @@ export async function callGrokAPI(topic: string): Promise<string> {
   try {
     console.log('Calling Groq API with topic:', topic)
 
+    const requestBody = {
+      model: 'mixtral-8x7b-32768',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Summarize the latest news on: ${topic}` },
+      ],
+      temperature: 0.3,
+      max_tokens: 1500,
+    }
+
+    console.log('Request body:', JSON.stringify(requestBody, null, 2))
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: 'mixtral-8x7b-32768',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `Summarize the latest news on: ${topic}` },
-        ],
-        temperature: 0.3,
-        max_tokens: 1500,
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`Groq API error: ${response.status} ${response.statusText}`)
-      console.error('Response:', errorText)
+      console.error('Response body:', errorText)
 
       if (response.status === 403) {
         throw new Error('API access forbidden - check your API key')
@@ -42,6 +46,9 @@ export async function callGrokAPI(topic: string): Promise<string> {
       }
       if (response.status === 429) {
         throw new Error('Rate limited - too many requests')
+      }
+      if (response.status === 400) {
+        throw new Error(`Bad Request - Invalid request format. Details: ${errorText}`)
       }
 
       throw new Error(`Groq API error: ${response.status} ${response.statusText}`)
