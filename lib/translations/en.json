@@ -31,7 +31,10 @@
     "highRisk": "High Risk",
     "source": "Source",
     "author": "Author",
-    "published": "Published"
+    "published": "Published",
+    "severityHigh": "high",
+    "severityMedium": "medium",
+    "severityLow": "low"
   },
   "error": {
     "title": "Error",

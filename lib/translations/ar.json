@@ -31,7 +31,10 @@
     "highRisk": "مخاطر عالية",
     "source": "المصدر",
     "author": "المؤلف",
-    "published": "منشور في"
+    "published": "منشور في",
+    "severityHigh": "مرتفع",
+    "severityMedium": "متوسط",
+    "severityLow": "منخفض"
   },
   "error": {
     "title": "خطأ",
