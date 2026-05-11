@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import { CopyButton } from '@/components/CopyButton'
 import { AnalysisHistory } from '@/components/AnalysisHistory'
+import { ColorThemeSettings } from '@/components/ColorThemeSettings'
 import { useTranslation } from '@/lib/i18n'
 import { saveAnalysis } from '@/lib/history'
 
@@ -156,6 +157,7 @@ export default function Home() {
             </div>
             <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
               <AnalysisHistory />
+              <ColorThemeSettings />
             </div>
           </div>
         )}
@@ -166,6 +168,7 @@ export default function Home() {
             <div className="lg:col-span-2" />
             <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
               <AnalysisHistory />
+              <ColorThemeSettings />
             </div>
           </div>
         )}

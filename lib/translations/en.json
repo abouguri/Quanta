@@ -62,7 +62,17 @@
     "copied": "Copied to clipboard!",
     "failed": "Failed to copy"
   },
-  "empty": {
+  "settings": {
+    "title": "Score Thresholds",
+    "reliableMin": "Reliable (≥)",
+    "moderateMin": "Moderate (≥)",
+    "questionableMin": "Questionable (≥)",
+    "save": "Save",
+    "saved": "Saved!",
+    "reset": "Reset defaults",
+    "confirmReset": "Reset color thresholds to defaults?"
+  },
+  "empty\": {
     "message": "Paste a URL or article text to analyze credibility"
   }
 }

@@ -1,6 +1,7 @@
 'use client'
 
-import { AnalysisHistory, getHistory, deleteHistoryEntry, clearHistory } from '@/lib/history'
+import type { AnalysisHistory } from '@/lib/history'
+import { getHistory, deleteHistoryEntry, clearHistory } from '@/lib/history'
 import { useState, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
 
