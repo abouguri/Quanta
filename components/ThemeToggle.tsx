@@ -4,13 +4,14 @@ import { useTheme } from '@/lib/theme'
 import { useEffect, useState } from 'react'
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Show placeholder on server/before mount
   if (!mounted) {
     return <div className="w-9 h-9" />
   }

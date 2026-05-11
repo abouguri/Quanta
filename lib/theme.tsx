@@ -22,27 +22,28 @@ const applyTheme = (newTheme: Theme) => {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
-  const [mounted, setMounted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
+  // Initialize theme from localStorage or system preference
   useEffect(() => {
-    // Get theme from localStorage or system preference
     const storedTheme = localStorage.getItem('theme') as Theme | null
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light')
 
     setTheme(initialTheme)
     applyTheme(initialTheme)
-    setMounted(true)
+    setIsMounted(true)
   }, [])
 
+  // Apply theme changes to DOM
   useEffect(() => {
-    if (mounted) {
+    if (isMounted) {
       applyTheme(theme)
     }
-  }, [theme, mounted])
+  }, [theme, isMounted])
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => {
+    setTheme((prevTheme: Theme) => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light'
       localStorage.setItem('theme', newTheme)
       return newTheme
