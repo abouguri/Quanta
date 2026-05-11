@@ -33,6 +33,28 @@ export function SearchBar({ onSubmit, disabled = false }: SearchBarProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          placeholder="Search news topics..."
+          disabled={disabled}
+          maxLength={200}
+          className="flex-1 px-4 py-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 placeholder-gray-500"
+        />
+        <button
+          type="submit"
+          disabled={disabled}
+          className="px-6 py-3 bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed rounded-none"
+        >
+          {disabled ? 'Searching...' : 'Search'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Search for news topic..."
           disabled={disabled}
           maxLength={200}

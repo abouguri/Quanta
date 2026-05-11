@@ -68,53 +68,49 @@ export default function Home(): React.ReactElement {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
-              FactNews
-            </h1>
-            <span className="px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full animate-pulse">
-              Live
-            </span>
+    <main className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-serif font-bold text-gray-900">
+                FactNews
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Real-time news summaries
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600 text-lg">
-            Real-time news summaries powered by AI
-          </p>
         </div>
+      </header>
 
-        {/* Search Bar */}
-        <div className="animate-fadeInUp">
+      {/* Search Section */}
+      <div className="bg-gray-50 border-b border-gray-200 py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           <SearchBar onSubmit={handleSearch} disabled={loading} />
-        </div>
-
-        {/* Category Chips */}
-        <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
           <CategoryChips onSelect={handleSearch} disabled={loading} />
         </div>
+      </div>
 
-        {/* Results */}
-        <div
-          className="animate-fadeInUp"
-          style={{ animationDelay: '0.2s' }}
-        >
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
-              <p className="font-semibold">Error</p>
-              <p>{error}</p>
-            </div>
-          )}
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <p className="font-bold text-red-900">Error</p>
+            <p className="text-red-800 text-sm mt-1">{error}</p>
+          </div>
+        )}
 
-          {loading && <SkeletonCard />}
+        {loading && <SkeletonCard />}
 
-          {result && !loading && (
-            <div className="animate-fadeInUp">
-              <SummaryCard data={result} />
-            </div>
-          )}
-        </div>
+        {result && !loading && <SummaryCard data={result} />}
+
+        {!loading && !result && !error && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Search for a topic to get started</p>
+          </div>
+        )}
       </div>
     </main>
   )
