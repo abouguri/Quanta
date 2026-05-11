@@ -62,6 +62,14 @@
     "copied": "Copied to clipboard!",
     "failed": "Failed to copy"
   },
+  "source": {
+    "title": "Source Credibility",
+    "credibilityLevel": "Credibility Level",
+    "bias": "Editorial Bias",
+    "rating": "Fact-Checker Rating",
+    "strengths": "Strengths",
+    "issues": "Notable Issues"
+  },
   "empty": {
     "message": "Paste a URL or article text to analyze credibility"
   }

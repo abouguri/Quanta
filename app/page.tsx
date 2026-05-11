@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ArticleInput } from '@/components/ArticleInput'
 import { CredibilityReport } from '@/components/CredibilityReport'
+import { SourceCredibilityCard } from '@/components/SourceCredibilityCard'
 import { AnalysisResult } from '@/types/analysis'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
@@ -141,6 +142,7 @@ export default function Home() {
               <CopyButton result={result} />
             </div>
             <div className="animate-fadeInUp">
+              <SourceCredibilityCard url={result.metadata?.source} />
               <CredibilityReport result={result} />
             </div>
           </div>
