@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { ArticleInput } from '@/components/ArticleInput'
 import { CredibilityReport } from '@/components/CredibilityReport'
 import { AnalysisResult } from '@/types/analysis'
+import { useTheme } from '@/lib/theme'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { theme, toggleTheme } = useTheme()
 
   const handleAnalyze = async (url: string | null, text: string) => {
     setLoading(true)
@@ -65,14 +67,31 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-serif font-bold text-gray-900">FactsNews</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Analyze news credibility, detect misinformation, and evaluate bias
-          </p>
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">FactNews</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Analyze news credibility, detect misinformation, and evaluate bias
+            </p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-yellow-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657 9.193l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zM5 10a1 1 0 100-2H4a1 1 0 100 2h1z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
         </div>
       </header>
 
@@ -85,19 +104,19 @@ export default function Home() {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-            <p className="font-bold text-red-900">Error</p>
-            <p className="text-red-800 text-sm mt-1">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-600 p-4 mb-6 rounded-none">
+            <p className="font-bold text-red-900 dark:text-red-200">Error</p>
+            <p className="text-red-800 dark:text-red-300 text-sm mt-1">{error}</p>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
           <div className="space-y-4">
-            <div className="h-20 bg-gray-100 animate-pulse rounded-none" />
+            <div className="h-20 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-none" />
             <div className="grid grid-cols-2 gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-none" />
+                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-none" />
               ))}
             </div>
           </div>
@@ -113,7 +132,7 @@ export default function Home() {
         {/* Empty State */}
         {!loading && !result && !error && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Paste a URL or article text to analyze credibility</p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Paste a URL or article text to analyze credibility</p>
           </div>
         )}
       </div>

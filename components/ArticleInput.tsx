@@ -25,13 +25,13 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
   return (
     <div className="w-full space-y-4">
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setTab('url')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             tab === 'url'
-              ? 'border-gray-900 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
           Paste URL
@@ -40,8 +40,8 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
           onClick={() => setTab('text')}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
             tab === 'text'
-              ? 'border-gray-900 text-gray-900'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
           Paste Text
@@ -56,7 +56,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
           onChange={(e) => setUrlInput(e.target.value)}
           placeholder="https://example.com/article"
           disabled={disabled}
-          className="w-full px-4 py-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 disabled:bg-gray-100 text-gray-900 placeholder-gray-500"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
         />
       ) : (
         <textarea
@@ -65,7 +65,7 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
           placeholder="Paste article text here (min 100 characters)..."
           disabled={disabled}
           rows={8}
-          className="w-full px-4 py-3 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 disabled:bg-gray-100 text-gray-900 placeholder-gray-500 font-mono text-sm"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-mono text-sm"
         />
       )}
 
@@ -73,13 +73,13 @@ export function ArticleInput({ onSubmit, disabled = false }: ArticleInputProps) 
       <button
         onClick={handleSubmit}
         disabled={!isReady || disabled}
-        className="w-full px-6 py-3 bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed rounded-none"
+        className="w-full px-6 py-3 bg-gray-900 dark:bg-gray-800 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-none"
       >
         {disabled ? 'Analyzing...' : 'Analyze Credibility'}
       </button>
 
       {tab === 'text' && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {textInput.length} characters ({textInput.length < 100 ? 'min 100 required' : '✓'})
         </p>
       )}

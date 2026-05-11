@@ -7,17 +7,17 @@ interface CredibilityReportProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-600'
-  if (score >= 60) return 'text-yellow-600'
-  if (score >= 40) return 'text-orange-600'
-  return 'text-red-600'
+  if (score >= 80) return 'text-green-600 dark:text-green-400'
+  if (score >= 60) return 'text-yellow-600 dark:text-yellow-400'
+  if (score >= 40) return 'text-orange-600 dark:text-orange-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 function getScoreBg(score: number): string {
-  if (score >= 80) return 'bg-green-50 border-green-200'
-  if (score >= 60) return 'bg-yellow-50 border-yellow-200'
-  if (score >= 40) return 'bg-orange-50 border-orange-200'
-  return 'bg-red-50 border-red-200'
+  if (score >= 80) return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+  if (score >= 60) return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+  if (score >= 40) return 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+  return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
 }
 
 function getScoreLabel(score: number): string {
@@ -33,15 +33,15 @@ export function CredibilityReport({ result }: CredibilityReportProps) {
       {/* Main Score */}
       <div className={`border-l-4 p-6 rounded-none ${getScoreBg(result.overallScore)}`}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Credibility Analysis</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Credibility Analysis</h2>
           <div className="text-right">
             <div className={`text-5xl font-bold ${getScoreColor(result.overallScore)}`}>
               {result.overallScore}
             </div>
-            <div className="text-sm text-gray-600 mt-1">{getScoreLabel(result.overallScore)}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">{getScoreLabel(result.overallScore)}</div>
           </div>
         </div>
-        <p className="text-gray-700 text-sm">
+        <p className="text-gray-700 dark:text-gray-300 text-sm">
           This article scores {result.overallScore}/100 on credibility. 80-100 is reliable, 60-79 is moderate, 40-59 is questionable, and below 40 has high misinformation risk.
         </p>
       </div>
@@ -49,43 +49,43 @@ export function CredibilityReport({ result }: CredibilityReportProps) {
       {/* Breakdown Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Fact Risk */}
-        <div className="border border-gray-200 p-4 bg-white">
-          <h3 className="font-bold text-gray-900 mb-2">Fact Risk</h3>
+        <div className="border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2">Fact Risk</h3>
           <div className="mb-3">
-            <div className="text-3xl font-bold text-gray-900">{result.factRiskScore}</div>
-            <div className="text-xs text-gray-500">Higher = riskier</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{result.factRiskScore}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Higher = riskier</div>
           </div>
-          <p className="text-sm text-gray-700">{result.breakdown.factRisk}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">{result.breakdown.factRisk}</p>
         </div>
 
         {/* Bias Score */}
-        <div className="border border-gray-200 p-4 bg-white">
-          <h3 className="font-bold text-gray-900 mb-2">Bias Level</h3>
+        <div className="border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2">Bias Level</h3>
           <div className="mb-3">
-            <div className="text-3xl font-bold text-gray-900">{result.biasScore}</div>
-            <div className="text-xs text-gray-500">Higher = more biased</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{result.biasScore}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Higher = more biased</div>
           </div>
-          <p className="text-sm text-gray-700">{result.breakdown.bias}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">{result.breakdown.bias}</p>
         </div>
 
         {/* Sensationalism */}
-        <div className="border border-gray-200 p-4 bg-white">
-          <h3 className="font-bold text-gray-900 mb-2">Sensationalism</h3>
+        <div className="border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2">Sensationalism</h3>
           <div className="mb-3">
-            <div className="text-3xl font-bold text-gray-900">{result.sensationalismScore}</div>
-            <div className="text-xs text-gray-500">Higher = more sensationalist</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{result.sensationalismScore}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Higher = more sensationalist</div>
           </div>
-          <p className="text-sm text-gray-700">{result.breakdown.sensationalism}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">{result.breakdown.sensationalism}</p>
         </div>
 
         {/* Red Flags */}
-        <div className="border border-gray-200 p-4 bg-white">
-          <h3 className="font-bold text-gray-900 mb-2">Red Flags</h3>
+        <div className="border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-2">Red Flags</h3>
           <div className="mb-3">
-            <div className="text-3xl font-bold text-gray-900">{result.redFlags.length}</div>
-            <div className="text-xs text-gray-500">Credibility warnings</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{result.redFlags.length}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Credibility warnings</div>
           </div>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             {result.redFlags.length === 0
               ? 'No major red flags found'
               : `${result.redFlags.filter(f => f.severity === 'high').length} high, ${result.redFlags.filter(f => f.severity === 'medium').length} medium`}
@@ -95,25 +95,25 @@ export function CredibilityReport({ result }: CredibilityReportProps) {
 
       {/* Red Flags Detail */}
       {result.redFlags.length > 0 && (
-        <div className="border border-red-200 bg-red-50 p-4 space-y-3">
-          <h3 className="font-bold text-gray-900">Warnings</h3>
+        <div className="border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 space-y-3">
+          <h3 className="font-bold text-gray-900 dark:text-white">Warnings</h3>
           <div className="space-y-2">
             {result.redFlags.map((flag, index) => (
               <div key={index} className="text-sm">
-                <div className="font-semibold text-gray-900 flex items-center gap-2">
+                <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <span
                     className={`w-2 h-2 rounded-full ${
                       flag.severity === 'high'
-                        ? 'bg-red-600'
+                        ? 'bg-red-600 dark:bg-red-400'
                         : flag.severity === 'medium'
-                          ? 'bg-orange-600'
-                          : 'bg-yellow-600'
+                          ? 'bg-orange-600 dark:bg-orange-400'
+                          : 'bg-yellow-600 dark:bg-yellow-400'
                     }`}
                   />
                   {flag.type}
-                  <span className="text-xs text-gray-500">({flag.severity})</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">({flag.severity})</span>
                 </div>
-                <p className="text-gray-700 ml-4">{flag.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 ml-4">{flag.description}</p>
               </div>
             ))}
           </div>
@@ -125,21 +125,21 @@ export function CredibilityReport({ result }: CredibilityReportProps) {
         result.metadata.source ||
         result.metadata.author ||
         result.metadata.publishedDate) && (
-        <div className="border-t border-gray-200 pt-4 text-sm text-gray-600">
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="grid grid-cols-2 gap-4">
             {result.metadata.source && (
               <div>
-                <span className="font-semibold text-gray-900">Source:</span> {result.metadata.source}
+                <span className="font-semibold text-gray-900 dark:text-white">Source:</span> {result.metadata.source}
               </div>
             )}
             {result.metadata.author && (
               <div>
-                <span className="font-semibold text-gray-900">Author:</span> {result.metadata.author}
+                <span className="font-semibold text-gray-900 dark:text-white">Author:</span> {result.metadata.author}
               </div>
             )}
             {result.metadata.publishedDate && (
               <div>
-                <span className="font-semibold text-gray-900">Published:</span>{' '}
+                <span className="font-semibold text-gray-900 dark:text-white">Published:</span>{' '}
                 {result.metadata.publishedDate}
               </div>
             )}

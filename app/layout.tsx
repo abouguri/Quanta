@@ -1,17 +1,18 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { ThemeProvider } from '@/lib/theme'
 
 export const metadata: Metadata = {
-  title: 'FactNews — Real-time news summaries',
+  title: 'FactNews — News Credibility Analyzer',
   description:
-    'Get real-time news summaries on any topic powered by Grok API with live web search.',
+    'Analyze news articles for credibility, bias, and misinformation risk. Get a bullshit meter score powered by AI.',
   keywords: [
     'news',
-    'summarizer',
-    'real-time',
-    'grok',
+    'credibility',
+    'misinformation',
+    'bias',
     'ai',
-    'current events',
+    'fact-check',
   ],
   authors: [{ name: 'FactNews' }],
   viewport: 'width=device-width, initial-scale=1',
@@ -23,8 +24,12 @@ export default function RootLayout({
   children: React.ReactNode
 }): React.ReactElement {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
