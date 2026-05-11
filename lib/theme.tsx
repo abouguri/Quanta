@@ -12,12 +12,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 const applyTheme = (newTheme: Theme) => {
+  console.log('Applying theme:', newTheme)
   const html = document.documentElement
   if (newTheme === 'dark') {
     html.classList.add('dark')
   } else {
     html.classList.remove('dark')
   }
+  console.log('Theme applied, html classes:', html.className, html.classList)
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -37,12 +39,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Apply theme to DOM whenever theme changes
   useEffect(() => {
+    console.log('Theme effect running, theme:', theme)
     applyTheme(theme)
   }, [theme])
 
   const toggleTheme = () => {
+    console.log('toggleTheme called, current theme:', theme)
     setTheme((prevTheme: Theme) => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light'
+      console.log('Setting theme from', prevTheme, 'to', newTheme)
       localStorage.setItem('theme', newTheme)
       return newTheme
     })
