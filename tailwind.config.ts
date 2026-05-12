@@ -9,8 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)'],
-        arabic: ['var(--font-cairo)'],
+        sans: 'var(--font-sans)',
       },
       keyframes: {
         pulse: {
