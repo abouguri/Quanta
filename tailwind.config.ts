@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+        arabic: ['var(--font-cairo)'],
+      },
       keyframes: {
         pulse: {
           '0%, 100%': { opacity: '1' },
