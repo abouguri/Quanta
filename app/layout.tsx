@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cairo } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
 import { TranslationProvider } from '@/lib/i18n'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' })
 
 export const metadata: Metadata = {
   title: 'FactNews — News Credibility Analyzer',
@@ -33,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }): React.ReactElement {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${cairo.variable}`}>
+    <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <TranslationProvider>
