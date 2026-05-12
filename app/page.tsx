@@ -16,12 +16,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const { t, language } = useTranslation()
 
   const handleAnalyze = async (url: string | null, text: string) => {
     setLoading(true)
     setError(null)
     setResult(null)
+    setCurrentUrl(url)
 
     try {
       const body = url 
@@ -142,7 +144,7 @@ export default function Home() {
               <CopyButton result={result} />
             </div>
             <div className="animate-fadeInUp">
-              <SourceCredibilityCard url={result.metadata?.source} />
+              <SourceCredibilityCard url={currentUrl || result.metadata?.source} />
               <CredibilityReport result={result} />
             </div>
           </div>
