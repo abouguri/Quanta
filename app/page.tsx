@@ -1,33 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { ArticleInput } from '@/components/ArticleInput'
+import { AnalyzingStage } from '@/components/AnalyzingStage'
 import { CredibilityReport } from '@/components/CredibilityReport'
-import { SourceCredibilityCard } from '@/components/SourceCredibilityCard'
-import { AnalysisResult } from '@/types/analysis'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { LanguageSelector } from '@/components/LanguageSelector'
-import { CopyButton } from '@/components/CopyButton'
 import { AnalysisHistory } from '@/components/AnalysisHistory'
+import { AnalysisResult } from '@/types/analysis'
+import { AnalysisHistory as AnalysisHistoryEntry, saveAnalysis } from '@/lib/history'
 import { useTranslation } from '@/lib/i18n'
-import { saveAnalysis } from '@/lib/history'
+
+type Stage = 'input' | 'analyzing' | 'report'
 
 export default function Home() {
-  const [loading, setLoading] = useState(false)
+  const [stage, setStage] = useState<Stage>('input')
+  const [target, setTarget] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
-  const { t, language } = useTranslation()
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [now] = useState(new Date())
+  const { language, setLanguage } = useTranslation()
 
-  const handleAnalyze = async (url: string | null, text: string) => {
-    setLoading(true)
-    setError(null)
-    setResult(null)
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  }).toUpperCase()
+
+  const handleAnalyze = useCallback(async (url: string | null, text: string) => {
+    const t = url || (text ? `pasted text · ${text.length} chars` : '')
+    setTarget(t)
     setCurrentUrl(url)
+    setResult(null)
+    setError(null)
+    setStage('analyzing')
 
     try {
-      const body = url 
-        ? { articleUrl: url, language } 
+      const body = url
+        ? { articleUrl: url, language }
         : { articleText: text, language }
 
       const response = await fetch('/api/analyze', {
@@ -38,143 +46,223 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json() as { error?: string }
-        let errorKey = 'error.generic'
-        
-        if (errorData.error?.includes('100 characters')) {
-          errorKey = 'error.textTooShort'
-        } else if (errorData.error?.includes('invalid')) {
-          errorKey = 'error.urlInvalid'
-        } else if (errorData.error?.includes('429') || errorData.error?.includes('rate limit')) {
-          errorKey = 'error.rateLimited'
-        } else if (errorData.error?.includes('fetch')) {
-          errorKey = 'error.fetchFailed'
-        } else if (errorData.error?.includes('scrape')) {
-          errorKey = 'error.scrapeFailed'
-        }
-        
-        throw new Error(t(errorKey))
+        throw new Error(errorData.error || 'Analysis failed')
       }
 
       const reader = response.body?.getReader()
-      if (!reader) throw new Error(t('error.apiError'))
+      if (!reader) throw new Error('No response stream')
 
       let buffer = ''
+      let finalResult: AnalysisResult | null = null
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-
-        const chunk = new TextDecoder().decode(value)
-        buffer += chunk
-
+        buffer += new TextDecoder().decode(value)
         const lines = buffer.split('\n')
         buffer = lines[lines.length - 1]
-
         for (let i = 0; i < lines.length - 1; i++) {
           const line = lines[i]
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6)) as AnalysisResult
-              setResult(data)
-              // Save to history
-              saveAnalysis(data, url || undefined)
-            } catch {
-              // Ignore parsing errors
-            }
+              if (data.overallScore !== undefined) {
+                finalResult = data
+                saveAnalysis(data, url || undefined)
+                setHistoryRefreshKey(k => k + 1)
+              }
+            } catch { /* ignore parse errors */ }
           }
         }
       }
+
+      if (finalResult) {
+        setResult(finalResult)
+        setStage('report')
+      } else {
+        throw new Error('No analysis result received')
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('error.generic')
+      const message = err instanceof Error ? err.message : 'Analysis failed'
       setError(message)
-    } finally {
-      setLoading(false)
+      setStage('input')
     }
-  }
+  }, [language])
+
+  const handleReset = useCallback(() => {
+    setStage('input')
+    setResult(null)
+    setTarget('')
+    setCurrentUrl(null)
+    setError(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const handleSelectHistory = useCallback((entry: AnalysisHistoryEntry) => {
+    setCurrentUrl(entry.url || null)
+    setTarget(entry.url || entry.title || 'Archived analysis')
+    setResult(entry.result)
+    setStage('report')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10 transition-colors">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">FactNews</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {t('header.subtitle')}
+    <div
+      id="app"
+      data-density="comfortable"
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
+      style={{ maxWidth: 1320, margin: '0 auto', padding: '28px 36px 64px' }}
+    >
+      {/* Masthead */}
+      <header style={{ borderBottom: '1px solid var(--ink)', paddingBottom: 20, marginBottom: 32 }}>
+        {/* top utility strip */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontFamily: 'var(--mono)',
+          fontSize: 11,
+          color: 'var(--ink-2)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.14em',
+          paddingBottom: 14,
+          borderBottom: '1px solid var(--paper-rule)',
+          marginBottom: 18,
+        }}>
+          <span>{dateStr}</span>
+          <span style={{ display: 'flex', gap: 18 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span style={{
+                width: 6, height: 6,
+                background: 'var(--moss)',
+                borderRadius: 6,
+                animation: 'pulse-dot 2s ease-in-out infinite',
+              }} />
+              Live analysis online
+            </span>
+            <span>Vol. I — No. 0427</span>
+          </span>
+        </div>
+
+        {/* logotype row */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+          <button onClick={handleReset} style={{ textAlign: 'left', cursor: 'pointer' }}>
+            <h1 style={{
+              fontFamily: 'var(--serif)',
+              fontWeight: 400,
+              fontSize: 'clamp(48px, 7vw, 88px)',
+              lineHeight: 0.9,
+              letterSpacing: '-0.02em',
+              margin: 0,
+              color: 'var(--ink)',
+            }}>
+              Fact<span style={{ fontStyle: 'italic', color: 'var(--vermillion)' }}>News</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink-3)', verticalAlign: 'top', marginLeft: 6, letterSpacing: 0 }}>™</span>
+            </h1>
+            <p style={{
+              margin: '6px 0 0',
+              fontFamily: 'var(--serif)',
+              fontStyle: 'italic',
+              fontSize: 20,
+              color: 'var(--ink-2)',
+              lineHeight: 1.2,
+            }}>
+              an instrument for reading news with both eyes open.
             </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <LanguageSelector />
-            <ThemeToggle />
+          </button>
+
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            alignItems: 'center',
+            fontFamily: 'var(--mono)',
+            fontSize: 11,
+            color: 'var(--ink-2)',
+          }}>
+            <NavPill label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
+            <NavPill label="AR" active={language === 'ar'} onClick={() => setLanguage('ar')} />
+            <span style={{ width: 1, height: 16, background: 'var(--paper-rule)', margin: '0 6px' }} />
+            <button
+              onClick={() => alert('FactNews — Four-pass AI review: Fact Risk → Bias & Framing → Sensationalism → Red Flags. Credibility scored 0–100. Not legal advice.')}
+              style={{
+                border: '1px solid var(--ink)',
+                padding: '8px 14px',
+                background: 'transparent',
+                fontFamily: 'var(--mono)',
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: '0.14em',
+                cursor: 'pointer',
+              }}
+            >
+              Method →
+            </button>
           </div>
         </div>
+
+        {/* double rule */}
+        <div style={{ marginTop: 18, height: 1, background: 'var(--ink)' }} />
+        <div style={{ marginTop: 3, height: 1, background: 'var(--ink)' }} />
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Input Section */}
-        <div className="mb-8">
-          <ArticleInput onSubmit={handleAnalyze} disabled={loading} />
+      {/* Error banner */}
+      {error && (
+        <div style={{
+          border: '1px solid var(--vermillion)',
+          borderLeft: '3px solid var(--vermillion)',
+          padding: '14px 18px',
+          marginBottom: 28,
+          fontFamily: 'var(--mono)',
+          fontSize: 13,
+          color: 'var(--vermillion)',
+          background: 'var(--paper-2)',
+        }}>
+          <span className="smcap" style={{ color: 'var(--vermillion)', display: 'block', marginBottom: 4 }}>Analysis error</span>
+          {error}
         </div>
+      )}
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-600 p-4 mb-6 rounded-none">
-            <p className="font-bold text-red-900 dark:text-red-200">{t('error.title')}</p>
-            <p className="text-red-800 dark:text-red-300 text-sm mt-1">{error}</p>
-          </div>
-        )}
+      {/* 2-column layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 40 }}>
+        <main style={{ minWidth: 0 }}>
+          {stage === 'input' && (
+            <ArticleInput onSubmit={handleAnalyze} />
+          )}
+          {stage === 'analyzing' && (
+            <AnalyzingStage target={target} />
+          )}
+          {stage === 'report' && result && (
+            <CredibilityReport result={result} currentUrl={currentUrl} onReset={handleReset} />
+          )}
+        </main>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="space-y-4">
-            <div className="h-20 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-none" />
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-none" />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Results */}
-        {result && !loading && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 justify-end">
-              <CopyButton result={result} />
-            </div>
-            <div className="animate-fadeInUp">
-              <SourceCredibilityCard url={currentUrl || result.metadata?.source} />
-              <CredibilityReport result={result} />
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !result && !error && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400 text-lg">{t('empty.message')}</p>
-              </div>
-            </div>
-            <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
-              <AnalysisHistory />
-            </div>
-          </div>
-        )}
-
-        {/* Results with History */}
-        {result && !loading && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            <div className="lg:col-span-2" />
-            <div className="lg:col-span-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 rounded-none">
-              <AnalysisHistory />
-            </div>
-          </div>
-        )}
+        <AnalysisHistory
+          onSelect={handleSelectHistory}
+          currentUrl={currentUrl}
+          refreshKey={historyRefreshKey}
+        />
       </div>
-    </main>
+    </div>
   )
 }
 
+function NavPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '8px 12px',
+        border: active ? '1px solid var(--ink)' : '1px solid transparent',
+        background: active ? 'var(--ink)' : 'transparent',
+        color: active ? 'var(--paper)' : 'var(--ink-2)',
+        fontFamily: 'var(--mono)',
+        fontSize: 11,
+        textTransform: 'uppercase',
+        letterSpacing: '0.14em',
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
+  )
+}
