@@ -38,7 +38,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
       {/* Lede */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 5fr) minmax(0, 3fr)', gap: 48, alignItems: 'end' }}>
         <div>
-          <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Today's Brief — No. 0427</p>
+          <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Today&apos;s Brief — No. 0427</p>
           <h2 style={{
             fontFamily: 'var(--serif)',
             fontWeight: 400,

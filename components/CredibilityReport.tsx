@@ -260,7 +260,7 @@ function SourceDossier({ source, domain }: SourceDossierProps) {
         <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--paper-rule)' }}>
           <div className="smcap" style={{ color: 'var(--ink-3)' }}>Fact-checker note</div>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, marginTop: 4 }}>
-            "{source.factCheckerRating}."
+            &ldquo;{source.factCheckerRating}.&rdquo;
           </div>
         </div>
       )}
