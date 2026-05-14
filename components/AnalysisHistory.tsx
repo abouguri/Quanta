@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnalysisHistory as AnalysisHistoryEntry, getHistory, clearHistory } from '@/lib/history'
+import { useTranslation } from '@/lib/i18n'
 
 interface AnalysisHistoryProps {
   onSelect: (entry: AnalysisHistoryEntry) => void
@@ -16,19 +17,8 @@ function scoreColor(score: number): string {
   return 'var(--vermillion)'
 }
 
-function timeAgo(timestamp: number): string {
-  const diffMs = Date.now() - timestamp
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
-  if (diffMins < 1) return 'just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
 export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHistoryProps) {
+  const { t } = useTranslation()
   const [history, setHistory] = useState<AnalysisHistoryEntry[]>([])
   const [mounted, setMounted] = useState(false)
 
@@ -37,19 +27,52 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHi
     setMounted(true)
   }, [refreshKey])
 
-  if (!mounted) return <HistoryShell><HistoryEmpty /></HistoryShell>
-
   const handleClear = () => {
-    if (confirm('Clear all analysis history?')) {
+    if (confirm(t('history.confirmClear'))) {
       clearHistory()
       setHistory([])
     }
   }
 
   return (
-    <HistoryShell onClear={history.length > 0 ? handleClear : undefined}>
-      {history.length === 0 ? (
-        <HistoryEmpty />
+    <aside style={{
+      borderLeft: '1px solid var(--paper-rule)',
+      paddingLeft: 28,
+      position: 'sticky',
+      top: 32,
+      alignSelf: 'start',
+      maxHeight: 'calc(100vh - 64px)',
+      overflowY: 'auto',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('history.title')}</p>
+        {mounted && history.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="mono"
+            style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer' }}
+          >
+            {t('history.clearAll')}
+          </button>
+        )}
+      </div>
+      <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-2)', margin: '0 0 18px', fontSize: 14 }}>
+        {t('history.subtitle')}
+      </p>
+
+      {!mounted || history.length === 0 ? (
+        <div style={{
+          padding: '32px 12px',
+          textAlign: 'center',
+          fontFamily: 'var(--mono)',
+          fontSize: 12,
+          color: 'var(--ink-3)',
+          letterSpacing: '0.1em',
+          border: '1px dashed var(--paper-rule)',
+          whiteSpace: 'pre-line',
+        }}>
+          {t('history.empty')}
+        </div>
       ) : (
         <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {history.map((entry) => (
@@ -62,75 +85,34 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHi
           ))}
         </ol>
       )}
-    </HistoryShell>
-  )
-}
-
-function HistoryShell({
-  children,
-  onClear,
-}: {
-  children: React.ReactNode
-  onClear?: () => void
-}) {
-  return (
-    <aside style={{
-      borderLeft: '1px solid var(--paper-rule)',
-      paddingLeft: 28,
-      position: 'sticky',
-      top: 32,
-      alignSelf: 'start',
-      maxHeight: 'calc(100vh - 64px)',
-      overflowY: 'auto',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
-        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>The archive</p>
-        {onClear && (
-          <button
-            onClick={onClear}
-            className="mono"
-            style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer' }}
-          >
-            Clear all
-          </button>
-        )}
-      </div>
-      <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-2)', margin: '0 0 18px', fontSize: 14 }}>
-        Recent passes, stored locally on this device.
-      </p>
-      {children}
     </aside>
   )
 }
 
-function HistoryEmpty() {
-  return (
-    <div style={{
-      padding: '32px 12px',
-      textAlign: 'center',
-      fontFamily: 'var(--mono)',
-      fontSize: 12,
-      color: 'var(--ink-3)',
-      letterSpacing: '0.1em',
-      border: '1px dashed var(--paper-rule)',
-    }}>
-      NO ENTRIES YET.<br />
-      ANALYZE AN ARTICLE TO BEGIN.
-    </div>
-  )
-}
-
 function HistoryItem({
-  entry,
-  active,
-  onSelect,
+  entry, active, onSelect,
 }: {
   entry: AnalysisHistoryEntry
   active: boolean
   onSelect: (e: AnalysisHistoryEntry) => void
 }) {
+  const { t } = useTranslation()
   const c = scoreColor(entry.score)
-  const sourceName = entry.result?.metadata?.source || (entry.url ? (() => { try { return new URL(entry.url!).hostname.replace(/^www\./, '') } catch { return '' } })() : '')
+
+  const sourceName = entry.result?.metadata?.source
+    || (entry.url ? (() => { try { return new URL(entry.url!).hostname.replace(/^www\./, '') } catch { return '' } })() : '')
+
+  const whenAgo = (() => {
+    const diffMs = Date.now() - entry.date
+    const mins = Math.floor(diffMs / 60000)
+    const hours = Math.floor(diffMs / 3600000)
+    const days = Math.floor(diffMs / 86400000)
+    if (mins < 1) return t('history.justNow')
+    if (mins < 60) return t('history.minutesAgo', { count: mins })
+    if (hours < 24) return t('history.hoursAgo', { count: hours })
+    if (days < 7) return t('history.daysAgo', { count: days })
+    return new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  })()
 
   return (
     <li>
@@ -156,7 +138,7 @@ function HistoryItem({
         </div>
         <div style={{ minWidth: 0 }}>
           <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
-            {sourceName}{sourceName ? ' · ' : ''}{timeAgo(entry.date)}
+            {sourceName}{sourceName ? ' · ' : ''}{whenAgo}
           </div>
           <div style={{
             fontFamily: 'var(--serif)',

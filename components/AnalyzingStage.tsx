@@ -1,33 +1,30 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslation } from '@/lib/i18n'
 
-const PASS_LABELS = [
-  { code: '01', name: 'FACT RISK',      detail: 'checking claims against named sources …' },
-  { code: '02', name: 'BIAS & FRAMING', detail: 'scanning loaded language and attribution …' },
-  { code: '03', name: 'SENSATIONALISM', detail: 'measuring emotional intensifiers …' },
-  { code: '04', name: 'RED FLAGS',      detail: 'cross-referencing fact-checker databases …' },
-]
-
-interface AnalyzingStageProps {
-  target: string
-}
-
-export function AnalyzingStage({ target }: AnalyzingStageProps) {
+export function AnalyzingStage({ target }: { target: string }) {
+  const { t } = useTranslation()
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 70)
+    const id = setInterval(() => setTick(v => v + 1), 70)
     return () => clearInterval(id)
   }, [])
 
-  // 4 passes × 24 ticks each = 96 total; after that, loop in completed state
   const total = 96
-  const t = Math.min(tick, total)
+  const tCapped = Math.min(tick, total)
 
-  const passProgress = PASS_LABELS.map((_, i) => {
+  const PASSES = [
+    { code: '01', nameKey: 'analyzing.pass01', detailKey: 'analyzing.pass01Detail' },
+    { code: '02', nameKey: 'analyzing.pass02', detailKey: 'analyzing.pass02Detail' },
+    { code: '03', nameKey: 'analyzing.pass03', detailKey: 'analyzing.pass03Detail' },
+    { code: '04', nameKey: 'analyzing.pass04', detailKey: 'analyzing.pass04Detail' },
+  ]
+
+  const passProgress = PASSES.map((_, i) => {
     const start = i * 24
-    const local = t - start
+    const local = tCapped - start
     if (local <= 0) return 0
     if (local >= 24) return 1
     return local / 24
@@ -49,7 +46,7 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
     >
       {/* Left: pass list */}
       <div>
-        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Now reading</p>
+        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('analyzing.nowReading')}</p>
         <div style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-3)', marginTop: 6, wordBreak: 'break-all' }}>
           {target}
         </div>
@@ -63,11 +60,11 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
           margin: '16px 0 28px',
           color: 'var(--ink)',
         }}>
-          Working through the article<span className="caret" />
+          {t('analyzing.working')}<span className="caret" />
         </h2>
 
         <div style={{ display: 'grid', gap: 14 }}>
-          {PASS_LABELS.map((p, i) => {
+          {PASSES.map((p, i) => {
             const prog = passProgress[i]
             const done = prog >= 1
             const active = prog > 0 && prog < 1
@@ -87,17 +84,16 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
                     fontWeight: 600,
                     color: done ? 'var(--moss)' : 'var(--ink)',
                   }}>
-                    {p.name}
+                    {t(p.nameKey)}
                   </span>
                   <span style={{ flex: 1, borderBottom: '1px dotted var(--paper-rule)', height: 1, alignSelf: 'center' }} />
                   <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-                    {done ? '✓ DONE' : active ? `${Math.floor(prog * 100)}%` : 'QUEUED'}
+                    {done ? t('analyzing.done') : active ? `${Math.floor(prog * 100)}%` : t('analyzing.queued')}
                   </span>
                 </div>
                 <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--mono)' }}>
-                  {p.detail}
+                  {t(p.detailKey)}
                 </div>
-                {/* progress bar */}
                 <div style={{ marginTop: 10, height: 3, background: 'var(--paper-2)', position: 'relative', overflow: 'hidden' }}>
                   <div style={{
                     position: 'absolute',
@@ -114,15 +110,17 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
 
         <div style={{ marginTop: 22 }}>
           <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-            ELAPSED {elapsedSec}s &nbsp;·&nbsp; PASSES {doneCount}/4
-            {doneCount === 4 && <span style={{ marginLeft: 16, color: 'var(--moss)' }}>— WAITING FOR RESULTS…</span>}
+            {t('analyzing.elapsed')} {elapsedSec}s &nbsp;·&nbsp; {t('analyzing.passes')} {doneCount}/4
+            {doneCount === 4 && (
+              <span style={{ marginLeft: 16, color: 'var(--moss)' }}>{t('analyzing.waitingResults')}</span>
+            )}
           </span>
         </div>
       </div>
 
       {/* Right: scanning placeholder */}
       <aside>
-        <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>Article surface</p>
+        <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>{t('analyzing.articleSurface')}</p>
         <div style={{
           marginTop: 12,
           border: '1px solid var(--paper-rule)',
@@ -132,7 +130,6 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
           background: 'var(--paper)',
           height: 360,
         }}>
-          {/* scanning bar */}
           <div style={{
             position: 'absolute',
             left: 0, right: 0,
@@ -142,7 +139,6 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
             animation: 'scan 2.2s ease-in-out infinite',
             pointerEvents: 'none',
           }} />
-          {/* fake article lines */}
           <div style={{ display: 'grid', gap: 10 }}>
             {[100, 92, 96, 88, 70, 100, 84, 91, 60, 95, 89, 100, 78, 92].map((w, i) => (
               <div key={i} style={{
@@ -155,7 +151,7 @@ export function AnalyzingStage({ target }: AnalyzingStageProps) {
           </div>
         </div>
         <div className="mono" style={{ marginTop: 12, fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-          DO NOT REFRESH — STREAMING ANALYSIS
+          {t('analyzing.doNotRefresh')}
         </div>
       </aside>
     </section>

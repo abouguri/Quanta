@@ -2,6 +2,7 @@
 
 import { AnalysisResult, RedFlag } from '@/types/analysis'
 import { getSourceCredibility } from '@/lib/sourceDatabase'
+import { useTranslation } from '@/lib/i18n'
 
 interface CredibilityReportProps {
   result: AnalysisResult
@@ -9,12 +10,12 @@ interface CredibilityReportProps {
   onReset: () => void
 }
 
-function verdictMeta(score: number) {
-  if (score >= 80) return { label: 'RELIABLE',     color: 'var(--moss)',                   tone: 'Reads as solid reporting.' }
-  if (score >= 60) return { label: 'MODERATE',     color: 'oklch(0.60 0.13 75)',           tone: 'Mostly reliable, with caveats.' }
-  if (score >= 40) return { label: 'QUESTIONABLE', color: 'oklch(0.62 0.18 55)',           tone: 'Approach with skepticism.' }
-  if (score >= 20) return { label: 'LOW',          color: 'var(--vermillion-2)',            tone: 'Substantial credibility concerns.' }
-  return               { label: 'HIGH RISK',    color: 'var(--vermillion)',              tone: 'Treat as unverified or worse.' }
+function scoreColor(score: number): string {
+  if (score >= 80) return 'var(--moss)'
+  if (score >= 60) return 'oklch(0.60 0.13 75)'
+  if (score >= 40) return 'oklch(0.62 0.18 55)'
+  if (score >= 20) return 'var(--vermillion-2)'
+  return 'var(--vermillion)'
 }
 
 function biasIndex(bias: string): number {
@@ -22,27 +23,43 @@ function biasIndex(bias: string): number {
   return map[bias] ?? 0
 }
 
-const BIAS_LABELS: Record<string, string> = { '-2': 'LEFT', '-1': 'CENTER-LEFT', '0': 'CENTER', '1': 'CENTER-RIGHT', '2': 'RIGHT' }
-
 export function CredibilityReport({ result, currentUrl, onReset }: CredibilityReportProps) {
-  const v = verdictMeta(result.overallScore)
+  const { t } = useTranslation()
+  const v = {
+    color: scoreColor(result.overallScore),
+    label: result.overallScore >= 80 ? t('report.reliable')
+      : result.overallScore >= 60 ? t('report.moderate')
+      : result.overallScore >= 40 ? t('report.questionable')
+      : result.overallScore >= 20 ? t('report.low')
+      : t('report.highRisk'),
+    tone: result.overallScore >= 80 ? t('report.reliableTone')
+      : result.overallScore >= 60 ? t('report.moderateTone')
+      : result.overallScore >= 40 ? t('report.questionableTone')
+      : result.overallScore >= 20 ? t('report.lowTone')
+      : t('report.highRiskTone'),
+  }
+
   const reportId = Math.random().toString(16).slice(2, 8).toUpperCase()
   const reportDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
 
-  // Resolve source: prefer URL lookup, fall back to metadata.source domain
   const sourceLookupUrl = currentUrl || (result.metadata.source ? `https://${result.metadata.source}` : '')
   const source = sourceLookupUrl ? getSourceCredibility(sourceLookupUrl) : null
 
+  const flagCount = result.redFlags.length
+  const flagText = flagCount === 1
+    ? t('report.redFlagCount', { n: flagCount })
+    : t('report.redFlagCountPlural', { n: flagCount })
+
   return (
     <section className="animate-fadeInUp" style={{ paddingTop: 10 }}>
-      {/* Back + report ID row */}
+      {/* Back + report ID */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <button
           onClick={onReset}
           className="mono"
           style={{ fontSize: 12, color: 'var(--ink-2)', textTransform: 'uppercase', letterSpacing: '0.16em', cursor: 'pointer' }}
         >
-          ← Analyze another
+          {t('report.analyzeAnother')}
         </button>
         <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
           REPORT · {reportDate} · ID #{reportId}
@@ -58,10 +75,9 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
         gridTemplateColumns: 'minmax(0, 1fr) auto',
         gap: 32,
         alignItems: 'center',
-        position: 'relative',
       }}>
         <div>
-          <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>The verdict</p>
+          <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.theVerdict')}</p>
           <h2 style={{
             fontFamily: 'var(--serif)',
             fontWeight: 400,
@@ -81,14 +97,9 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
             lineHeight: 1.3,
             maxWidth: '55ch',
           }}>
-            {v.tone} A four-pass review found{' '}
-            <span style={{ color: 'var(--vermillion)' }}>
-              {result.redFlags.length} red flag{result.redFlags.length === 1 ? '' : 's'}
-            </span>,{' '}
-            with a credibility score of{' '}
-            <span style={{ color: v.color, fontStyle: 'normal', fontWeight: 600 }}>
-              {result.overallScore}/100
-            </span>.
+            {v.tone}{' '}
+            <span style={{ color: 'var(--vermillion)' }}>{flagText}</span>,{' '}
+            <span style={{ color: v.color, fontStyle: 'normal', fontWeight: 600 }}>{result.overallScore}/100</span>.
           </p>
         </div>
 
@@ -107,16 +118,13 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
               <span style={{ fontSize: 32, color: 'var(--ink-3)', verticalAlign: 'top', marginLeft: 4 }}>/100</span>
             </div>
             <div style={{ position: 'absolute', top: -10, right: -28, animation: 'stampIn 700ms cubic-bezier(.2,1.2,.4,1) 300ms both' }}>
-              <div
-                className="stamp"
-                style={{ color: v.color, borderColor: v.color, boxShadow: `inset 0 0 0 1px ${v.color}` }}
-              >
+              <div className="stamp" style={{ color: v.color, borderColor: v.color, boxShadow: `inset 0 0 0 1px ${v.color}` }}>
                 {v.label}
               </div>
             </div>
           </div>
           <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
-            OVERALL CREDIBILITY
+            {t('report.overallCredibility')}
           </div>
         </div>
       </div>
@@ -127,20 +135,20 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
           <SourceDossier source={source} domain={result.metadata.source || ''} />
         ) : (
           <div style={{ border: '1px solid var(--paper-rule)', padding: '20px 22px', background: 'var(--paper-2)' }}>
-            <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>Source on file</p>
+            <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>{t('report.sourceOnFile')}</p>
             <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-2)', marginTop: 10 }}>
-              No URL provided — source database not consulted.
+              {t('report.noSourceUrl')}
             </p>
           </div>
         )}
         <ArticleSlate metadata={result.metadata} />
       </div>
 
-      {/* Three pass triptych */}
+      {/* Triptych */}
       <Triptych result={result} />
 
       {/* Red flags */}
-      {result.redFlags.length > 0 && <RedFlags flags={result.redFlags} />}
+      {result.redFlags.length > 0 && <RedFlagsSection flags={result.redFlags} />}
 
       {/* Colophon */}
       <div style={{
@@ -156,46 +164,47 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
         color: 'var(--ink-3)',
         textTransform: 'uppercase',
       }}>
-        <div>Method · 4-pass LLM review cross-referenced with a fact-checker source database. Not legal advice. Use your own judgement.</div>
-        <div>END OF REPORT — 30 —</div>
+        <div>{t('report.colophon')}</div>
+        <div>{t('report.endOfReport')}</div>
       </div>
     </section>
   )
 }
 
-/* ── Source Dossier ── */
-interface SourceDossierProps {
-  source: ReturnType<typeof getSourceCredibility>
-  domain: string
-}
-
-function SourceDossier({ source, domain }: SourceDossierProps) {
+function SourceDossier({ source, domain }: { source: ReturnType<typeof getSourceCredibility>; domain: string }) {
+  const { t } = useTranslation()
   const credColor = source.credibilityScore >= 80 ? 'var(--moss)'
     : source.credibilityScore >= 60 ? 'oklch(0.60 0.13 75)'
     : source.credibilityScore >= 40 ? 'oklch(0.62 0.18 55)'
     : 'var(--vermillion)'
 
   const biasIdx = biasIndex(source.bias)
+  const biasLabelMap: Record<string, string> = {
+    '-2': t('report.biasLeft'),
+    '-1': t('report.biasCenterLeft'),
+    '0':  t('report.biasCenter'),
+    '1':  t('report.biasCenterRight'),
+    '2':  t('report.biasRight'),
+  }
 
   return (
     <div style={{ border: '1px solid var(--ink)', padding: '20px 22px 22px', background: 'var(--paper-2)', position: 'relative' }}>
       <div style={{ position: 'absolute', top: 12, right: 14, fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.18em' }}>
-        DOSSIER · SRC
+        {t('report.dossierLabel')}
       </div>
 
-      <p className="smcap" style={{ margin: 0, color: 'var(--vermillion)' }}>Source on file</p>
+      <p className="smcap" style={{ margin: 0, color: 'var(--vermillion)' }}>{t('report.sourceOnFile')}</p>
       <h3 style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 34, margin: '6px 0 2px', lineHeight: 1.05 }}>
         {source.name}
       </h3>
       <div className="mono" style={{ fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.06em' }}>{domain}</div>
 
-      {/* Credibility bar */}
       <div style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 18, alignItems: 'center' }}>
         <div style={{ fontFamily: 'var(--serif)', fontSize: 56, lineHeight: 0.9, color: credColor }}>
           {source.credibilityScore}
         </div>
         <div>
-          <div className="smcap" style={{ color: 'var(--ink-3)' }}>Credibility on record</div>
+          <div className="smcap" style={{ color: 'var(--ink-3)' }}>{t('report.credibilityOnRecord')}</div>
           <div style={{ display: 'flex', height: 8, marginTop: 8, background: 'var(--paper)', border: '1px solid var(--paper-rule)' }}>
             <div style={{ width: `${source.credibilityScore}%`, background: credColor }} />
           </div>
@@ -205,32 +214,33 @@ function SourceDossier({ source, domain }: SourceDossierProps) {
         </div>
       </div>
 
-      {/* Bias scale */}
       <div style={{ marginTop: 22 }}>
-        <div className="smcap" style={{ color: 'var(--ink-3)' }}>Editorial bias</div>
-        <div style={{ marginTop: 10, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <div className="smcap" style={{ color: 'var(--ink-3)' }}>{t('report.editorialBias')}</div>
+        <div style={{ marginTop: 10, display: 'flex', gap: 2 }}>
           {([-2, -1, 0, 1, 2] as const).map(v => (
             <div key={v} style={{
-              flex: 1,
-              height: 22,
+              flex: 1, height: 22,
               border: '1px solid var(--ink)',
               background: v === biasIdx ? 'var(--ink)' : 'transparent',
             }} />
           ))}
         </div>
         <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em', marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
-          <span>LEFT</span><span>CTR-L</span><span>CTR</span><span>CTR-R</span><span>RIGHT</span>
+          <span>{t('report.biasLeft')}</span>
+          <span>{t('report.biasCenterLeft')}</span>
+          <span>{t('report.biasCenter')}</span>
+          <span>{t('report.biasCenterRight')}</span>
+          <span>{t('report.biasRight')}</span>
         </div>
         <div className="mono" style={{ fontSize: 12, color: 'var(--ink)', letterSpacing: '0.1em', marginTop: 10, fontWeight: 600 }}>
-          {BIAS_LABELS[String(biasIdx)] ?? 'CENTER'}
+          {biasLabelMap[String(biasIdx)] ?? t('report.biasCenter')}
         </div>
       </div>
 
-      {/* Strengths / Issues */}
       <div style={{ marginTop: 22, display: 'grid', gap: 14 }}>
         {source.strengths && source.strengths.length > 0 && (
           <div>
-            <div className="smcap" style={{ color: 'var(--ink-3)' }}>On its record</div>
+            <div className="smcap" style={{ color: 'var(--ink-3)' }}>{t('report.onItsRecord')}</div>
             <ul style={{ margin: '6px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
               {source.strengths.map((s, i) => (
                 <li key={i} style={{ fontSize: 13, color: 'var(--ink-2)', display: 'flex', gap: 8 }}>
@@ -243,7 +253,7 @@ function SourceDossier({ source, domain }: SourceDossierProps) {
         )}
         {source.notableIssues && source.notableIssues.length > 0 && (
           <div>
-            <div className="smcap" style={{ color: 'var(--ink-3)' }}>On its rap sheet</div>
+            <div className="smcap" style={{ color: 'var(--ink-3)' }}>{t('report.onItsRapSheet')}</div>
             <ul style={{ margin: '6px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
               {source.notableIssues.map((s, i) => (
                 <li key={i} style={{ fontSize: 13, color: 'var(--ink-2)', display: 'flex', gap: 8 }}>
@@ -258,7 +268,7 @@ function SourceDossier({ source, domain }: SourceDossierProps) {
 
       {source.factCheckerRating && (
         <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--paper-rule)' }}>
-          <div className="smcap" style={{ color: 'var(--ink-3)' }}>Fact-checker note</div>
+          <div className="smcap" style={{ color: 'var(--ink-3)' }}>{t('report.factCheckerNote')}</div>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, marginTop: 4 }}>
             &ldquo;{source.factCheckerRating}.&rdquo;
           </div>
@@ -268,34 +278,21 @@ function SourceDossier({ source, domain }: SourceDossierProps) {
   )
 }
 
-/* ── Article Slate ── */
 function ArticleSlate({ metadata }: { metadata: AnalysisResult['metadata'] }) {
+  const { t } = useTranslation()
   return (
     <div style={{ display: 'grid', gap: 20 }}>
       <div>
-        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Article slate</p>
-        <h3 style={{
-          fontFamily: 'var(--serif)',
-          fontWeight: 400,
-          fontStyle: 'italic',
-          fontSize: 26,
-          margin: '8px 0 0',
-          lineHeight: 1.15,
-          color: 'var(--ink-2)',
-        }}>
-          What we know about this piece, before we read it.
+        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.articleSlate')}</p>
+        <h3 style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontStyle: 'italic', fontSize: 26, margin: '8px 0 0', lineHeight: 1.15, color: 'var(--ink-2)' }}>
+          {t('report.articleSlateSubtitle')}
         </h3>
       </div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        borderTop: '1px solid var(--ink)',
-        borderLeft: '1px solid var(--ink)',
-      }}>
-        <SlateCell label="Headline" value={metadata.title || '—'} span />
-        <SlateCell label="Byline"   value={metadata.author || '—'} />
-        <SlateCell label="Published" value={metadata.publishedDate || '—'} />
-        <SlateCell label="Source"   value={metadata.source || '—'} mono />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '1px solid var(--ink)', borderLeft: '1px solid var(--ink)' }}>
+        <SlateCell label={t('report.labelHeadline')} value={metadata.title || '—'} span />
+        <SlateCell label={t('report.labelByline')}   value={metadata.author || '—'} />
+        <SlateCell label={t('report.labelPublished')} value={metadata.publishedDate || '—'} />
+        <SlateCell label={t('report.labelSource')}   value={metadata.source || '—'} mono />
       </div>
     </div>
   )
@@ -304,83 +301,55 @@ function ArticleSlate({ metadata }: { metadata: AnalysisResult['metadata'] }) {
 function SlateCell({ label, value, mono, span }: { label: string; value: string; mono?: boolean; span?: boolean }) {
   return (
     <div style={{
-      borderRight: '1px solid var(--ink)',
-      borderBottom: '1px solid var(--ink)',
-      padding: '12px 14px',
-      gridColumn: span ? '1 / -1' : 'auto',
-      background: 'var(--paper)',
+      borderRight: '1px solid var(--ink)', borderBottom: '1px solid var(--ink)',
+      padding: '12px 14px', gridColumn: span ? '1 / -1' : 'auto', background: 'var(--paper)',
     }}>
       <div className="smcap" style={{ color: 'var(--ink-3)' }}>{label}</div>
-      <div style={{
-        marginTop: 4,
-        fontFamily: mono ? 'var(--mono)' : 'var(--serif)',
-        fontSize: mono ? 14 : 18,
-        lineHeight: 1.25,
-        color: 'var(--ink)',
-      }}>
+      <div style={{ marginTop: 4, fontFamily: mono ? 'var(--mono)' : 'var(--serif)', fontSize: mono ? 14 : 18, lineHeight: 1.25, color: 'var(--ink)' }}>
         {value}
       </div>
     </div>
   )
 }
 
-/* ── Triptych (3 pass cells) ── */
 function Triptych({ result }: { result: AnalysisResult }) {
+  const { t } = useTranslation()
   const passes = [
-    { code: '01', name: 'FACT RISK',      score: result.factRiskScore,      note: result.breakdown.factRisk },
-    { code: '02', name: 'BIAS',           score: result.biasScore,           note: result.breakdown.bias },
-    { code: '03', name: 'SENSATIONALISM', score: result.sensationalismScore, note: result.breakdown.sensationalism },
+    { code: '01', name: t('report.pass01'), score: result.factRiskScore,      note: result.breakdown.factRisk },
+    { code: '02', name: t('report.pass02'), score: result.biasScore,           note: result.breakdown.bias },
+    { code: '03', name: t('report.pass03'), score: result.sensationalismScore, note: result.breakdown.sensationalism },
   ]
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>The four passes · detail</h3>
-        <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>HIGHER = MORE RISKY</div>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.fourPassesDetail')}</h3>
+        <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>{t('report.higherMoreRisky')}</div>
       </div>
       <div style={{ borderTop: '1px solid var(--ink)', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-        {passes.map((p, i) => (
-          <PassCell key={p.code} pass={p} isLast={i === passes.length - 1} delay={i * 90} />
-        ))}
+        {passes.map((p, i) => <PassCell key={p.code} pass={p} isLast={i === 2} delay={i * 90} />)}
       </div>
     </div>
   )
 }
 
 function PassCell({ pass, isLast, delay }: { pass: { code: string; name: string; score: number; note: string }; isLast: boolean; delay: number }) {
-  const danger = pass.score >= 60 ? 'var(--vermillion)'
-    : pass.score >= 40 ? 'oklch(0.62 0.18 55)'
-    : pass.score >= 20 ? 'oklch(0.60 0.13 75)'
-    : 'var(--moss)'
-
+  const danger = pass.score >= 60 ? 'var(--vermillion)' : pass.score >= 40 ? 'oklch(0.62 0.18 55)' : pass.score >= 20 ? 'oklch(0.60 0.13 75)' : 'var(--moss)'
   return (
-    <div style={{
-      padding: '20px 22px 24px',
-      borderRight: isLast ? 'none' : '1px solid var(--ink)',
-      borderBottom: '1px solid var(--ink)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 14,
-      background: 'var(--paper)',
-    }}>
+    <div style={{ padding: '20px 22px 24px', borderRight: isLast ? 'none' : '1px solid var(--ink)', borderBottom: '1px solid var(--ink)', display: 'flex', flexDirection: 'column', gap: 14, background: 'var(--paper)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.18em', color: 'var(--ink-3)' }}>
-          {pass.code} · {pass.name}
-        </div>
+        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.18em', color: 'var(--ink-3)' }}>{pass.code} · {pass.name}</div>
         <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>/100</div>
       </div>
-
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 110 }}>
         <div style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 96, lineHeight: 0.82, color: danger, letterSpacing: '-0.04em' }}>
           {pass.score}
         </div>
-        {/* mini bar chart */}
         <div style={{ flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end', gap: 3 }}>
           {Array.from({ length: 20 }).map((_, i) => {
             const filled = i < Math.round(pass.score / 5)
             return (
               <div key={i} style={{
-                flex: 1,
-                height: `${10 + i * 4}%`,
+                flex: 1, height: `${10 + i * 4}%`,
                 background: filled ? danger : 'var(--paper-2)',
                 border: `1px solid ${filled ? danger : 'var(--paper-rule)'}`,
                 transformOrigin: 'bottom',
@@ -390,65 +359,44 @@ function PassCell({ pass, isLast, delay }: { pass: { code: string; name: string;
           })}
         </div>
       </div>
-
-      <p style={{ fontFamily: 'var(--serif)', fontSize: 17, lineHeight: 1.35, color: 'var(--ink)', margin: 0 }}>
-        {pass.note}
-      </p>
+      <p style={{ fontFamily: 'var(--serif)', fontSize: 17, lineHeight: 1.35, color: 'var(--ink)', margin: 0 }}>{pass.note}</p>
     </div>
   )
 }
 
-/* ── Red Flags ── */
-function RedFlags({ flags }: { flags: RedFlag[] }) {
+function RedFlagsSection({ flags }: { flags: RedFlag[] }) {
+  const { t } = useTranslation()
   const sevWeight = { high: 3, medium: 2, low: 1 }
   const sorted = [...flags].sort((a, b) => sevWeight[b.severity] - sevWeight[a.severity])
+  const sevColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'oklch(0.55 0.16 50)' : 'var(--ink-3)'
+  const dotColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'oklch(0.65 0.16 50)' : 'var(--ink-4)'
+  const sevLabel = (s: string) => s === 'high' ? t('report.severityHigh') : s === 'medium' ? t('report.severityMedium') : t('report.severityLow')
 
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Red flags · footnotes</h3>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.redFlagsFootnotes')}</h3>
         <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-          {sorted.filter(f => f.severity === 'high').length} HIGH &nbsp;·&nbsp;
-          {sorted.filter(f => f.severity === 'medium').length} MED &nbsp;·&nbsp;
-          {sorted.filter(f => f.severity === 'low').length} LOW
+          {sorted.filter(f => f.severity === 'high').length} {t('report.severityHigh')} &nbsp;·&nbsp;
+          {sorted.filter(f => f.severity === 'medium').length} {t('report.severityMedium')} &nbsp;·&nbsp;
+          {sorted.filter(f => f.severity === 'low').length} {t('report.severityLow')}
         </div>
       </div>
       <ol style={{ listStyle: 'none', padding: 0, margin: 0, borderTop: '1px solid var(--ink)' }}>
         {sorted.map((flag, i) => (
-          <li key={i} style={{
-            display: 'grid',
-            gridTemplateColumns: 'auto 120px 1fr auto',
-            gap: 18,
-            alignItems: 'baseline',
-            padding: '18px 4px',
-            borderBottom: '1px solid var(--paper-rule)',
-          }}>
+          <li key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 120px 1fr auto', gap: 18, alignItems: 'baseline', padding: '18px 4px', borderBottom: '1px solid var(--paper-rule)' }}>
             <span style={{ fontFamily: 'var(--serif)', fontSize: 36, lineHeight: 1, color: 'var(--ink)', minWidth: 48 }}>
               {String(i + 1).padStart(2, '0')}
             </span>
-            <span className="mono" style={{
-              fontSize: 11,
-              letterSpacing: '0.16em',
-              fontWeight: 600,
-              color: flag.severity === 'high' ? 'var(--vermillion)' : flag.severity === 'medium' ? 'oklch(0.55 0.16 50)' : 'var(--ink-3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: 8,
-                background: flag.severity === 'high' ? 'var(--vermillion)' : flag.severity === 'medium' ? 'oklch(0.65 0.16 50)' : 'var(--ink-4)',
-                flexShrink: 0,
-              }} />
-              {flag.severity.toUpperCase()}
+            <span className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, color: sevColor(flag.severity), display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 8, background: dotColor(flag.severity), flexShrink: 0 }} />
+              {sevLabel(flag.severity)}
             </span>
             <div>
               <div style={{ fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--ink)' }}>{flag.type}</div>
               <div style={{ fontSize: 14, color: 'var(--ink-2)', marginTop: 4, fontFamily: 'var(--serif)', fontStyle: 'italic' }}>{flag.description}</div>
             </div>
-            <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.12em' }}>
-              FN.{String(i + 1).padStart(2, '0')}
-            </span>
+            <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.12em' }}>FN.{String(i + 1).padStart(2, '0')}</span>
           </li>
         ))}
       </ol>

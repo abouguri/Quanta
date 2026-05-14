@@ -19,7 +19,7 @@ export default function Home() {
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const [now] = useState(new Date())
-  const { language, setLanguage } = useTranslation()
+  const { language, setLanguage, t } = useTranslation()
 
   const dateStr = now.toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -138,7 +138,7 @@ export default function Home() {
                 borderRadius: 6,
                 animation: 'pulse-dot 2s ease-in-out infinite',
               }} />
-              Live analysis online
+              {t('header.liveStatus')}
             </span>
             <span>Vol. I — No. 0427</span>
           </span>
@@ -183,7 +183,7 @@ export default function Home() {
             <NavPill label="AR" active={language === 'ar'} onClick={() => setLanguage('ar')} />
             <span style={{ width: 1, height: 16, background: 'var(--paper-rule)', margin: '0 6px' }} />
             <button
-              onClick={() => alert('FactNews — Four-pass AI review: Fact Risk → Bias & Framing → Sensationalism → Red Flags. Credibility scored 0–100. Not legal advice.')}
+              onClick={() => alert(t('header.methodAlert'))}
               style={{
                 border: '1px solid var(--ink)',
                 padding: '8px 14px',
@@ -195,7 +195,7 @@ export default function Home() {
                 cursor: 'pointer',
               }}
             >
-              Method →
+              {t('header.method')}
             </button>
           </div>
         </div>
@@ -217,7 +217,7 @@ export default function Home() {
           color: 'var(--vermillion)',
           background: 'var(--paper-2)',
         }}>
-          <span className="smcap" style={{ color: 'var(--vermillion)', display: 'block', marginBottom: 4 }}>Analysis error</span>
+          <span className="smcap" style={{ color: 'var(--vermillion)', display: 'block', marginBottom: 4 }}>{t('error.title')}</span>
           {error}
         </div>
       )}
