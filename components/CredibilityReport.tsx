@@ -11,11 +11,11 @@ interface CredibilityReportProps {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 80) return 'var(--moss)'
-  if (score >= 60) return 'oklch(0.60 0.13 75)'
-  if (score >= 40) return 'oklch(0.62 0.18 55)'
-  if (score >= 20) return 'var(--vermillion-2)'
-  return 'var(--vermillion)'
+  if (score >= 80) return 'var(--verified)'
+  if (score >= 60) return 'var(--signal)'
+  if (score >= 40) return 'var(--mixed)'
+  if (score >= 20) return 'var(--disputed)'
+  return 'var(--disputed)'
 }
 
 function biasIndex(bias: string): number {
@@ -173,10 +173,10 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
 
 function SourceDossier({ source, domain }: { source: ReturnType<typeof getSourceCredibility>; domain: string }) {
   const { t } = useTranslation()
-  const credColor = source.credibilityScore >= 80 ? 'var(--moss)'
-    : source.credibilityScore >= 60 ? 'oklch(0.60 0.13 75)'
-    : source.credibilityScore >= 40 ? 'oklch(0.62 0.18 55)'
-    : 'var(--vermillion)'
+  const credColor = source.credibilityScore >= 80 ? 'var(--verified)'
+    : source.credibilityScore >= 60 ? 'var(--signal)'
+    : source.credibilityScore >= 40 ? 'var(--mixed)'
+    : 'var(--disputed)'
 
   const biasIdx = biasIndex(source.bias)
   const biasLabelMap: Record<string, string> = {
@@ -333,7 +333,7 @@ function Triptych({ result }: { result: AnalysisResult }) {
 }
 
 function PassCell({ pass, isLast, delay }: { pass: { code: string; name: string; score: number; note: string }; isLast: boolean; delay: number }) {
-  const danger = pass.score >= 60 ? 'var(--vermillion)' : pass.score >= 40 ? 'oklch(0.62 0.18 55)' : pass.score >= 20 ? 'oklch(0.60 0.13 75)' : 'var(--moss)'
+  const danger = pass.score >= 60 ? 'var(--disputed)' : pass.score >= 40 ? 'var(--mixed)' : pass.score >= 20 ? 'var(--signal)' : 'var(--verified)'
   return (
     <div style={{ padding: '20px 22px 24px', borderRight: isLast ? 'none' : '1px solid var(--ink)', borderBottom: '1px solid var(--ink)', display: 'flex', flexDirection: 'column', gap: 14, background: 'var(--paper)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>

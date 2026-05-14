@@ -1,10 +1,10 @@
 {
   "header": {
-    "title": "FactNews",
-    "subtitle": "Analyze news credibility, detect misinformation, and evaluate bias",
+    "title": "Quanta",
+    "subtitle": "The credibility instrument for the internet. Measure bias, evidence, and source reliability.",
     "liveStatus": "Live analysis online",
     "method": "Method →",
-    "methodAlert": "FactNews — Four-pass AI review: Fact Risk → Bias & Framing → Sensationalism → Red Flags. Credibility scored 0–100. Not legal advice."
+    "methodAlert": "Quanta — Four-pass AI review: Fact Risk → Bias & Framing → Sensationalism → Red Flags. Credibility scored 0–100. We show our work. Not legal advice."
   },
   "input": {
     "urlTab": "01 · By URL",

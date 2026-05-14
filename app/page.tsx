@@ -11,6 +11,7 @@ import { useTranslation } from '@/lib/i18n'
 
 type Stage = 'input' | 'analyzing' | 'report'
 
+
 export default function Home() {
   const [stage, setStage] = useState<Stage>('input')
   const [target, setTarget] = useState('')
@@ -22,12 +23,12 @@ export default function Home() {
   const { language, setLanguage, t } = useTranslation()
 
   const dateStr = now.toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
   }).toUpperCase()
 
   const handleAnalyze = useCallback(async (url: string | null, text: string) => {
-    const t = url || (text ? `pasted text · ${text.length} chars` : '')
-    setTarget(t)
+    const tgt = url || (text ? `pasted text · ${text.length} chars` : '')
+    setTarget(tgt)
     setCurrentUrl(url)
     setResult(null)
     setError(null)
@@ -109,121 +110,185 @@ export default function Home() {
   return (
     <div
       id="app"
-      data-density="comfortable"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
-      style={{ maxWidth: 1320, margin: '0 auto', padding: '28px 36px 64px' }}
+      style={{ maxWidth: 1320, margin: '0 auto', padding: '0 36px 72px' }}
     >
-      {/* Masthead */}
-      <header style={{ borderBottom: '1px solid var(--ink)', paddingBottom: 20, marginBottom: 32 }}>
-        {/* top utility strip */}
+      {/* ─── Masthead ─── */}
+      <header style={{ marginBottom: 40 }}>
+
+        {/* Top utility strip */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           fontFamily: 'var(--mono)',
-          fontSize: 11,
-          color: 'var(--ink-2)',
+          fontSize: 10,
+          color: 'var(--ink-3)',
           textTransform: 'uppercase',
           letterSpacing: '0.14em',
-          paddingBottom: 14,
-          borderBottom: '1px solid var(--paper-rule)',
-          marginBottom: 18,
+          padding: '14px 0',
+          borderBottom: '0.5px solid var(--fog)',
         }}>
-          <span>{dateStr}</span>
-          <span style={{ display: 'flex', gap: 18 }}>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{dateStr}</span>
+          <span style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <span style={{
-                width: 6, height: 6,
-                background: 'var(--moss)',
-                borderRadius: 6,
-                animation: 'pulse-dot 2s ease-in-out infinite',
+                width: 5, height: 5,
+                background: 'var(--verified)',
+                borderRadius: 5,
+                animation: 'pulse-dot 2.4s ease-in-out infinite',
               }} />
               {t('header.liveStatus')}
             </span>
-            <span>Vol. I — No. 0427</span>
+            <span>Vol. I · No. 0427</span>
           </span>
         </div>
 
-        {/* logotype row */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-          <button onClick={handleReset} style={{ textAlign: 'left', cursor: 'pointer' }}>
-            <h1 style={{
-              fontFamily: 'var(--serif)',
-              fontWeight: 400,
-              fontSize: 'clamp(48px, 7vw, 88px)',
-              lineHeight: 0.9,
-              letterSpacing: '-0.02em',
-              margin: 0,
-              color: 'var(--ink)',
-            }}>
-              Fact<span style={{ fontStyle: 'italic', color: 'var(--vermillion)' }}>News</span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink-3)', verticalAlign: 'top', marginLeft: 6, letterSpacing: 0 }}>™</span>
-            </h1>
-            <p style={{
-              margin: '6px 0 0',
-              fontFamily: 'var(--serif)',
-              fontStyle: 'italic',
-              fontSize: 20,
-              color: 'var(--ink-2)',
-              lineHeight: 1.2,
-            }}>
-              an instrument for reading news with both eyes open.
-            </p>
+        {/* Logotype row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr auto',
+          alignItems: 'center',
+          gap: 32,
+          padding: '22px 0 20px',
+          borderBottom: '1px solid var(--ink)',
+        }}>
+          {/* Left: logo + wordmark */}
+          <button
+            onClick={handleReset}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            aria-label="Quanta home"
+          >
+            {/* Monogram: Q-circle in rounded square + ember dot */}
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+              <rect width="36" height="36" rx="7" fill="#F5F2EA" stroke="#0F2942" strokeWidth="1"/>
+              <circle cx="16" cy="16" r="9.5" stroke="#0F2942" strokeWidth="2.2"/>
+              <circle cx="25" cy="25" r="3.2" fill="#E8A33D"/>
+            </svg>
+            <div>
+              <div style={{
+                fontFamily: 'var(--sans)',
+                fontWeight: 600,
+                fontSize: 28,
+                letterSpacing: '-0.035em',
+                lineHeight: 1,
+                color: 'var(--ink)',
+              }}>
+                quanta<span style={{ color: 'var(--ember)' }}>.</span>
+              </div>
+              <div style={{
+                fontFamily: 'var(--serif)',
+                fontStyle: 'italic',
+                fontSize: 13,
+                color: 'var(--ink-3)',
+                lineHeight: 1,
+                marginTop: 4,
+                letterSpacing: 0,
+              }}>
+                Truth, measured.
+              </div>
+            </div>
           </button>
 
-          <div style={{
+          {/* Center: nav */}
+          <nav style={{
             display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            fontFamily: 'var(--mono)',
-            fontSize: 11,
-            color: 'var(--ink-2)',
+            gap: 28,
+            justifyContent: 'center',
+            fontFamily: 'var(--sans)',
+            fontSize: 12,
+            letterSpacing: '0.02em',
           }}>
+            {(['Analyze', 'Compare', 'Library', 'Methodology'] as const).map(item => (
+              <button
+                key={item}
+                onClick={item === 'Analyze' ? handleReset : undefined}
+                style={{
+                  color: item === 'Analyze' && stage !== 'input' ? 'var(--ink-3)' : 'var(--ink-2)',
+                  fontWeight: item === 'Analyze' ? 500 : 400,
+                  cursor: item === 'Analyze' ? 'pointer' : 'default',
+                  padding: '4px 0',
+                }}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+
+          {/* Right: language + CTA */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <NavPill label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
             <NavPill label="AR" active={language === 'ar'} onClick={() => setLanguage('ar')} />
-            <span style={{ width: 1, height: 16, background: 'var(--paper-rule)', margin: '0 6px' }} />
+            <div style={{ width: 1, height: 16, background: 'var(--fog)', margin: '0 4px' }} />
             <button
               onClick={() => alert(t('header.methodAlert'))}
               style={{
                 border: '1px solid var(--ink)',
-                padding: '8px 14px',
-                background: 'transparent',
+                padding: '7px 14px',
                 fontFamily: 'var(--mono)',
-                fontSize: 11,
+                fontSize: 10,
                 textTransform: 'uppercase',
                 letterSpacing: '0.14em',
                 cursor: 'pointer',
+                color: 'var(--ink)',
+                background: 'transparent',
               }}
             >
               {t('header.method')}
             </button>
+            <button style={{
+              border: 'none',
+              padding: '7px 16px',
+              fontFamily: 'var(--mono)',
+              fontSize: 10,
+              textTransform: 'uppercase',
+              letterSpacing: '0.14em',
+              cursor: 'pointer',
+              color: 'var(--bone)',
+              background: 'var(--ink)',
+            }}>
+              Pro
+            </button>
           </div>
         </div>
 
-        {/* double rule */}
-        <div style={{ marginTop: 18, height: 1, background: 'var(--ink)' }} />
-        <div style={{ marginTop: 3, height: 1, background: 'var(--ink)' }} />
+        {/* Subtitle rule */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          padding: '12px 0 0',
+          fontFamily: 'var(--mono)',
+          fontSize: 10,
+          color: 'var(--ink-3)',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+        }}>
+          <span>The credibility instrument</span>
+          <span style={{ flex: 1, height: '0.5px', background: 'var(--fog)' }} />
+          <span>Free · 3 analyses / day · no account needed</span>
+        </div>
       </header>
 
       {/* Error banner */}
       {error && (
         <div style={{
-          border: '1px solid var(--vermillion)',
-          borderLeft: '3px solid var(--vermillion)',
-          padding: '14px 18px',
+          border: '1px solid var(--disputed)',
+          borderLeft: '3px solid var(--disputed)',
+          padding: '12px 16px',
           marginBottom: 28,
           fontFamily: 'var(--mono)',
-          fontSize: 13,
-          color: 'var(--vermillion)',
-          background: 'var(--paper-2)',
+          fontSize: 12,
+          color: 'var(--disputed)',
+          background: 'var(--paper)',
         }}>
-          <span className="smcap" style={{ color: 'var(--vermillion)', display: 'block', marginBottom: 4 }}>{t('error.title')}</span>
+          <span className="smcap" style={{ color: 'var(--disputed)', display: 'block', marginBottom: 4 }}>{t('error.title')}</span>
           {error}
         </div>
       )}
 
       {/* 2-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 40 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 48 }}>
         <main style={{ minWidth: 0 }}>
           {stage === 'input' && (
             <ArticleInput onSubmit={handleAnalyze} />
@@ -242,6 +307,23 @@ export default function Home() {
           refreshKey={historyRefreshKey}
         />
       </div>
+
+      {/* Footer */}
+      <footer style={{
+        marginTop: 64,
+        paddingTop: 16,
+        borderTop: '0.5px solid var(--fog)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontFamily: 'var(--mono)',
+        fontSize: 10,
+        color: 'var(--ink-4)',
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+      }}>
+        <span>Quanta · Truth, measured.</span>
+        <span>Open methodology · Independent · Ad-free</span>
+      </footer>
     </div>
   )
 }
@@ -251,12 +333,12 @@ function NavPill({ label, active, onClick }: { label: string; active: boolean; o
     <button
       onClick={onClick}
       style={{
-        padding: '8px 12px',
-        border: active ? '1px solid var(--ink)' : '1px solid transparent',
+        padding: '6px 10px',
+        border: active ? '1px solid var(--ink)' : '1px solid var(--fog)',
         background: active ? 'var(--ink)' : 'transparent',
-        color: active ? 'var(--paper)' : 'var(--ink-2)',
+        color: active ? 'var(--bone)' : 'var(--ink-3)',
         fontFamily: 'var(--mono)',
-        fontSize: 11,
+        fontSize: 10,
         textTransform: 'uppercase',
         letterSpacing: '0.14em',
         cursor: 'pointer',

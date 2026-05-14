@@ -3,25 +3,40 @@
 @tailwind utilities;
 
 :root {
-  /* Editorial Forensics palette */
-  --paper:        oklch(0.972 0.012 80);
-  --paper-2:      oklch(0.945 0.014 80);
-  --paper-rule:   oklch(0.880 0.014 75);
-  --ink:          oklch(0.180 0.012 50);
-  --ink-2:        oklch(0.340 0.010 50);
-  --ink-3:        oklch(0.520 0.010 60);
-  --ink-4:        oklch(0.700 0.012 70);
-  --vermillion:   oklch(0.560 0.190 30);
-  --vermillion-2: oklch(0.480 0.180 30);
-  --amber:        oklch(0.700 0.140 75);
-  --moss:         oklch(0.510 0.090 145);
-  --stamp:        oklch(0.560 0.190 30);
+  /* Quanta brand palette */
+  --bone:         #F5F2EA;
+  --paper:        #FFFFFF;
+  --mist:         #FAFAF7;
+  --fog:          #E5E3DA;
 
-  --serif: "Instrument Serif", "Times New Roman", serif;
-  --sans:  "IBM Plex Sans", system-ui, -apple-system, Helvetica, sans-serif;
+  --ink:          #0F2942;
+  --ink-2:        rgba(15, 41, 66, 0.60);
+  --ink-3:        rgba(15, 41, 66, 0.42);
+  --ink-4:        #888780;
+
+  --signal:       #1A4D7A;
+  --ember:        #E8A33D;
+
+  /* Signal colors (credibility) */
+  --verified:     #2E7D5B;
+  --mixed:        #C77A2E;
+  --disputed:     #B33A3A;
+  --unclear:      #6B6B6B;
+
+  /* Aliases to preserve existing component references */
+  --paper-2:      var(--mist);
+  --paper-rule:   var(--fog);
+  --moss:         var(--verified);
+  --vermillion:   var(--disputed);
+  --vermillion-2: var(--mixed);
+  --amber:        var(--ember);
+  --stamp:        var(--disputed);
+
+  --serif: "Source Serif 4", "Georgia", serif;
+  --sans:  "Inter", system-ui, -apple-system, Helvetica, sans-serif;
   --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
-  --rule: 1px solid var(--paper-rule);
+  --rule:     1px solid var(--fog);
   --rule-ink: 1px solid var(--ink);
 }
 
@@ -29,7 +44,7 @@
 html, body { margin: 0; padding: 0; }
 
 body {
-  background: var(--paper);
+  background: var(--bone);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
@@ -37,30 +52,28 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   min-height: 100vh;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(20,15,10,0.025) 1px, transparent 0),
-    linear-gradient(180deg, oklch(0.978 0.012 80) 0%, oklch(0.965 0.014 80) 100%);
-  background-size: 3px 3px, 100% 100%;
+  font-feature-settings: "tnum";
 }
 
-::selection { background: var(--vermillion); color: var(--paper); }
+::selection { background: var(--ink); color: var(--bone); }
 
 /* Base resets */
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 input, textarea { font: inherit; color: inherit; }
-a, button { transition: opacity 120ms ease, color 120ms ease, background 120ms ease, border-color 120ms ease; }
+a, button { transition: opacity 150ms ease-out, color 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out; }
 input:focus, textarea:focus { outline: none; }
 
 /* Utility classes */
 .smcap {
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 11px;
+  letter-spacing: 0.15em;
+  font-size: 10px;
   font-weight: 600;
+  font-family: var(--sans);
 }
 .upper {
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 .mono {
   font-family: var(--mono);
@@ -86,12 +99,12 @@ input:focus, textarea:focus { outline: none; }
 
 /* Approval stamp */
 .stamp {
-  border: 2.5px solid var(--stamp);
+  border: 2px solid var(--stamp);
   color: var(--stamp);
-  padding: 6px 12px 4px;
+  padding: 5px 11px 4px;
   font-family: var(--serif);
   font-style: italic;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: 0.04em;
   transform: rotate(-7deg);
@@ -103,9 +116,15 @@ input:focus, textarea:focus { outline: none; }
 
 /* Skeleton shimmer */
 .skel {
-  background: linear-gradient(90deg, var(--paper-2) 0%, var(--paper) 50%, var(--paper-2) 100%);
+  background: linear-gradient(90deg, var(--mist) 0%, var(--paper) 50%, var(--mist) 100%);
   background-size: 200% 100%;
   animation: skelShift 1.6s linear infinite;
+}
+
+/* Signal bar animation (Quanta loader) */
+@keyframes qbar {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50%       { opacity: 0.5; transform: scaleY(0.6); }
 }
 
 /* === Animations === */
@@ -146,11 +165,15 @@ input:focus, textarea:focus { outline: none; }
   from { background-position: 200% 0; }
   to   { background-position: -200% 0; }
 }
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
 
 /* Animation utility classes */
-.animate-fadeUp    { animation: fadeUp 480ms cubic-bezier(.2,.7,.2,1) both; }
-.animate-fadeIn    { animation: fadeIn 240ms ease both; }
-.animate-fadeInUp  { animation: fadeUp 520ms cubic-bezier(.2,.7,.2,1) both; }
+.animate-fadeUp    { animation: fadeUp 400ms cubic-bezier(.2,.7,.2,1) both; }
+.animate-fadeIn    { animation: fadeIn 220ms ease-out both; }
+.animate-fadeInUp  { animation: fadeUp 480ms cubic-bezier(.2,.7,.2,1) both; }
 
 /* Scrollbar removal */
 html {

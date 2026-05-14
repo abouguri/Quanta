@@ -134,7 +134,7 @@ export function AnalyzingStage({ target }: { target: string }) {
             position: 'absolute',
             left: 0, right: 0,
             height: 60,
-            background: 'linear-gradient(180deg, transparent 0%, oklch(0.56 0.19 30 / 0.10) 50%, transparent 100%)',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(26,77,122,0.12) 50%, transparent 100%)',
             top: 0,
             animation: 'scan 2.2s ease-in-out infinite',
             pointerEvents: 'none',
