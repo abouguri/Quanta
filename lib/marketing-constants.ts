@@ -124,7 +124,7 @@ export const SIGNALS_DATA = [
     name: 'Evidence',
     short: 'How well-supported are the central claims?',
     detail:
-      'Every claim in the article is identified and traced. We count primary citations, secondary citations, and unsupported assertions. A claim without a verifiable source isn't flagged as false — it's flagged as unverified.',
+      "Every claim in the article is identified and traced. We count primary citations, secondary citations, and unsupported assertions. A claim without a verifiable source isn't flagged as false — it's flagged as unverified.",
     sample: { Verified: 14, Partial: 5, Unsupported: 2 },
     tone: 'verified' as const,
   },
@@ -142,7 +142,7 @@ export const SIGNALS_DATA = [
     name: 'Framing',
     short: 'Whose perspective is missing?',
     detail:
-      'We map the named voices, attribution patterns, and which side of an issue receives more space. Framing isn't left vs. right — it's a fingerprint that shows what the article emphasizes and what it elides.',
+      "We map the named voices, attribution patterns, and which side of an issue receives more space. Framing isn't left vs. right — it's a fingerprint that shows what the article emphasizes and what it elides.",
     sample: { 'Voices A': 62, 'Voices B': 28, Neutral: 10 },
     tone: 'mixed' as const,
   },
