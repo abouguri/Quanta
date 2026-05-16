@@ -151,7 +151,7 @@ export const SIGNALS_DATA = [
     name: 'Confidence',
     short: 'How sure are we of our own analysis?',
     detail:
-      'Every score comes with a confidence interval. A short opinion piece with ambiguous claims gets lower confidence than a 2,000-word investigation. We'd rather tell you "we don't know yet" than guess.',
+      "Every score comes with a confidence interval. A short opinion piece with ambiguous claims gets lower confidence than a 2,000-word investigation. We'd rather tell you \"we don't know yet\" than guess.",
     sample: { '± conf.': '94%' },
     tone: 'verified' as const,
   },
