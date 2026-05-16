@@ -9,6 +9,7 @@ import { useExtractedArticle } from './hooks/useExtractedArticle'
 import { useAnalyzePort } from './hooks/useAnalyzePort'
 import { useRateLimit } from './hooks/useRateLimit'
 import type { AnalysisResult, HistoryEntry } from '@/lib/types'
+import { API_BASE_URL } from '@/lib/config'
 
 export function Popup() {
   const extracted = useExtractedArticle()
@@ -89,7 +90,7 @@ export function Popup() {
   return (
     <div className="shell">
       <header className="shell-header">
-        <a className="wordmark" href="https://factnews.vercel.app" target="_blank" rel="noreferrer">
+        <a className="wordmark" href={API_BASE_URL} target="_blank" rel="noreferrer">
           <Monogram size={26} />
           <span>Quanta<span className="q-dot">.</span></span>
         </a>
@@ -103,7 +104,7 @@ export function Popup() {
 
       <footer className="shell-footer">
         <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic' }}>Truth, measured.</span>
-        <a href="https://factnews.vercel.app" target="_blank" rel="noreferrer">quanta ↗</a>
+        <a href={API_BASE_URL} target="_blank" rel="noreferrer">quanta ↗</a>
       </footer>
     </div>
   )
