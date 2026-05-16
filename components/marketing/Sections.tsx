@@ -598,18 +598,20 @@ export function CTAFooter() {
               Quanta is the credibility layer for the internet. Independent and ad-free — revenue from subscriptions and the API.
             </p>
           </div>
-          {[
-            ['Product', ['Web app', 'Browser extension', 'Mobile (iOS, Android)', 'API', 'Pricing']],
-            ['For', ['Readers', 'Students & educators', 'Journalists', 'Newsrooms', 'Researchers']],
-            ['Open', ['Methodology', 'Changelog', 'Advisory board', 'Bias audits', 'Research papers']],
-            ['Company', ['About', 'Manifesto', 'Press', 'Careers', 'Contact']],
-          ].map(([title, items]) => (
+          {(
+            [
+              ['Product', ['Web app', 'Browser extension', 'Mobile (iOS, Android)', 'API', 'Pricing']],
+              ['For', ['Readers', 'Students & educators', 'Journalists', 'Newsrooms', 'Researchers']],
+              ['Open', ['Methodology', 'Changelog', 'Advisory board', 'Bias audits', 'Research papers']],
+              ['Company', ['About', 'Manifesto', 'Press', 'Careers', 'Contact']],
+            ] as const
+          ).map(([title, items]) => (
             <div key={String(title)}>
               <div style={{ fontFamily: FONTS.sans, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: COLORS.slate }}>
                 {title}
               </div>
               <ul style={{ margin: `${SPACING[4]} 0 0`, padding: 0, listStyle: 'none', display: 'grid', gap: SPACING[2] }}>
-                {items.map((it) => (
+                {(items as string[]).map((it) => (
                   <li key={it}>
                     <a href="#" style={{ fontSize: '14px', color: COLORS['ink-navy'], textDecoration: 'none' }}>
                       {it}
