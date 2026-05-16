@@ -154,7 +154,7 @@ export function HowItWorks() {
               Every Quanta analysis decomposes an article into four measurements. None of them is a verdict. All of them are auditable down to the sentence.
             </p>
             <p style={{ marginTop: SPACING[4], fontSize: '16px', lineHeight: 1.6, color: COLORS.slate }}>
-              We don't say <em>true</em> or <em>false</em>. We say <span style={{ fontFamily: FONTS.mono, color: COLORS['ink-navy'] }}>78% confidence</span>, with these citations, on this methodology. Confidence intervals beat verdicts.
+              We don&apos;t say <em>true</em> or <em>false</em>. We say <span style={{ fontFamily: FONTS.mono, color: COLORS['ink-navy'] }}>78% confidence</span>, with these citations, on this methodology. Confidence intervals beat verdicts.
             </p>
           </div>
         </div>
@@ -349,7 +349,7 @@ export function Methodology() {
               color: '#CFCFC2',
               maxWidth: '32ch',
             }}>
-              If Quanta can't defend an output, Quanta doesn't produce it. Every score traces to specific sentences, citations, and reasoning.
+              If Quanta can&apos;t defend an output, Quanta doesn&apos;t produce it. Every score traces to specific sentences, citations, and reasoning.
             </p>
 
             <div style={{ marginTop: SPACING[10], display: 'grid', gap: SPACING[4], maxWidth: 460 }}>
@@ -407,7 +407,7 @@ export function Methodology() {
               letterSpacing: '-0.01em',
               lineHeight: 1.25,
             }}>
-              "The Fed's decision was widely expected by economists." <span style={{ color: '#A6B3C4', fontStyle: 'italic', fontSize: 18 }}>— attributed once, sourced from an analyst note.</span>
+              &quot;The Fed&apos;s decision was widely expected by economists.&quot; <span style={{ color: '#A6B3C4', fontStyle: 'italic', fontSize: 18 }}>— attributed once, sourced from an analyst note.</span>
             </h3>
 
             <div style={{
@@ -489,7 +489,7 @@ export function QuoteStrip() {
           color: COLORS['ink-navy'],
           maxWidth: '24ch',
         }}>
-          "78% confidence. Three of five citations led to primary sources. The framing leans slightly <span style={{ fontStyle: 'italic' }}>—</span> read another view too."
+          &quot;78% confidence. Three of five citations led to primary sources. The framing leans slightly <span style={{ fontStyle: 'italic' }}>—</span> read another view too.&quot;
         </p>
         <div style={{ marginTop: SPACING[6], fontFamily: FONTS.mono, fontSize: '11px', color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '0.18em' }}>
           — Quanta, on a typical Tuesday
