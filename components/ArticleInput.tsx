@@ -36,46 +36,52 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
   }
 
   return (
-    <section className="animate-fadeUp" style={{ display: 'grid', gap: 36, paddingTop: 8 }}>
-      {/* Lede */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 5fr) minmax(0, 3fr)', gap: 48, alignItems: 'end' }}>
-        <div>
-          <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('input.briefNo')}</p>
-          <h2 style={{
-            fontFamily: 'var(--serif)',
-            fontWeight: 400,
-            fontSize: 'clamp(40px, 5.2vw, 72px)',
-            lineHeight: 1.02,
-            letterSpacing: '-0.02em',
-            margin: '10px 0 0',
-          }}>
-            {t('input.heroLine1')}<br />
-            {t('input.heroLine2')}{' '}
-            <span style={{ fontStyle: 'italic', color: 'var(--vermillion)' }}>{t('input.heroItalic')}</span>,{' '}
-            <span style={{ fontStyle: 'italic' }}>{t('input.heroLine3')}</span> {t('input.heroLine4')}
-          </h2>
+    <section className="animate-fadeUp" style={{ display: 'grid', gap: 44, paddingTop: 8 }}>
+      {/* Hero */}
+      <div>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          fontFamily: 'var(--sans)',
+          fontSize: 11,
+          fontWeight: 500,
+          color: 'var(--ember)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.16em',
+          marginBottom: 24,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: 6, background: 'var(--ember)' }} />
+          The credibility layer for the internet
         </div>
-        <aside style={{ borderLeft: '1px solid var(--paper-rule)', paddingLeft: 20, color: 'var(--ink-2)' }}>
-          <p className="smcap" style={{ margin: 0, color: 'var(--ink-3)' }}>{t('input.fourPasses')}</p>
-          <ol style={{
-            margin: '12px 0 0',
-            padding: 0,
-            listStyle: 'none',
-            fontFamily: 'var(--mono)',
-            fontSize: 12,
-            lineHeight: 1.9,
-            color: 'var(--ink-2)',
-          }}>
-            <li><span style={{ color: 'var(--ink-4)', marginRight: 8 }}>01</span>{t('input.pass01')}</li>
-            <li><span style={{ color: 'var(--ink-4)', marginRight: 8 }}>02</span>{t('input.pass02')}</li>
-            <li><span style={{ color: 'var(--ink-4)', marginRight: 8 }}>03</span>{t('input.pass03')}</li>
-            <li><span style={{ color: 'var(--ink-4)', marginRight: 8 }}>04</span>{t('input.pass04')}</li>
-          </ol>
-        </aside>
+        <h1 style={{
+          fontFamily: 'var(--sans)',
+          fontWeight: 500,
+          fontSize: 'clamp(56px, 8vw, 96px)',
+          lineHeight: 1.0,
+          letterSpacing: '-0.035em',
+          color: 'var(--ink)',
+          margin: 0,
+        }}>
+          Measure.<br />
+          Understand.<br />
+          Elevate<span style={{ color: 'var(--ember)' }}>.</span>
+        </h1>
+        <p style={{
+          margin: '32px 0 0',
+          maxWidth: '52ch',
+          fontFamily: 'var(--serif)',
+          fontStyle: 'italic',
+          fontSize: 21,
+          lineHeight: 1.45,
+          color: 'var(--ink-2)',
+        }}>
+          Paste a news article. Quanta measures bias, evidence, source provenance, and confidence — and shows its work, sentence by sentence. Read with your eyes open.
+        </p>
       </div>
 
-      {/* Tabbed input */}
-      <div style={{ borderTop: '1px solid var(--ink)', paddingTop: 22 }}>
+      {/* Input block */}
+      <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', gap: 4 }}>
             <TabBtn active={tab === 'url'} onClick={() => setTab('url')}>{t('input.urlTab')}</TabBtn>
@@ -87,28 +93,40 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
         </div>
 
         {tab === 'url' ? (
-          <div className="field" style={{ border: '1px solid var(--ink)', display: 'flex', alignItems: 'stretch', background: 'var(--paper)' }}>
-            <span className="mono" style={{
-              padding: '18px 16px',
-              fontSize: 12,
+          <div className="field" style={{
+            border: '1px solid var(--ink)',
+            display: 'flex',
+            alignItems: 'stretch',
+            background: 'var(--paper)',
+            borderRadius: 12,
+            overflow: 'hidden',
+          }}>
+            <span style={{
+              padding: '0 18px',
+              fontFamily: 'var(--mono)',
+              fontSize: 11,
+              fontWeight: 500,
               color: 'var(--ink-3)',
-              borderRight: '1px solid var(--paper-rule)',
-              alignSelf: 'center',
-              letterSpacing: '0.1em',
+              borderRight: '0.5px solid var(--fog)',
+              alignSelf: 'stretch',
+              display: 'flex',
+              alignItems: 'center',
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
             }}>{t('input.urlPrefix')}</span>
             <input
               ref={inputRef as React.RefObject<HTMLInputElement>}
               value={url}
               onChange={e => setUrl(e.target.value)}
               onKeyDown={handleKey}
-              placeholder={t('input.urlPlaceholder')}
+              placeholder="https://"
               spellCheck={false}
               style={{
                 flex: 1,
                 border: 0,
                 background: 'transparent',
-                padding: '18px 16px',
-                fontSize: 17,
+                padding: '20px 18px',
+                fontSize: 15,
                 fontFamily: 'var(--mono)',
                 color: 'var(--ink)',
                 minWidth: 0,
@@ -118,20 +136,23 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
               onClick={submit}
               disabled={!ready}
               style={{
-                background: ready ? 'var(--ink)' : 'var(--paper-2)',
-                color: ready ? 'var(--paper)' : 'var(--ink-4)',
-                padding: '0 28px',
-                fontFamily: 'var(--mono)',
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
+                background: ready ? 'var(--ink)' : 'var(--fog)',
+                color: ready ? 'var(--bone)' : 'var(--ink-4)',
+                padding: '0 32px',
+                fontFamily: 'var(--sans)',
+                fontSize: 14,
+                fontWeight: 500,
+                letterSpacing: '0.01em',
                 cursor: ready ? 'pointer' : 'not-allowed',
-                borderLeft: '1px solid var(--ink)',
+                border: 0,
                 minWidth: 160,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
               }}
             >
-              {t('input.submitButton')}
+              Measure <span>→</span>
             </button>
           </div>
         ) : (
@@ -199,23 +220,41 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
         )}
 
         {/* Sample picks */}
-        <div style={{ marginTop: 24 }}>
-          <p className="smcap" style={{ color: 'var(--ink-3)', margin: '0 0 12px' }}>{t('input.tryOneOf')}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
-            {SAMPLE_URLS.map(s => (
-              <SampleButton
+        <div style={{ marginTop: 22, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+          <span style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 10,
+            color: 'var(--ink-3)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.18em',
+            marginRight: 4,
+          }}>Try one</span>
+          {SAMPLE_URLS.map(s => {
+            let host = ''
+            try { host = new URL(s.url).hostname } catch { host = s.url }
+            return (
+              <button
                 key={s.url}
-                url={s.url}
-                label={s.label}
-                onPick={() => { setTab('url'); setUrl(s.url) }}
-              />
-            ))}
-          </div>
+                type="button"
+                onClick={() => { setTab('url'); setUrl(s.url) }}
+                style={{
+                  fontFamily: 'var(--mono)',
+                  fontSize: 12,
+                  background: 'transparent',
+                  border: '0.5px solid var(--fog)',
+                  color: 'var(--ink)',
+                  padding: '7px 14px',
+                  borderRadius: 999,
+                  cursor: 'pointer',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {host} ↗
+              </button>
+            )
+          })}
         </div>
       </div>
-
-      {/* Marquee */}
-      <Marquee />
     </section>
   )
 }
@@ -241,67 +280,3 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   )
 }
 
-function SampleButton({ url, label, onPick }: { url: string; label: string; onPick: () => void }) {
-  const [hovered, setHovered] = useState(false)
-  let hostname = ''
-  try { hostname = new URL(url).hostname } catch { hostname = url }
-
-  return (
-    <button
-      onClick={onPick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        textAlign: 'left',
-        border: `1px solid ${hovered ? 'var(--ink)' : 'var(--paper-rule)'}`,
-        padding: '12px 14px',
-        background: 'transparent',
-        cursor: 'pointer',
-        display: 'block',
-        transition: 'border-color 120ms ease',
-      }}
-    >
-      <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-        {hostname}
-      </div>
-      <div style={{ fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.15, marginTop: 4, color: 'var(--ink)' }}>
-        {label.split(' — ')[1] || label}
-      </div>
-    </button>
-  )
-}
-
-function Marquee() {
-  const items = [
-    'MEDIA LITERACY', '·',
-    '1,824 ARTICLES ANALYZED THIS WEEK', '·',
-    'FOUR-PASS LLM REVIEW', '·',
-    'FACT-CHECKER CROSS-REFERENCE', '·',
-    'OPEN METHODOLOGY', '·',
-    'NO ACCOUNT REQUIRED', '·',
-  ]
-  const repeated = [...items, ...items, ...items, ...items]
-  return (
-    <div style={{
-      borderTop: '1px solid var(--paper-rule)',
-      borderBottom: '1px solid var(--paper-rule)',
-      overflow: 'hidden',
-      padding: '12px 0',
-      marginTop: 20,
-    }}>
-      <div style={{
-        display: 'flex',
-        gap: 28,
-        whiteSpace: 'nowrap',
-        fontFamily: 'var(--mono)',
-        fontSize: 11,
-        letterSpacing: '0.22em',
-        color: 'var(--ink-3)',
-        animation: 'ticker 38s linear infinite',
-        width: 'max-content',
-      }}>
-        {repeated.map((text, i) => <span key={i}>{text}</span>)}
-      </div>
-    </div>
-  )
-}

@@ -19,12 +19,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
-  const [now] = useState(new Date())
   const { language, setLanguage, t } = useTranslation()
-
-  const dateStr = now.toLocaleDateString('en-US', {
-    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
-  }).toUpperCase()
 
   const handleAnalyze = useCallback(async (url: string | null, text: string) => {
     const tgt = url || (text ? `pasted text · ${text.length} chars` : '')
@@ -114,159 +109,75 @@ export default function Home() {
       style={{ maxWidth: 1320, margin: '0 auto', padding: '0 36px 72px' }}
     >
       {/* ─── Masthead ─── */}
-      <header style={{ marginBottom: 40 }}>
-
-        {/* Top utility strip */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontFamily: 'var(--mono)',
-          fontSize: 10,
-          color: 'var(--ink-3)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.14em',
-          padding: '14px 0',
-          borderBottom: '0.5px solid var(--fog)',
-        }}>
-          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{dateStr}</span>
-          <span style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <span style={{
-                width: 5, height: 5,
-                background: 'var(--verified)',
-                borderRadius: 5,
-                animation: 'pulse-dot 2.4s ease-in-out infinite',
-              }} />
-              {t('header.liveStatus')}
-            </span>
-            <span>Vol. I · No. 0427</span>
-          </span>
-        </div>
-
-        {/* Logotype row */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'auto 1fr auto',
-          alignItems: 'center',
-          gap: 32,
-          padding: '22px 0 20px',
-          borderBottom: '1px solid var(--ink)',
-        }}>
-          {/* Left: logo + wordmark */}
-          <button
-            onClick={handleReset}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-            aria-label="Quanta home"
-          >
-            {/* Monogram: Q-circle in rounded square + ember dot */}
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-              <rect width="36" height="36" rx="7" fill="#F5F2EA" stroke="#0F2942" strokeWidth="1"/>
-              <circle cx="16" cy="16" r="9.5" stroke="#0F2942" strokeWidth="2.2"/>
-              <circle cx="25" cy="25" r="3.2" fill="#E8A33D"/>
-            </svg>
-            <div>
-              <div style={{
-                fontFamily: 'var(--sans)',
-                fontWeight: 600,
-                fontSize: 28,
-                letterSpacing: '-0.035em',
-                lineHeight: 1,
-                color: 'var(--ink)',
-              }}>
-                quanta<span style={{ color: 'var(--ember)' }}>.</span>
-              </div>
-              <div style={{
-                fontFamily: 'var(--serif)',
-                fontStyle: 'italic',
-                fontSize: 13,
-                color: 'var(--ink-3)',
-                lineHeight: 1,
-                marginTop: 4,
-                letterSpacing: 0,
-              }}>
-                Truth, measured.
-              </div>
-            </div>
-          </button>
-
-          {/* Center: nav */}
-          <nav style={{
-            display: 'flex',
-            gap: 28,
-            justifyContent: 'center',
+      <header style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 32,
+        padding: '24px 0',
+        marginBottom: 56,
+        borderBottom: '0.5px solid var(--fog)',
+      }}>
+        <button
+          onClick={handleReset}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          aria-label="Quanta home"
+        >
+          <svg width="32" height="32" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect width="64" height="64" rx="14" fill="#0F2942"/>
+            <circle cx="32" cy="30" r="13" stroke="#F5F2EA" strokeWidth="2.5" fill="none"/>
+            <circle cx="44" cy="42" r="3.2" fill="#E8A33D"/>
+          </svg>
+          <span style={{
             fontFamily: 'var(--sans)',
-            fontSize: 12,
-            letterSpacing: '0.02em',
+            fontWeight: 600,
+            fontSize: 22,
+            letterSpacing: '-0.02em',
+            color: 'var(--ink)',
           }}>
-            {(['Analyze', 'Compare', 'Library', 'Methodology'] as const).map(item => (
-              <button
-                key={item}
-                onClick={item === 'Analyze' ? handleReset : undefined}
-                style={{
-                  color: item === 'Analyze' && stage !== 'input' ? 'var(--ink-3)' : 'var(--ink-2)',
-                  fontWeight: item === 'Analyze' ? 500 : 400,
-                  cursor: item === 'Analyze' ? 'pointer' : 'default',
-                  padding: '4px 0',
-                }}
-              >
-                {item}
-              </button>
-            ))}
-          </nav>
+            Quanta<span style={{ color: 'var(--ember)' }}>.</span>
+          </span>
+        </button>
 
-          {/* Right: language + CTA */}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <NavPill label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
-            <NavPill label="AR" active={language === 'ar'} onClick={() => setLanguage('ar')} />
-            <div style={{ width: 1, height: 16, background: 'var(--fog)', margin: '0 4px' }} />
+        <nav style={{
+          display: 'flex',
+          gap: 32,
+          fontFamily: 'var(--sans)',
+          fontSize: 14,
+          color: 'var(--ink-2)',
+        }}>
+          {(['Analyze', 'Methodology', 'Pricing', 'For teams', 'API'] as const).map(item => (
             <button
-              onClick={() => alert(t('header.methodAlert'))}
+              key={item}
+              onClick={item === 'Analyze' ? handleReset : undefined}
               style={{
-                border: '1px solid var(--ink)',
-                padding: '7px 14px',
-                fontFamily: 'var(--mono)',
-                fontSize: 10,
-                textTransform: 'uppercase',
-                letterSpacing: '0.14em',
-                cursor: 'pointer',
-                color: 'var(--ink)',
-                background: 'transparent',
+                color: item === 'Analyze' ? 'var(--ink)' : 'var(--ink-2)',
+                fontWeight: item === 'Analyze' ? 500 : 400,
+                cursor: item === 'Analyze' ? 'pointer' : 'default',
               }}
             >
-              {t('header.method')}
+              {item}
             </button>
-            <button style={{
-              border: 'none',
-              padding: '7px 16px',
-              fontFamily: 'var(--mono)',
-              fontSize: 10,
-              textTransform: 'uppercase',
-              letterSpacing: '0.14em',
-              cursor: 'pointer',
-              color: 'var(--bone)',
-              background: 'var(--ink)',
-            }}>
-              Pro
-            </button>
-          </div>
-        </div>
+          ))}
+        </nav>
 
-        {/* Subtitle rule */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          padding: '12px 0 0',
-          fontFamily: 'var(--mono)',
-          fontSize: 10,
-          color: 'var(--ink-3)',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-        }}>
-          <span>The credibility instrument</span>
-          <span style={{ flex: 1, height: '0.5px', background: 'var(--fog)' }} />
-          <span>Free · 3 analyses / day · no account needed</span>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <NavPill label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
+          <NavPill label="AR" active={language === 'ar'} onClick={() => setLanguage('ar')} />
+          <button style={{
+            border: 0,
+            padding: '9px 18px',
+            fontFamily: 'var(--sans)',
+            fontSize: 13,
+            fontWeight: 500,
+            borderRadius: 8,
+            cursor: 'pointer',
+            color: 'var(--bone)',
+            background: 'var(--ink)',
+            marginLeft: 4,
+          }}>
+            Install extension
+          </button>
         </div>
       </header>
 
@@ -288,7 +199,7 @@ export default function Home() {
       )}
 
       {/* 2-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 48 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: 64 }}>
         <main style={{ minWidth: 0 }}>
           {stage === 'input' && (
             <ArticleInput onSubmit={handleAnalyze} />
@@ -310,18 +221,19 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={{
-        marginTop: 64,
-        paddingTop: 16,
+        marginTop: 96,
+        paddingTop: 24,
         borderTop: '0.5px solid var(--fog)',
         display: 'flex',
         justifyContent: 'space-between',
-        fontFamily: 'var(--mono)',
-        fontSize: 10,
+        alignItems: 'center',
+        fontFamily: 'var(--sans)',
+        fontSize: 13,
         color: 'var(--ink-4)',
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
       }}>
-        <span>Quanta · Truth, measured.</span>
+        <span style={{ fontStyle: 'italic', fontFamily: 'var(--serif)' }}>
+          Quanta — Truth, measured.
+        </span>
         <span>Open methodology · Independent · Ad-free</span>
       </footer>
     </div>
@@ -333,14 +245,15 @@ function NavPill({ label, active, onClick }: { label: string; active: boolean; o
     <button
       onClick={onClick}
       style={{
-        padding: '6px 10px',
-        border: active ? '1px solid var(--ink)' : '1px solid var(--fog)',
+        padding: '6px 11px',
+        border: active ? '1px solid var(--ink)' : '0.5px solid var(--fog)',
+        borderRadius: 6,
         background: active ? 'var(--ink)' : 'transparent',
         color: active ? 'var(--bone)' : 'var(--ink-3)',
-        fontFamily: 'var(--mono)',
-        fontSize: 10,
-        textTransform: 'uppercase',
-        letterSpacing: '0.14em',
+        fontFamily: 'var(--sans)',
+        fontSize: 12,
+        fontWeight: 500,
+        letterSpacing: '0.02em',
         cursor: 'pointer',
       }}
     >
