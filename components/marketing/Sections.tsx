@@ -123,7 +123,7 @@ export function HowItWorks() {
   return (
     <section id="how" style={{ padding: `${SPACING[20]} 0 ${SPACING[20]}`, scrollMarginTop: '96px' }}>
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: `0 ${SPACING[10]}` }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: SPACING[16], alignItems: 'start', marginBottom: SPACING[14] }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: SPACING[16], alignItems: 'start', marginBottom: SPACING[12] }}>
           <div>
             <div style={{ fontFamily: FONTS.sans, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: COLORS.slate }}>
               How it works
