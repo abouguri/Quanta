@@ -3,19 +3,20 @@
 @tailwind utilities;
 
 :root {
-  /* Quanta brand palette */
-  --bone:         #F5F2EA;
-  --paper:        #FFFFFF;
-  --mist:         #FAFAF7;
-  --fog:          #E5E3DA;
+  /* Quanta brand palette (handoff-tuned) */
+  --bone:         #F4F1E9;
+  --paper:        #FBF9F3;
+  --mist:         #EFEBE0;
+  --fog:          #DDD7C6;
 
-  --ink:          #0F2942;
-  --ink-2:        rgba(15, 41, 66, 0.60);
-  --ink-3:        rgba(15, 41, 66, 0.42);
-  --ink-4:        #888780;
+  --ink:          #0F2233;
+  --ink-2:        rgba(15, 34, 51, 0.72);
+  --ink-3:        rgba(15, 34, 51, 0.50);
+  --ink-4:        #5B6770;
+  --graphite:     #333E48;
 
   --signal:       #1A4D7A;
-  --ember:        #E8A33D;
+  --ember:        #E6A23C;
 
   /* Signal colors (credibility) */
   --verified:     #2E7D5B;
@@ -33,11 +34,66 @@
   --stamp:        var(--disputed);
 
   --serif: "Source Serif 4", "Georgia", serif;
-  --sans:  "Inter", system-ui, -apple-system, Helvetica, sans-serif;
+  --sans:  "Urbanist", "Inter", system-ui, -apple-system, Helvetica, sans-serif;
   --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
   --rule:     1px solid var(--fog);
   --rule-ink: 1px solid var(--ink);
+}
+
+/* === Quanta utility classes (ported from handoff site.css) === */
+.q-container { max-width: 1320px; margin: 0 auto; padding: 0 40px; }
+.q-narrow    { max-width: 960px;  margin: 0 auto; padding: 0 40px; }
+
+.q-btn {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.005em;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--bone);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+  transition: background 150ms cubic-bezier(.2,.7,.2,1);
+}
+.q-btn:hover { background: #1a3346; }
+.q-btn--ghost { background: transparent; color: var(--ink); }
+.q-btn--ghost:hover { background: rgba(15,34,51,0.06); }
+
+.q-eyebrow {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-4);
+}
+.q-mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.q-dot { color: var(--ember); }
+.q-anchor { scroll-margin-top: 96px; }
+
+@keyframes qpulse {
+  0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+  50%      { transform: scaleY(1);   opacity: 1; }
+}
+@keyframes qcount {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.q-reveal { animation: qcount 360ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes qfill {
+  from { width: 0; }
+  to   { width: var(--q-w, 0%); }
 }
 
 * { box-sizing: border-box; }
