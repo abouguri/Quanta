@@ -35,11 +35,10 @@ export default function LandingPage() {
         <div style={{
           maxWidth: '1320px',
           margin: '0 auto',
-          padding: `${COLORS.bone} 0`,
+          padding: `14px ${SPACING[10]}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: `14px ${COLORS.bone}`,
         }}>
           <a href="#top" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
             <svg width="36" height="36" viewBox="0 0 64 64" fill="none" aria-hidden="true">
@@ -52,7 +51,7 @@ export default function LandingPage() {
             </span>
           </a>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: COLORS.ember, fontFamily: FONTS.sans, fontSize: '14px', fontWeight: 500 }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: SPACING[8], fontFamily: FONTS.sans, fontSize: '14px', fontWeight: 500 }}>
             {['How it works', 'Methodology', 'Pricing', 'For teams', 'API'].map((link) => (
               <a
                 key={link}
