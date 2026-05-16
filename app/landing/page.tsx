@@ -2,7 +2,7 @@
 
 import { MarketingHero } from '@/components/marketing/Hero'
 import { TrustStrip, HowItWorks, ComparePreview, Methodology, QuoteStrip, CTAFooter } from '@/components/marketing/Sections'
-import { COLORS, FONTS } from '@/lib/marketing-constants'
+import { COLORS, FONTS, SPACING } from '@/lib/marketing-constants'
 
 export default function LandingPage() {
   const handleAnalyzeUrl = (url: string) => {
