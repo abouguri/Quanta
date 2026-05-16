@@ -604,7 +604,7 @@ export function CTAFooter() {
             ['Open', ['Methodology', 'Changelog', 'Advisory board', 'Bias audits', 'Research papers']],
             ['Company', ['About', 'Manifesto', 'Press', 'Careers', 'Contact']],
           ].map(([title, items]) => (
-            <div key={title}>
+            <div key={String(title)}>
               <div style={{ fontFamily: FONTS.sans, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: COLORS.slate }}>
                 {title}
               </div>
