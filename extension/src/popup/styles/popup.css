@@ -1,6 +1,15 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
+html, body, .shell, .shell-main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.shell::-webkit-scrollbar,
+.shell-main::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
 body {
   width: 360px;
   min-height: 560px;
