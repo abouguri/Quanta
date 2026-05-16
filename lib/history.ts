@@ -9,7 +9,7 @@ export interface AnalysisHistory {
   result: AnalysisResult
 }
 
-const HISTORY_KEY = 'factnews_analysis_history'
+const HISTORY_KEY = 'quanta_analysis_history'
 const MAX_HISTORY = 50
 
 export function saveAnalysis(

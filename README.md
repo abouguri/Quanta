@@ -1,12 +1,15 @@
-# FactNews
+# Quanta
 
-A web app that analyzes news articles for credibility, bias, and misinformation risk.
+*Truth, measured.*
+
+The credibility instrument for the internet. Quanta measures bias, evidence, and source reliability for any news article — and shows its work.
 
 ## Features
 
-- Analyze articles by URL or pasting text
-- 4-pass LLM analysis (fact risk, bias, sensationalism, red flags)
-- Analysis history (saved in browser)
+- Analyze articles by URL or pasted text
+- Four-pass LLM review (fact risk, bias & framing, sensationalism, red flags)
+- Calibrated credibility score (0–100) with explanation
+- Analysis history (stored locally in the browser)
 - Copy results as markdown
 - Dark/light mode
 - Multi-language (English & Arabic)

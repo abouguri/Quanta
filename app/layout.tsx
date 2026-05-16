@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'The credibility instrument for the internet. Measure bias, evidence, and source reliability for any news article — and see the work.',
   keywords: ['news', 'credibility', 'misinformation', 'bias', 'ai', 'fact-check', 'media literacy'],
   authors: [{ name: 'Quanta' }],
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+  },
 }
 
 export const viewport: Viewport = {
