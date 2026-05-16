@@ -611,7 +611,7 @@ export function CTAFooter() {
                 {title}
               </div>
               <ul style={{ margin: `${SPACING[4]} 0 0`, padding: 0, listStyle: 'none', display: 'grid', gap: SPACING[2] }}>
-                {(items as string[]).map((it) => (
+                {(items as readonly string[]).map((it) => (
                   <li key={it}>
                     <a href="#" style={{ fontSize: '14px', color: COLORS['ink-navy'], textDecoration: 'none' }}>
                       {it}
