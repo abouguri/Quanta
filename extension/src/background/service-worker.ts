@@ -1,6 +1,11 @@
 import type { BackgroundToPopup, PopupToBackground } from '@/lib/messages'
-import { ANALYZE_PORT } from '@/lib/messages'
-import { API_BASE_URL } from '@/lib/config'
+
+// Inlined to keep the service worker free of shared chunks — Chrome MV3 module
+// SWs can fail to register ("Status code: 2") when their imports cross
+// generated chunk boundaries. Source of truth lives in @/lib/messages and
+// @/lib/config; mirror any changes here.
+const ANALYZE_PORT = 'analyze'
+const API_BASE_URL = 'https://factnews-six.vercel.app'
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== ANALYZE_PORT) return
