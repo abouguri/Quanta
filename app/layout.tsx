@@ -3,7 +3,7 @@ import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
 import { TranslationProvider } from '@/lib/i18n'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://factnews-hnbs3l9f3-abouguris-projects.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://factnews-six.vercel.app'
 const TITLE = 'Quanta — Truth, measured.'
 const DESCRIPTION = 'The credibility instrument for the internet. Measure bias, evidence, and source reliability for any news article — and see the work.'
 

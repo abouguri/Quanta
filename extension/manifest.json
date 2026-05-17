@@ -19,7 +19,7 @@
     "128": "public/icons/icon-128.png"
   },
   "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["https://factnews-hnbs3l9f3-abouguris-projects.vercel.app/*", "https://*.vercel.app/*", "http://localhost:3000/*"],
+  "host_permissions": ["https://factnews-six.vercel.app/*", "http://localhost:3000/*"],
   "background": {
     "service_worker": "src/background/service-worker.ts",
     "type": "module"
