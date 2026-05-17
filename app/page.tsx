@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ArticleInput } from '@/components/ArticleInput'
 import { AnalyzingStage } from '@/components/AnalyzingStage'
 import { CredibilityReport } from '@/components/CredibilityReport'
@@ -15,14 +16,16 @@ import {
 
 type Stage = 'input' | 'analyzing' | 'report'
 
-export default function Home() {
+function HomeInner() {
   const [stage, setStage] = useState<Stage>('input')
   const [target, setTarget] = useState('')
+  const [currentPass, setCurrentPass] = useState(0)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const { language, t } = useTranslation()
+  const searchParams = useSearchParams()
 
   const handleAnalyze = useCallback(async (url: string | null, text: string) => {
     const tgt = url || (text ? `pasted text · ${text.length} chars` : '')
@@ -30,6 +33,7 @@ export default function Home() {
     setCurrentUrl(url)
     setResult(null)
     setError(null)
+    setCurrentPass(0)
     setStage('analyzing')
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
@@ -57,15 +61,20 @@ export default function Home() {
         buffer = lines[lines.length - 1]
         for (let i = 0; i < lines.length - 1; i++) {
           const line = lines[i]
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6)) as AnalysisResult
-              if (data.overallScore !== undefined) {
-                finalResult = data
-                saveAnalysis(data, url || undefined)
-                setHistoryRefreshKey(k => k + 1)
-              }
-            } catch { /* ignore */ }
+          if (!line.startsWith('data: ')) continue
+          try {
+            const data = JSON.parse(line.slice(6)) as Partial<AnalysisResult> & { pass?: number; progress?: number; error?: string }
+            if (data.error) throw new Error(data.error)
+            if (typeof data.pass === 'number') {
+              setCurrentPass(data.pass)
+            } else if (data.overallScore !== undefined) {
+              finalResult = data as AnalysisResult
+              setCurrentPass(5)
+              saveAnalysis(finalResult, url || undefined)
+              setHistoryRefreshKey(k => k + 1)
+            }
+          } catch (err) {
+            if (err instanceof Error && err.message !== 'Unexpected end of JSON input') throw err
           }
         }
       }
@@ -85,6 +94,7 @@ export default function Home() {
     setTarget('')
     setCurrentUrl(null)
     setError(null)
+    setCurrentPass(0)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
@@ -96,13 +106,23 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
+  // Auto-run when navigated from /landing with ?url=...&auto=1
+  useEffect(() => {
+    const url = searchParams.get('url')
+    const auto = searchParams.get('auto')
+    if (url && auto === '1' && stage === 'input') {
+      void handleAnalyze(url, '')
+    }
+    // intentionally only run on first paint
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const showMarketing = stage === 'input'
 
   return (
     <div id="app" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <QuantaNav onHome={handleReset} />
 
-      {/* Hero / analyzer */}
       <section style={{ padding: '72px 0 96px' }}>
         <div className="q-container">
           {error && (
@@ -126,7 +146,7 @@ export default function Home() {
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: 64 }}>
             <main style={{ minWidth: 0 }}>
               {stage === 'input' && <ArticleInput onSubmit={handleAnalyze} />}
-              {stage === 'analyzing' && <AnalyzingStage target={target} />}
+              {stage === 'analyzing' && <AnalyzingStage target={target} currentPass={currentPass} />}
               {stage === 'report' && result && (
                 <CredibilityReport result={result} currentUrl={currentUrl} onReset={handleReset} />
               )}
@@ -151,5 +171,13 @@ export default function Home() {
         </>
       )}
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeInner />
+    </Suspense>
   )
 }

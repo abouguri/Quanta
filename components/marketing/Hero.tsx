@@ -224,6 +224,20 @@ function ResultPanel({ data, onReset }: { data: typeof SAMPLE_ANALYSES[keyof typ
             <span style={{ fontFamily: FONTS.mono, fontSize: '11px', color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '0.14em' }}>
               {data.host} · {data.published} · {data.readTime}
             </span>
+            <span style={{
+              fontFamily: FONTS.mono,
+              fontSize: '9px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.18em',
+              color: COLORS.slate,
+              border: `0.5px solid ${COLORS.fog}`,
+              padding: `2px 6px`,
+              borderRadius: '3px',
+              marginLeft: 'auto',
+            }}>
+              Demo · cached sample
+            </span>
           </div>
           <h2 style={{
             fontFamily: FONTS.serif,

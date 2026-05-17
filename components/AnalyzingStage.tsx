@@ -1,36 +1,42 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from '@/lib/i18n'
 
-export function AnalyzingStage({ target }: { target: string }) {
+const PASSES = [
+  { code: '01', nameKey: 'analyzing.pass01', detailKey: 'analyzing.pass01Detail' },
+  { code: '02', nameKey: 'analyzing.pass02', detailKey: 'analyzing.pass02Detail' },
+  { code: '03', nameKey: 'analyzing.pass03', detailKey: 'analyzing.pass03Detail' },
+  { code: '04', nameKey: 'analyzing.pass04', detailKey: 'analyzing.pass04Detail' },
+]
+
+interface Props {
+  target: string
+  // 0 = not started; 1-4 = working on that pass; 5 = all passes done, waiting on result frame
+  currentPass: number
+}
+
+export function AnalyzingStage({ target, currentPass }: Props) {
   const { t } = useTranslation()
-  const [tick, setTick] = useState(0)
 
+  // Animate active bar creep so the user feels motion within a pass.
+  const [creep, setCreep] = useState(0)
+  const lastPassRef = useRef(currentPass)
   useEffect(() => {
-    const id = setInterval(() => setTick(v => v + 1), 70)
+    if (lastPassRef.current !== currentPass) {
+      setCreep(0)
+      lastPassRef.current = currentPass
+    }
+    const id = setInterval(() => setCreep(c => Math.min(0.85, c + 0.012)), 80)
     return () => clearInterval(id)
-  }, [])
-
-  const total = 96
-  const tCapped = Math.min(tick, total)
-
-  const PASSES = [
-    { code: '01', nameKey: 'analyzing.pass01', detailKey: 'analyzing.pass01Detail' },
-    { code: '02', nameKey: 'analyzing.pass02', detailKey: 'analyzing.pass02Detail' },
-    { code: '03', nameKey: 'analyzing.pass03', detailKey: 'analyzing.pass03Detail' },
-    { code: '04', nameKey: 'analyzing.pass04', detailKey: 'analyzing.pass04Detail' },
-  ]
+  }, [currentPass])
 
   const passProgress = PASSES.map((_, i) => {
-    const start = i * 24
-    const local = tCapped - start
-    if (local <= 0) return 0
-    if (local >= 24) return 1
-    return local / 24
+    const pass = i + 1
+    if (currentPass > pass) return 1
+    if (currentPass === pass) return Math.max(0.05, creep)
+    return 0
   })
-
-  const elapsedSec = (tick * 0.07).toFixed(2)
   const doneCount = passProgress.filter(p => p >= 1).length
 
   return (
@@ -44,7 +50,6 @@ export function AnalyzingStage({ target }: { target: string }) {
         gap: 36,
       }}
     >
-      {/* Left: pass list */}
       <div>
         <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('analyzing.nowReading')}</p>
         <div style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-3)', marginTop: 6, wordBreak: 'break-all' }}>
@@ -88,7 +93,7 @@ export function AnalyzingStage({ target }: { target: string }) {
                   </span>
                   <span style={{ flex: 1, borderBottom: '1px dotted var(--paper-rule)', height: 1, alignSelf: 'center' }} />
                   <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-                    {done ? t('analyzing.done') : active ? `${Math.floor(prog * 100)}%` : t('analyzing.queued')}
+                    {done ? t('analyzing.done') : active ? t('analyzing.working') : t('analyzing.queued')}
                   </span>
                 </div>
                 <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--mono)' }}>
@@ -100,7 +105,7 @@ export function AnalyzingStage({ target }: { target: string }) {
                     left: 0, top: 0, bottom: 0,
                     width: `${prog * 100}%`,
                     background: done ? 'var(--moss)' : 'var(--ink)',
-                    transition: 'width 80ms linear',
+                    transition: 'width 220ms ease-out',
                   }} />
                 </div>
               </div>
@@ -110,7 +115,7 @@ export function AnalyzingStage({ target }: { target: string }) {
 
         <div style={{ marginTop: 22 }}>
           <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-            {t('analyzing.elapsed')} {elapsedSec}s &nbsp;·&nbsp; {t('analyzing.passes')} {doneCount}/4
+            {t('analyzing.passes')} {doneCount}/4
             {doneCount === 4 && (
               <span style={{ marginLeft: 16, color: 'var(--moss)' }}>{t('analyzing.waitingResults')}</span>
             )}
@@ -118,7 +123,6 @@ export function AnalyzingStage({ target }: { target: string }) {
         </div>
       </div>
 
-      {/* Right: scanning placeholder */}
       <aside>
         <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>{t('analyzing.articleSurface')}</p>
         <div style={{

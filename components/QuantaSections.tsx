@@ -47,7 +47,6 @@ export function QuantaNav({ onHome }: { onHome: () => void }) {
           ))}
         </nav>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <a href="#" style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)' }}>Sign in</a>
           <a href="#cta" className="q-btn">Install extension</a>
         </div>
       </div>

@@ -40,7 +40,7 @@ export function Popup() {
   if (pinnedResult) {
     body = <ResultCard result={pinnedResult} onReset={onReset} />
   } else if (analyze.state.phase === 'measuring') {
-    body = <MeasuringCard progress={analyze.state.progress} onCancel={analyze.cancel} />
+    body = <MeasuringCard currentPass={analyze.state.currentPass} progress={analyze.state.progress} onCancel={analyze.cancel} />
   } else if (analyze.state.phase === 'result' && analyze.state.result) {
     body = <ResultCard result={analyze.state.result} onReset={onReset} />
   } else if (analyze.state.phase === 'limit') {

@@ -3,14 +3,35 @@ import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
 import { TranslationProvider } from '@/lib/i18n'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://factnews-hnbs3l9f3-abouguris-projects.vercel.app'
+const TITLE = 'Quanta — Truth, measured.'
+const DESCRIPTION = 'The credibility instrument for the internet. Measure bias, evidence, and source reliability for any news article — and see the work.'
+
 export const metadata: Metadata = {
-  title: 'Quanta — Truth, measured.',
-  description: 'The credibility instrument for the internet. Measure bias, evidence, and source reliability for any news article — and see the work.',
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
   keywords: ['news', 'credibility', 'misinformation', 'bias', 'ai', 'fact-check', 'media literacy'],
   authors: [{ name: 'Quanta' }],
   icons: {
     icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
   },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: '/',
+    siteName: 'Quanta',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'Quanta — Truth, measured.' }],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['/og.png'],
+  },
+  robots: { index: true, follow: true },
 }
 
 export const viewport: Viewport = {

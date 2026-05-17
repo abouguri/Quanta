@@ -1,14 +1,14 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { MarketingHero } from '@/components/marketing/Hero'
 import { TrustStrip, HowItWorks, ComparePreview, Methodology, QuoteStrip, CTAFooter } from '@/components/marketing/Sections'
 import { COLORS, FONTS, SPACING } from '@/lib/marketing-constants'
 
 export default function LandingPage() {
+  const router = useRouter()
   const handleAnalyzeUrl = (url: string) => {
-    console.log('Analyzing URL:', url)
-    // TODO: Connect to real analysis endpoint
-    // This would typically redirect to the product page with the URL
+    router.push(`/?url=${encodeURIComponent(url)}&auto=1`)
   }
 
   return (
@@ -68,11 +68,8 @@ export default function LandingPage() {
           </nav>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <a href="#" style={{ fontSize: '14px', fontWeight: 500, color: COLORS['ink-navy'], textDecoration: 'none' }}>
-              Sign in
-            </a>
             <a
-              href="/api/auth/signin"
+              href="#cta"
               style={{
                 background: COLORS['ink-navy'],
                 color: COLORS.bone,

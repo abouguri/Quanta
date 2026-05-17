@@ -39,3 +39,9 @@ DEPLOYMENT.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# handoff dump (brand spec already lives in code)
+Quanta-handoff/
+MARKETING_INTEGRATION.md
+MARKETING_QUICK_START.md
+components/marketing/INTEGRATION_EXAMPLES.md

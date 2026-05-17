@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const PASSES = [
   { code: '01', name: 'Fact risk' },
@@ -7,19 +7,27 @@ const PASSES = [
   { code: '04', name: 'Red flags' },
 ]
 
-export function MeasuringCard({ progress, onCancel }: { progress: number; onCancel: () => void }) {
-  // Simulate per-pass advance from the single SSE progress signal we get.
-  const [tickPass, setTickPass] = useState(0)
+interface Props {
+  // 0 = not started; 1-4 = working on that pass; 5 = result frame received
+  currentPass: number
+  progress: number
+  onCancel: () => void
+}
+
+export function MeasuringCard({ currentPass, progress, onCancel }: Props) {
+  // Slow creep on the active pass so the user feels motion between SSE frames.
+  const [creep, setCreep] = useState(0)
+  const lastPass = useRef(currentPass)
   useEffect(() => {
-    const start = Date.now()
-    const dur = 2400
-    const id = setInterval(() => {
-      const elapsed = Date.now() - start
-      const p = Math.min(1, elapsed / dur)
-      setTickPass(Math.min(3, Math.floor(p * 4)))
-    }, 200)
+    if (lastPass.current !== currentPass) {
+      setCreep(0)
+      lastPass.current = currentPass
+    }
+    const id = setInterval(() => setCreep(c => Math.min(0.85, c + 0.04)), 120)
     return () => clearInterval(id)
-  }, [])
+  }, [currentPass])
+
+  const headlineProgress = Math.max(progress, Math.min(99, currentPass * 22 + creep * 22))
 
   return (
     <div className="measure">
@@ -27,7 +35,7 @@ export function MeasuringCard({ progress, onCancel }: { progress: number; onCanc
         <div className="eyebrow-row">
           <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>Measuring</div>
           <span className="q-mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>
-            {Math.max(progress, Math.min(99, Math.round((tickPass / 4) * 100)))}%
+            {Math.round(headlineProgress)}%
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
@@ -40,8 +48,9 @@ export function MeasuringCard({ progress, onCancel }: { progress: number; onCanc
 
       <div className="pass-list">
         {PASSES.map((p, i) => {
-          const done = i < tickPass
-          const active = i === tickPass
+          const pass = i + 1
+          const done = currentPass > pass
+          const active = currentPass === pass
           const state = done ? 'Done' : active ? 'Working' : 'Queued'
           return (
             <div key={p.code} className={`pass-row${done ? ' done' : active ? ' active' : ''}`}>

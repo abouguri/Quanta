@@ -65,10 +65,17 @@ chrome.runtime.onConnect.addListener((port) => {
           if (!frame.startsWith('data: ')) continue
           try {
             const parsed = JSON.parse(frame.slice(6))
-            if (parsed && typeof parsed.overallScore === 'number') {
+            if (parsed && typeof parsed.error === 'string') {
+              send({ type: 'ERROR', message: parsed.error })
+            } else if (parsed && typeof parsed.overallScore === 'number') {
               send({ type: 'RESULT', data: parsed })
             } else if (parsed && typeof parsed.progress === 'number') {
-              send({ type: 'PROGRESS', status: String(parsed.status ?? ''), progress: parsed.progress })
+              send({
+                type: 'PROGRESS',
+                status: String(parsed.status ?? ''),
+                progress: parsed.progress,
+                pass: typeof parsed.pass === 'number' ? parsed.pass : undefined,
+              })
             }
           } catch {
             // ignore parse errors on partial frames

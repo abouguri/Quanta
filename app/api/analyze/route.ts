@@ -1,5 +1,6 @@
 import { analyzeArticle } from '@/lib/analyze'
 import { scrapeArticle } from '@/lib/scraper'
+import { Redis } from '@upstash/redis'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -8,23 +9,36 @@ const CORS_HEADERS = {
 }
 
 const RATE_LIMIT_MAX = 3
-const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000
+const RATE_LIMIT_WINDOW_S = 24 * 60 * 60
 
-// In-memory rate limit. Survives a single warm Vercel instance; resets on cold start.
-// Upgrade to KV/Redis when traffic grows past a single instance.
-const rateLimitStore = new Map<string, number[]>()
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? Redis.fromEnv()
+  : null
 
-function checkRateLimit(installId: string): { ok: true } | { ok: false; retryAfter: number } {
+const inMemoryStore = new Map<string, number[]>()
+
+async function checkRateLimit(installId: string): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+  if (redis) {
+    const key = `quanta:rl:${installId}`
+    const count = await redis.incr(key)
+    if (count === 1) await redis.expire(key, RATE_LIMIT_WINDOW_S)
+    if (count > RATE_LIMIT_MAX) {
+      const ttl = await redis.ttl(key)
+      return { ok: false, retryAfter: Math.max(ttl, 1) }
+    }
+    return { ok: true }
+  }
+
   const now = Date.now()
-  const cutoff = now - RATE_LIMIT_WINDOW_MS
-  const recent = (rateLimitStore.get(installId) ?? []).filter(t => t > cutoff)
+  const windowMs = RATE_LIMIT_WINDOW_S * 1000
+  const cutoff = now - windowMs
+  const recent = (inMemoryStore.get(installId) ?? []).filter(t => t > cutoff)
   if (recent.length >= RATE_LIMIT_MAX) {
-    const retryAfter = Math.ceil((recent[0] + RATE_LIMIT_WINDOW_MS - now) / 1000)
-    rateLimitStore.set(installId, recent)
-    return { ok: false, retryAfter }
+    inMemoryStore.set(installId, recent)
+    return { ok: false, retryAfter: Math.ceil((recent[0] + windowMs - now) / 1000) }
   }
   recent.push(now)
-  rateLimitStore.set(installId, recent)
+  inMemoryStore.set(installId, recent)
   return { ok: true }
 }
 
@@ -43,7 +57,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const installId = request.headers.get('x-quanta-install-id')
     if (installId) {
-      const rl = checkRateLimit(installId)
+      const rl = await checkRateLimit(installId)
       if (!rl.ok) {
         return json(
           { error: 'Daily free limit reached. Try again later.', retryAfter: rl.retryAfter },
@@ -83,14 +97,22 @@ export async function POST(request: Request): Promise<Response> {
       return json({ error: 'Article text must be at least 100 characters' }, { status: 400 })
     }
 
-    const result = await analyzeArticle(trimmedText, metadata, language)
-
     const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
+      async start(controller) {
         const enc = new TextEncoder()
-        controller.enqueue(enc.encode(`data: ${JSON.stringify({ status: 'analyzing', progress: 25 })}\n\n`))
-        controller.enqueue(enc.encode(`data: ${JSON.stringify(result)}\n\n`))
-        controller.close()
+        try {
+          for await (const frame of analyzeArticle(trimmedText, metadata, language)) {
+            const payload = frame.type === 'pass'
+              ? { status: frame.name, progress: frame.progress, pass: frame.pass }
+              : frame.data
+            controller.enqueue(enc.encode(`data: ${JSON.stringify(payload)}\n\n`))
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Analysis failed'
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: message })}\n\n`))
+        } finally {
+          controller.close()
+        }
       },
     })
 
