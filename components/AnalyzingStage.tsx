@@ -3,41 +3,34 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from '@/lib/i18n'
 
-const PASSES = [
-  { code: '01', nameKey: 'analyzing.pass01', detailKey: 'analyzing.pass01Detail' },
-  { code: '02', nameKey: 'analyzing.pass02', detailKey: 'analyzing.pass02Detail' },
-  { code: '03', nameKey: 'analyzing.pass03', detailKey: 'analyzing.pass03Detail' },
-  { code: '04', nameKey: 'analyzing.pass04', detailKey: 'analyzing.pass04Detail' },
-]
+interface AnalyzeStep {
+  step: string
+  label: string
+  done: boolean
+}
 
 interface Props {
   target: string
-  // 0 = not started; 1-4 = working on that pass; 5 = all passes done, waiting on result frame
-  currentPass: number
+  steps: AnalyzeStep[]
+  activeLabel: string
 }
 
-export function AnalyzingStage({ target, currentPass }: Props) {
+export function AnalyzingStage({ target, steps, activeLabel }: Props) {
   const { t } = useTranslation()
-
-  // Animate active bar creep so the user feels motion within a pass.
   const [creep, setCreep] = useState(0)
-  const lastPassRef = useRef(currentPass)
+  const activeStepRef = useRef(activeLabel)
+
   useEffect(() => {
-    if (lastPassRef.current !== currentPass) {
+    if (activeStepRef.current !== activeLabel) {
       setCreep(0)
-      lastPassRef.current = currentPass
+      activeStepRef.current = activeLabel
     }
     const id = setInterval(() => setCreep(c => Math.min(0.85, c + 0.012)), 80)
     return () => clearInterval(id)
-  }, [currentPass])
+  }, [activeLabel])
 
-  const passProgress = PASSES.map((_, i) => {
-    const pass = i + 1
-    if (currentPass > pass) return 1
-    if (currentPass === pass) return Math.max(0.05, creep)
-    return 0
-  })
-  const doneCount = passProgress.filter(p => p >= 1).length
+  const doneCount = steps.filter(s => s.done).length
+  const totalCount = steps.length || 1
 
   return (
     <section
@@ -69,54 +62,73 @@ export function AnalyzingStage({ target, currentPass }: Props) {
         </h2>
 
         <div style={{ display: 'grid', gap: 14 }}>
-          {PASSES.map((p, i) => {
-            const prog = passProgress[i]
-            const done = prog >= 1
-            const active = prog > 0 && prog < 1
+          {steps.map((s, i) => {
+            const prog = s.done ? 1 : (steps[i]?.step === steps.find(x => !x.done)?.step ? Math.max(0.05, creep) : 0)
             return (
-              <div key={p.code} style={{
+              <div key={s.step} style={{
                 borderBottom: '1px solid var(--paper-rule)',
                 paddingBottom: 14,
-                opacity: prog === 0 ? 0.35 : 1,
+                opacity: prog === 0 && !s.done ? 0.35 : 1,
                 transition: 'opacity 280ms ease',
               }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
-                  <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>{p.code}</span>
+                  <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   <span style={{
                     fontFamily: 'var(--mono)',
                     fontSize: 13,
                     letterSpacing: '0.14em',
                     fontWeight: 600,
-                    color: done ? 'var(--moss)' : 'var(--ink)',
+                    color: s.done ? 'var(--moss)' : 'var(--ink)',
                   }}>
-                    {t(p.nameKey)}
+                    {s.label}
                   </span>
                   <span style={{ flex: 1, borderBottom: '1px dotted var(--paper-rule)', height: 1, alignSelf: 'center' }} />
                   <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-                    {done ? t('analyzing.done') : active ? t('analyzing.working') : t('analyzing.queued')}
+                    {s.done ? t('analyzing.done') : prog > 0 ? t('analyzing.working') : t('analyzing.queued')}
                   </span>
-                </div>
-                <div style={{ marginTop: 8, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--mono)' }}>
-                  {t(p.detailKey)}
                 </div>
                 <div style={{ marginTop: 10, height: 3, background: 'var(--paper-2)', position: 'relative', overflow: 'hidden' }}>
                   <div style={{
-                    position: 'absolute',
-                    left: 0, top: 0, bottom: 0,
+                    position: 'absolute', left: 0, top: 0, bottom: 0,
                     width: `${prog * 100}%`,
-                    background: done ? 'var(--moss)' : 'var(--ink)',
+                    background: s.done ? 'var(--moss)' : 'var(--ink)',
                     transition: 'width 220ms ease-out',
                   }} />
                 </div>
               </div>
             )
           })}
+
+          {steps.length === 0 && (
+            <div style={{ borderBottom: '1px solid var(--paper-rule)', paddingBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
+                <span className="mono" style={{ fontSize: 12, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>01</span>
+                <span className="mono" style={{ fontSize: 13, letterSpacing: '0.14em', fontWeight: 600, color: 'var(--ink)' }}>
+                  Structural analysis
+                </span>
+                <span style={{ flex: 1, borderBottom: '1px dotted var(--paper-rule)', height: 1, alignSelf: 'center' }} />
+                <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
+                  {t('analyzing.working')}
+                </span>
+              </div>
+              <div style={{ marginTop: 10, height: 3, background: 'var(--paper-2)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${Math.max(0.05, creep) * 100}%`,
+                  background: 'var(--ink)',
+                  transition: 'width 220ms ease-out',
+                }} />
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ marginTop: 22 }}>
           <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-            {t('analyzing.passes')} {doneCount}/4
-            {doneCount === 4 && (
+            {doneCount}/{totalCount} steps complete
+            {doneCount === totalCount && totalCount > 1 && (
               <span style={{ marginLeft: 16, color: 'var(--moss)' }}>{t('analyzing.waitingResults')}</span>
             )}
           </span>
@@ -135,9 +147,7 @@ export function AnalyzingStage({ target, currentPass }: Props) {
           height: 360,
         }}>
           <div style={{
-            position: 'absolute',
-            left: 0, right: 0,
-            height: 60,
+            position: 'absolute', left: 0, right: 0, height: 60,
             background: 'linear-gradient(180deg, transparent 0%, rgba(26,77,122,0.12) 50%, transparent 100%)',
             top: 0,
             animation: 'scan 2.2s ease-in-out infinite',

@@ -66,8 +66,14 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    const body = await request.json() as { articleUrl?: string; articleText?: string; language?: string }
-    const { articleUrl, articleText, language = 'en' } = body
+    const body = await request.json() as {
+      articleUrl?: string
+      articleText?: string
+      language?: string
+      // TODO: replace with server-side subscription check once auth is wired up
+      tier?: 'free' | 'paid'
+    }
+    const { articleUrl, articleText, language = 'en', tier = 'paid' } = body
 
     if (!articleUrl && !articleText) {
       return json({ error: 'Either articleUrl or articleText is required' }, { status: 400 })
@@ -101,9 +107,9 @@ export async function POST(request: Request): Promise<Response> {
       async start(controller) {
         const enc = new TextEncoder()
         try {
-          for await (const frame of analyzeArticle(trimmedText, metadata, language)) {
-            const payload = frame.type === 'pass'
-              ? { status: frame.name, progress: frame.progress, pass: frame.pass }
+          for await (const frame of analyzeArticle(trimmedText, metadata, tier, language)) {
+            const payload = frame.type === 'step'
+              ? { step: frame.step, label: frame.label, progress: frame.progress }
               : frame.data
             controller.enqueue(enc.encode(`data: ${JSON.stringify(payload)}\n\n`))
           }

@@ -19,7 +19,8 @@ type Stage = 'input' | 'analyzing' | 'report'
 function HomeInner() {
   const [stage, setStage] = useState<Stage>('input')
   const [target, setTarget] = useState('')
-  const [currentPass, setCurrentPass] = useState(0)
+  const [analyzeSteps, setAnalyzeSteps] = useState<Array<{ step: string; label: string; done: boolean }>>([])
+  const [activeStepLabel, setActiveStepLabel] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
@@ -33,12 +34,13 @@ function HomeInner() {
     setCurrentUrl(url)
     setResult(null)
     setError(null)
-    setCurrentPass(0)
+    setAnalyzeSteps([])
+    setActiveStepLabel('')
     setStage('analyzing')
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
     try {
-      const body = url ? { articleUrl: url, language } : { articleText: text, language }
+      const body = url ? { articleUrl: url, language, tier: 'paid' } : { articleText: text, language, tier: 'paid' }
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,13 +65,19 @@ function HomeInner() {
           const line = lines[i]
           if (!line.startsWith('data: ')) continue
           try {
-            const data = JSON.parse(line.slice(6)) as Partial<AnalysisResult> & { pass?: number; progress?: number; error?: string }
+            const data = JSON.parse(line.slice(6)) as Partial<AnalysisResult> & { step?: string; label?: string; progress?: number; error?: string }
             if (data.error) throw new Error(data.error)
-            if (typeof data.pass === 'number') {
-              setCurrentPass(data.pass)
-            } else if (data.overallScore !== undefined) {
+            if (data.step && data.label) {
+              setAnalyzeSteps(prev => {
+                const existing = prev.find(s => s.step === data.step)
+                if (existing) return prev
+                const updated = prev.map(s => ({ ...s, done: true }))
+                return [...updated, { step: data.step!, label: data.label!, done: false }]
+              })
+              setActiveStepLabel(data.label)
+            } else if ((data as AnalysisResult).version === 2) {
               finalResult = data as AnalysisResult
-              setCurrentPass(5)
+              setAnalyzeSteps(prev => prev.map(s => ({ ...s, done: true })))
               saveAnalysis(finalResult, url || undefined)
               setHistoryRefreshKey(k => k + 1)
             }
@@ -94,7 +102,8 @@ function HomeInner() {
     setTarget('')
     setCurrentUrl(null)
     setError(null)
-    setCurrentPass(0)
+    setAnalyzeSteps([])
+    setActiveStepLabel('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
@@ -146,7 +155,7 @@ function HomeInner() {
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: 64 }}>
             <main style={{ minWidth: 0 }}>
               {stage === 'input' && <ArticleInput onSubmit={handleAnalyze} />}
-              {stage === 'analyzing' && <AnalyzingStage target={target} currentPass={currentPass} />}
+              {stage === 'analyzing' && <AnalyzingStage target={target} steps={analyzeSteps} activeLabel={activeStepLabel} />}
               {stage === 'report' && result && (
                 <CredibilityReport result={result} currentUrl={currentUrl} onReset={handleReset} />
               )}

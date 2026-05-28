@@ -1,20 +1,49 @@
-export interface RedFlag {
+export interface Claim {
+  text: string
+  claimant?: string
+  context: string
+  topic: string
+}
+
+export type Verdict = 'TRUE' | 'FALSE' | 'MISLEADING' | 'MIXED' | 'UNVERIFIED'
+export type ConfidenceLevel = 'high' | 'medium' | 'low'
+
+export interface FactCheckResult {
+  claim: Claim
+  verdict: Verdict
+  confidence: ConfidenceLevel
+  source: 'factcheck_db' | 'web_search' | 'llm_assessment'
+  factCheckUrl?: string
+  factCheckPublisher?: string
+  factCheckRating?: string
+  summary: string
+}
+
+export interface StructuralFlag {
   type: string
   severity: 'high' | 'medium' | 'low'
   description: string
 }
 
-export interface AnalysisResult {
-  factRiskScore: number // 0-100 (higher = more risky)
-  biasScore: number // 0-100 (higher = more biased)
-  sensationalismScore: number // 0-100 (higher = more sensationalist)
-  redFlags: RedFlag[]
-  overallScore: number // 0-100 (higher = more credible)
-  breakdown: {
-    factRisk: string
-    bias: string
-    sensationalism: string
+export interface StructuralAnalysis {
+  score: number
+  flags: StructuralFlag[]
+  metrics: {
+    hasAuthor: boolean
+    hasDate: boolean
+    capsRatio: number
+    exclamationDensity: number
+    suspiciousDomain: boolean
+    articleLength: number
   }
+}
+
+export interface AnalysisResult {
+  version: 2
+  tier: 'free' | 'paid'
+  overallScore: number
+  structural: StructuralAnalysis
+  claims?: FactCheckResult[]
   metadata: {
     title?: string
     source?: string

@@ -1,8 +1,9 @@
 'use client'
 
-import { AnalysisResult, RedFlag } from '@/types/analysis'
+import { AnalysisResult, StructuralFlag, FactCheckResult } from '@/types/analysis'
 import { getSourceCredibility } from '@/lib/sourceDatabase'
 import { useTranslation } from '@/lib/i18n'
+import { ClaimCard } from '@/components/ClaimCard'
 
 interface CredibilityReportProps {
   result: AnalysisResult
@@ -45,7 +46,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
   const sourceLookupUrl = currentUrl || (result.metadata.source ? `https://${result.metadata.source}` : '')
   const source = sourceLookupUrl ? getSourceCredibility(sourceLookupUrl) : null
 
-  const flagCount = result.redFlags.length
+  const flagCount = result.structural.flags.length
   const flagText = flagCount === 1
     ? t('report.redFlagCount', { n: flagCount })
     : t('report.redFlagCountPlural', { n: flagCount })
@@ -144,11 +145,16 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
         <ArticleSlate metadata={result.metadata} />
       </div>
 
-      {/* Triptych */}
-      <Triptych result={result} />
+      {/* Claims */}
+      {result.tier === 'paid' && result.claims && result.claims.length > 0 && (
+        <ClaimsSection claims={result.claims} />
+      )}
+      {result.tier === 'free' && <FreeTierPrompt />}
 
-      {/* Red flags */}
-      {result.redFlags.length > 0 && <RedFlagsSection flags={result.redFlags} />}
+      {/* Structural flags */}
+      {result.structural.flags.length > 0 && (
+        <StructuralFlagsSection flags={result.structural.flags} />
+      )}
 
       {/* Colophon */}
       <div style={{
@@ -312,59 +318,50 @@ function SlateCell({ label, value, mono, span }: { label: string; value: string;
   )
 }
 
-function Triptych({ result }: { result: AnalysisResult }) {
-  const { t } = useTranslation()
-  const passes = [
-    { code: '01', name: t('report.pass01'), score: result.factRiskScore,      note: result.breakdown.factRisk },
-    { code: '02', name: t('report.pass02'), score: result.biasScore,           note: result.breakdown.bias },
-    { code: '03', name: t('report.pass03'), score: result.sensationalismScore, note: result.breakdown.sensationalism },
-  ]
+function ClaimsSection({ claims }: { claims: FactCheckResult[] }) {
+  const dbHits = claims.filter(c => c.source === 'factcheck_db').length
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.fourPassesDetail')}</h3>
-        <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>{t('report.higherMoreRisky')}</div>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Claim verification</h3>
+        <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
+          {claims.length} claims · {dbHits} matched in fact-check database
+        </div>
       </div>
-      <div style={{ borderTop: '1px solid var(--ink)', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
-        {passes.map((p, i) => <PassCell key={p.code} pass={p} isLast={i === 2} delay={i * 90} />)}
+      <div style={{ display: 'grid', gap: 2, borderTop: '1px solid var(--ink)' }}>
+        {claims.map((c, i) => <ClaimCard key={i} result={c} index={i} />)}
       </div>
     </div>
   )
 }
 
-function PassCell({ pass, isLast, delay }: { pass: { code: string; name: string; score: number; note: string }; isLast: boolean; delay: number }) {
-  const danger = pass.score >= 60 ? 'var(--disputed)' : pass.score >= 40 ? 'var(--mixed)' : pass.score >= 20 ? 'var(--signal)' : 'var(--verified)'
+function FreeTierPrompt() {
   return (
-    <div style={{ padding: '20px 22px 24px', borderRight: isLast ? 'none' : '1px solid var(--ink)', borderBottom: '1px solid var(--ink)', display: 'flex', flexDirection: 'column', gap: 14, background: 'var(--paper)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.18em', color: 'var(--ink-3)' }}>{pass.code} · {pass.name}</div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>/100</div>
+    <div style={{
+      marginTop: 44,
+      border: '1px solid var(--paper-rule)',
+      borderLeft: '3px solid var(--ink-3)',
+      padding: '22px 24px',
+      background: 'var(--paper-2)',
+      display: 'grid',
+      gridTemplateColumns: '1fr auto',
+      gap: 20,
+      alignItems: 'center',
+    }}>
+      <div>
+        <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>Claim verification — paid</p>
+        <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, margin: '8px 0 0', lineHeight: 1.3, color: 'var(--ink)' }}>
+          Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.
+        </p>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 110 }}>
-        <div style={{ fontFamily: 'var(--serif)', fontWeight: 400, fontSize: 96, lineHeight: 0.82, color: danger, letterSpacing: '-0.04em' }}>
-          {pass.score}
-        </div>
-        <div style={{ flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end', gap: 3 }}>
-          {Array.from({ length: 20 }).map((_, i) => {
-            const filled = i < Math.round(pass.score / 5)
-            return (
-              <div key={i} style={{
-                flex: 1, height: `${10 + i * 4}%`,
-                background: filled ? danger : 'var(--paper-2)',
-                border: `1px solid ${filled ? danger : 'var(--paper-rule)'}`,
-                transformOrigin: 'bottom',
-                animation: `barGrow 480ms cubic-bezier(.2,.8,.2,1) ${delay + i * 22}ms both`,
-              }} />
-            )
-          })}
-        </div>
+      <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>
+        FREE TIER
       </div>
-      <p style={{ fontFamily: 'var(--serif)', fontSize: 17, lineHeight: 1.35, color: 'var(--ink)', margin: 0 }}>{pass.note}</p>
     </div>
   )
 }
 
-function RedFlagsSection({ flags }: { flags: RedFlag[] }) {
+function StructuralFlagsSection({ flags }: { flags: StructuralFlag[] }) {
   const { t } = useTranslation()
   const sevWeight = { high: 3, medium: 2, low: 1 }
   const sorted = [...flags].sort((a, b) => sevWeight[b.severity] - sevWeight[a.severity])
@@ -375,7 +372,7 @@ function RedFlagsSection({ flags }: { flags: RedFlag[] }) {
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.redFlagsFootnotes')}</h3>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Structural red flags</h3>
         <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
           {sorted.filter(f => f.severity === 'high').length} {t('report.severityHigh')} &nbsp;·&nbsp;
           {sorted.filter(f => f.severity === 'medium').length} {t('report.severityMedium')} &nbsp;·&nbsp;
@@ -396,7 +393,7 @@ function RedFlagsSection({ flags }: { flags: RedFlag[] }) {
               <div style={{ fontFamily: 'var(--serif)', fontSize: 22, lineHeight: 1.2, color: 'var(--ink)' }}>{flag.type}</div>
               <div style={{ fontSize: 14, color: 'var(--ink-2)', marginTop: 4, fontFamily: 'var(--serif)', fontStyle: 'italic' }}>{flag.description}</div>
             </div>
-            <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.12em' }}>FN.{String(i + 1).padStart(2, '0')}</span>
+            <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.12em' }}>SF.{String(i + 1).padStart(2, '0')}</span>
           </li>
         ))}
       </ol>

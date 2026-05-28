@@ -1,129 +1,91 @@
-import {
-  FACT_RISK_PROMPT,
-  BIAS_PROMPT,
-  SENSATIONALISM_PROMPT,
-  RED_FLAGS_PROMPT
-} from './prompts'
-import { AnalysisResult, RedFlag } from '@/types/analysis'
+import { AnalysisResult, FactCheckResult } from '@/types/analysis'
+import { analyzeStructure } from './structural'
+import { extractClaims } from './claims'
+import { findFactCheck } from './factcheck'
+import { synthesizeClaim } from './synthesize'
 
 export type AnalyzeFrame =
-  | { type: 'pass'; pass: 1 | 2 | 3 | 4; name: string; progress: number }
+  | { type: 'step'; step: string; label: string; progress: number }
   | { type: 'result'; data: AnalysisResult }
 
-async function callGroqAPI(systemPrompt: string, userMessage: string, retries: number = 3): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY
-  if (!apiKey) throw new Error('GROQ_API_KEY environment variable is not set')
-
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage },
-        ],
-        temperature: 0.3,
-        max_tokens: 800,
-      }),
-    })
-
-    if (response.ok) {
-      const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
-      let output = data.choices?.[0]?.message?.content
-      if (!output) throw new Error('Groq API returned no output')
-      return output.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
-    }
-
-    if (response.status === 429 && attempt < retries - 1) {
-      const waitTime = Math.pow(2, attempt) * 1000 + Math.random() * 1000
-      await new Promise(resolve => setTimeout(resolve, waitTime))
-      continue
-    }
-
-    throw new Error(`Groq API error: ${response.status}`)
-  }
-  throw new Error('Groq API call failed after maximum retries')
+const VERDICT_PENALTY: Record<string, number> = {
+  FALSE: 60,
+  MISLEADING: 40,
+  MIXED: 20,
+  UNVERIFIED: 10,
+  TRUE: 0,
 }
 
-const PASSES = [
-  { pass: 1 as const, name: 'Fact risk',        progress: 5,  prompt: FACT_RISK_PROMPT },
-  { pass: 2 as const, name: 'Bias & framing',   progress: 30, prompt: BIAS_PROMPT },
-  { pass: 3 as const, name: 'Sensationalism',   progress: 55, prompt: SENSATIONALISM_PROMPT },
-  { pass: 4 as const, name: 'Red flags',        progress: 80, prompt: RED_FLAGS_PROMPT },
-]
+function calculateOverallScore(
+  structuralScore: number,
+  claims: FactCheckResult[],
+  tier: 'free' | 'paid',
+): number {
+  if (tier === 'free' || claims.length === 0) return structuralScore
+
+  const avgPenalty =
+    claims.reduce((acc, c) => acc + (VERDICT_PENALTY[c.verdict] ?? 10), 0) / claims.length
+  const claimScore = Math.max(0, 100 - avgPenalty)
+
+  return Math.round(structuralScore * 0.3 + claimScore * 0.7)
+}
 
 export async function* analyzeArticle(
   articleText: string,
-  metadata?: { title?: string; source?: string; author?: string; publishedDate?: string },
-  language: string = 'en'
+  metadata: { title?: string; source?: string; author?: string; publishedDate?: string },
+  tier: 'free' | 'paid' = 'free',
+  language: string = 'en',
 ): AsyncGenerator<AnalyzeFrame> {
-  const truncatedText = articleText.substring(0, 5000)
-  const languageInstruction = language === 'ar' ? 'Respond in Arabic only.' : 'Respond in English only.'
-  const user = `Article:\n${truncatedText}`
 
-  const raw: string[] = []
-  for (const p of PASSES) {
-    yield { type: 'pass', pass: p.pass, name: p.name, progress: p.progress }
-    raw.push(await callGroqAPI(p.prompt + '\n' + languageInstruction, user))
+  yield { type: 'step', step: 'structural', label: 'Structural analysis', progress: 10 }
+  const structural = analyzeStructure(articleText, metadata)
+
+  if (tier === 'free') {
+    yield {
+      type: 'result',
+      data: {
+        version: 2,
+        tier: 'free',
+        overallScore: structural.score,
+        structural,
+        metadata,
+      },
+    }
+    return
   }
 
-  const factRiskData = JSON.parse(raw[0]) as { riskScore: number; issues: string[]; explanation: string }
-  const biasData = JSON.parse(raw[1]) as { biasScore: number; biasType: string; evidence: string[]; explanation: string }
-  const sensationalismData = JSON.parse(raw[2]) as { sensationalismScore: number; patterns: string[]; examples: string[]; explanation: string }
-  const redFlagsData = JSON.parse(raw[3]) as { flags: RedFlag[]; count: number }
+  yield { type: 'step', step: 'extracting', label: 'Extracting claims', progress: 25 }
+  const claims = await extractClaims(articleText, language)
 
-  const redFlagsPenalty = redFlagsData.flags.reduce((total, flag) => {
-    if (flag.severity === 'high') return total + 10
-    if (flag.severity === 'medium') return total + 5
-    return total + 2
-  }, 0)
+  const results: FactCheckResult[] = []
+  for (let i = 0; i < claims.length; i++) {
+    yield {
+      type: 'step',
+      step: `claim_${i + 1}`,
+      label: `Verifying claim ${i + 1} of ${claims.length}`,
+      progress: 35 + Math.round((i / claims.length) * 55),
+    }
 
-  const overallScore = calculateFinalScore({
-    factRiskScore: factRiskData.riskScore,
-    biasScore: biasData.biasScore,
-    sensationalismScore: sensationalismData.sensationalismScore,
-    redFlagsPenalty: Math.min(redFlagsPenalty, 100),
-  })
-
-  const result: AnalysisResult = {
-    factRiskScore: factRiskData.riskScore,
-    biasScore: biasData.biasScore,
-    sensationalismScore: sensationalismData.sensationalismScore,
-    redFlags: redFlagsData.flags,
-    overallScore,
-    breakdown: {
-      factRisk: factRiskData.explanation,
-      bias: biasData.explanation,
-      sensationalism: sensationalismData.explanation,
-    },
-    metadata: {
-      title: metadata?.title,
-      source: metadata?.source,
-      author: metadata?.author,
-      publishedDate: metadata?.publishedDate,
-    },
+    const fcResult = await findFactCheck(claims[i])
+    if (fcResult) {
+      results.push(fcResult)
+    } else {
+      const synthesized = await synthesizeClaim(claims[i], articleText)
+      results.push(synthesized)
+    }
   }
 
-  yield { type: 'result', data: result }
-}
+  const overallScore = calculateOverallScore(structural.score, results, 'paid')
 
-function calculateFinalScore(analysis: {
-  factRiskScore: number
-  biasScore: number
-  sensationalismScore: number
-  redFlagsPenalty: number
-}): number {
-  const weights = { factRisk: 0.5, bias: 0.2, sensationalism: 0.2, redFlags: 0.1 }
-  const invertedFactRisk = 100 - analysis.factRiskScore
-  const invertedBias = 100 - analysis.biasScore
-  const invertedSensationalism = 100 - analysis.sensationalismScore
-  const invertedRedFlags = 100 - analysis.redFlagsPenalty
-  const weighted =
-    invertedFactRisk * weights.factRisk +
-    invertedBias * weights.bias +
-    invertedSensationalism * weights.sensationalism +
-    invertedRedFlags * weights.redFlags
-  return Math.max(0, Math.min(100, Math.round(weighted)))
+  yield {
+    type: 'result',
+    data: {
+      version: 2,
+      tier: 'paid',
+      overallScore,
+      structural,
+      claims: results,
+      metadata,
+    },
+  }
 }

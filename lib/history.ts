@@ -43,7 +43,9 @@ export function getHistory(): AnalysisHistory[] {
 
   try {
     const stored = localStorage.getItem(HISTORY_KEY)
-    return stored ? JSON.parse(stored) : []
+    const parsed: AnalysisHistory[] = stored ? JSON.parse(stored) : []
+    // Discard entries from the old analysis format (pre-v2)
+    return parsed.filter(h => (h.result as { version?: number }).version === 2)
   } catch {
     return []
   }
