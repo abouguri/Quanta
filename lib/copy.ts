@@ -17,28 +17,33 @@ export function formatResultsAsText(result: AnalysisResult): string {
     `Overall Score: ${result.overallScore}/100`,
     result.overallScore >= 80 ? '✓ Reliable' : result.overallScore >= 60 ? '⚠ Moderate' : result.overallScore >= 40 ? '⚠ Questionable' : '✗ High Risk',
     '',
-    '## Breakdown',
-    `Fact Risk: ${result.factRiskScore}/100`,
-    result.breakdown.factRisk,
-    '',
-    `Bias Level: ${result.biasScore}/100`,
-    result.breakdown.bias,
-    '',
-    `Sensationalism: ${result.sensationalismScore}/100`,
-    result.breakdown.sensationalism,
-    '',
+    '## Structural Analysis',
+    `Structural Score: ${result.structural.score}/100`,
   ]
 
-  if (result.redFlags.length > 0) {
-    lines.push('## Red Flags')
-    result.redFlags.forEach(flag => {
+  if (result.structural.flags.length > 0) {
+    lines.push('')
+    lines.push('### Structural Flags')
+    result.structural.flags.forEach(flag => {
       lines.push(`[${flag.severity.toUpperCase()}] ${flag.type}`)
       lines.push(`  ${flag.description}`)
     })
+  }
+
+  if (result.claims && result.claims.length > 0) {
     lines.push('')
+    lines.push('## Claim Verification')
+    result.claims.forEach((c, i) => {
+      lines.push('')
+      lines.push(`### Claim ${i + 1} — ${c.verdict}`)
+      lines.push(`"${c.claim.text}"`)
+      lines.push(c.summary)
+      if (c.factCheckUrl) lines.push(`Source: ${c.factCheckUrl}`)
+    })
   }
 
   if (result.metadata.source || result.metadata.author || result.metadata.publishedDate) {
+    lines.push('')
     lines.push('## Metadata')
     if (result.metadata.source) lines.push(`Source: ${result.metadata.source}`)
     if (result.metadata.author) lines.push(`Author: ${result.metadata.author}`)
