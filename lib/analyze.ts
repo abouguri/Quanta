@@ -32,7 +32,7 @@ function calculateOverallScore(
 
 export async function* analyzeArticle(
   articleText: string,
-  metadata: { title?: string; source?: string; author?: string; publishedDate?: string },
+  metadata: { title?: string; source?: string; author?: string; publishedDate?: string } = {},
   tier: 'free' | 'paid' = 'free',
   language: string = 'en',
 ): AsyncGenerator<AnalyzeFrame> {

@@ -6,6 +6,10 @@ import type { BackgroundToPopup, PopupToBackground } from '@/lib/messages'
 // @/lib/config; mirror any changes here.
 const ANALYZE_PORT = 'analyze'
 const API_BASE_URL = 'https://factnews-six.vercel.app'
+const STEP_TO_PASS: Record<string, number> = {
+  structural: 1,
+  extracting: 2,
+}
 
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== ANALYZE_PORT) return
@@ -75,11 +79,21 @@ chrome.runtime.onConnect.addListener((port) => {
             } else if (parsed && typeof parsed.overallScore === 'number') {
               send({ type: 'RESULT', data: parsed })
             } else if (parsed && typeof parsed.progress === 'number') {
+              const step = typeof parsed.step === 'string' ? parsed.step : undefined
+              const claimMatch = step?.match(/^claim_(\d+)$/)
               send({
                 type: 'PROGRESS',
-                status: String(parsed.status ?? ''),
+                status: String(parsed.label ?? parsed.status ?? ''),
                 progress: parsed.progress,
-                pass: typeof parsed.pass === 'number' ? parsed.pass : undefined,
+                pass: typeof parsed.pass === 'number'
+                  ? parsed.pass
+                  : claimMatch
+                    ? 3
+                    : step
+                      ? STEP_TO_PASS[step]
+                      : undefined,
+                step,
+                label: typeof parsed.label === 'string' ? parsed.label : undefined,
               })
             }
           } catch {

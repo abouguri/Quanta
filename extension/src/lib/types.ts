@@ -1,21 +1,52 @@
-// Mirror of /tmp/abougui/factnews/types/analysis.ts — keep in sync.
-export interface RedFlag {
+// Mirror of ../../../types/analysis.ts — keep in sync.
+export interface Claim {
+  text: string
+  claimant?: string
+  context: string
+  topic: string
+}
+
+export type Verdict = 'TRUE' | 'FALSE' | 'MISLEADING' | 'MIXED' | 'UNVERIFIED'
+export type ConfidenceLevel = 'high' | 'medium' | 'low'
+
+export interface FactCheckResult {
+  claim: Claim
+  verdict: Verdict
+  confidence: ConfidenceLevel
+  source: 'factcheck_db' | 'web_search' | 'llm_assessment'
+  factCheckUrl?: string
+  factCheckPublisher?: string
+  factCheckRating?: string
+  summary: string
+}
+
+export interface StructuralFlag {
   type: string
-  severity: 'low' | 'medium' | 'high'
+  severity: 'high' | 'medium' | 'low'
   description: string
 }
 
-export interface AnalysisResult {
-  factRiskScore: number
-  biasScore: number
-  sensationalismScore: number
-  redFlags: RedFlag[]
-  overallScore: number
-  breakdown: {
-    factRisk: string
-    bias: string
-    sensationalism: string
+export type RedFlag = StructuralFlag
+
+export interface StructuralAnalysis {
+  score: number
+  flags: StructuralFlag[]
+  metrics: {
+    hasAuthor: boolean
+    hasDate: boolean
+    capsRatio: number
+    exclamationDensity: number
+    suspiciousDomain: boolean
+    articleLength: number
   }
+}
+
+export interface AnalysisResult {
+  version: 2
+  tier: 'free' | 'paid'
+  overallScore: number
+  structural: StructuralAnalysis
+  claims?: FactCheckResult[]
   metadata: {
     title?: string
     source?: string

@@ -45,7 +45,7 @@ export function useAnalyzePort() {
         }))
       } else if (msg.type === 'RESULT') {
         void saveAnalysis(msg.data, article.url)
-        setState({ phase: 'result', progress: 100, currentPass: 5, result: msg.data, error: null, retryAfter: null })
+        setState({ phase: 'result', progress: 100, currentPass: 4, result: msg.data, error: null, retryAfter: null })
       } else if (msg.type === 'ERROR') {
         if (msg.status === 429) {
           setState({ phase: 'limit', progress: 0, currentPass: 0, result: null, error: msg.message, retryAfter: msg.retryAfter ?? null })

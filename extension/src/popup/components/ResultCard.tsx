@@ -12,12 +12,12 @@ function toneFor(score: number): { color: string; label: string } {
 
 export function ResultCard({ result, onReset }: { result: AnalysisResult; onReset: () => void }) {
   const tone = toneFor(result.overallScore)
-  // Sub-scores are inverted from raw scores (risk/bias/sensationalism = higher is worse;
-  // we display them as-is since the labels make the direction obvious).
+  const claims = result.claims ?? []
+  const disputedClaims = claims.filter(c => ['FALSE', 'MISLEADING', 'MIXED'].includes(c.verdict)).length
   const subscores: Array<[string, number, string]> = [
-    ['Fact risk',       result.factRiskScore,       'var(--disputed)'],
-    ['Bias',            result.biasScore,           'var(--mixed)'],
-    ['Sensationalism',  result.sensationalismScore, 'var(--mixed)'],
+    ['Structure', result.structural.score, 'var(--verified)'],
+    ['Claims checked', Math.min(100, claims.length * 20), 'var(--mixed)'],
+    ['Disputed claims', Math.min(100, disputedClaims * 25), 'var(--disputed)'],
   ]
   return (
     <div className="measure">
@@ -52,33 +52,29 @@ export function ResultCard({ result, onReset }: { result: AnalysisResult; onRese
         </div>
       </div>
 
-      {(result.breakdown.factRisk || result.breakdown.bias || result.breakdown.sensationalism) && (
-        <div>
-          <div className="section-title">Why</div>
-          <div className="card" style={{ display: 'grid', gap: 10 }}>
-            {result.breakdown.factRisk && (
-              <div>
-                <div className="q-eyebrow">Fact risk</div>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--graphite)', lineHeight: 1.5 }}>{result.breakdown.factRisk}</p>
-              </div>
-            )}
-            {result.breakdown.bias && (
-              <div>
-                <div className="q-eyebrow">Bias</div>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--graphite)', lineHeight: 1.5 }}>{result.breakdown.bias}</p>
-              </div>
-            )}
-            {result.breakdown.sensationalism && (
-              <div>
-                <div className="q-eyebrow">Sensationalism</div>
-                <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--graphite)', lineHeight: 1.5 }}>{result.breakdown.sensationalism}</p>
-              </div>
-            )}
+      <div>
+        <div className="section-title">Signals</div>
+        <div className="card" style={{ display: 'grid', gap: 10 }}>
+          <div>
+            <div className="q-eyebrow">Article structure</div>
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--graphite)', lineHeight: 1.5 }}>
+              {result.structural.metrics.hasAuthor ? 'Author found' : 'No author found'} ·{' '}
+              {result.structural.metrics.hasDate ? 'date found' : 'no date found'} ·{' '}
+              {result.structural.metrics.articleLength.toLocaleString()} characters measured.
+            </p>
           </div>
+          {claims.length > 0 && (
+            <div>
+              <div className="q-eyebrow">Claim verification</div>
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--graphite)', lineHeight: 1.5 }}>
+                {claims.length} claim{claims.length === 1 ? '' : 's'} checked · {disputedClaims} disputed or mixed.
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <RedFlagList flags={result.redFlags ?? []} />
+      <RedFlagList flags={result.structural.flags ?? []} />
 
       <div style={{ display: 'grid', gap: 8 }}>
         <button className="btn-primary" onClick={onReset}>Measure another</button>

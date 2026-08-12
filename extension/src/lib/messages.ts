@@ -10,7 +10,7 @@ export type PopupToBackground =
   | { type: 'CANCEL' }
 
 export type BackgroundToPopup =
-  | { type: 'PROGRESS'; status: string; progress: number; pass?: number }
+  | { type: 'PROGRESS'; status: string; progress: number; pass?: number; step?: string; label?: string }
   | { type: 'RESULT'; data: AnalysisResult }
   | { type: 'ERROR'; message: string; retryAfter?: number; status?: number }
 

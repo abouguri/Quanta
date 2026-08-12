@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
 const PASSES = [
-  { code: '01', name: 'Fact risk' },
-  { code: '02', name: 'Bias & framing' },
-  { code: '03', name: 'Sensationalism' },
-  { code: '04', name: 'Red flags' },
+  { code: '01', name: 'Structural signals' },
+  { code: '02', name: 'Claim extraction' },
+  { code: '03', name: 'Claim verification' },
 ]
 
 interface Props {
-  // 0 = not started; 1-4 = working on that pass; 5 = result frame received
+  // 0 = not started; 1-3 = working on that step; 4 = result frame received
   currentPass: number
   progress: number
   onCancel: () => void
