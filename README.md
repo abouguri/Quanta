@@ -73,7 +73,13 @@ This is the part that matters. Each claim carries a verdict, a confidence, the p
 
 ![Structural red flags](docs/screenshots/red-flags.png)
 
-### 6 · Source dossier
+### 6 · In the dark
+
+The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components. An inline script applies the stored preference before first paint, so there's no white flash on load.
+
+![The report in dark mode](docs/screenshots/report-dark.png)
+
+### 7 · Source dossier
 
 32 outlets are profiled locally — credibility score, editorial lean, track record, and the standing fact-checker note. Unknown domains degrade gracefully to "source database not consulted" rather than inventing a rating.
 
@@ -155,10 +161,11 @@ Structural weight is deliberately low: a well-formatted lie should not outscore 
 ```
 app/api/analyze/route.ts   SSE endpoint · CORS · rate limit · scrape → stream
 lib/structural.ts          deterministic signals          (no network)
+lib/groq.ts                shared LLM client              (retry, fence + JSON recovery)
 lib/claims.ts              claim extraction               (Groq)
 lib/factcheck.ts           Google Fact Check → Brave      (graceful null on miss)
 lib/analyze.ts             async generator orchestrating the passes
-lib/synthesize.ts          last-resort model assessment   (Groq)
+lib/synthesize.ts          last-resort model assessment   (Groq, never throws)
 lib/sourceDatabase.ts      32 outlets: score, lean, record
 components/                report UI · claim cards · history · marketing
 extension/                 MV3: content script · service worker · popup
@@ -195,6 +202,7 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 - **SSE, not WebSockets.** The stream is one-directional and the deployment target is Vercel serverless. A `ReadableStream` response needs no upgrade handshake, no connection state, no extra infrastructure.
 - **An `AsyncGenerator` as the analysis contract.** The pipeline yields `{type:'step'}` and `{type:'result'}` frames; the route just serialises them. Adding a pass changes one file, and the tests iterate the generator directly without touching HTTP.
 - **Every external service degrades into the next one.** No `GOOGLE_FACT_CHECK_API_KEY` → the lookup returns `null` and the chain falls through to Brave, then to the model. No Upstash → rate limiting falls back to an in-process `Map`. Missing keys quietly reduce the depth of the analysis instead of breaking the request.
+- **Transient upstream failures don't sink the run.** Groq calls retry with backoff on 429/5xx and network errors, honouring `Retry-After`; a claim whose assessment can't be parsed degrades to `UNVERIFIED` rather than failing the whole report.
 - **Prompts that are allowed to say "I don't know."** The synthesis prompt mandates `UNVERIFIED` with low confidence over a guess, and forbids fabricated citations — the failure mode that makes most LLM fact-checkers useless.
 - **Provenance is a first-class field.** `source: 'factcheck_db' | 'web_search' | 'llm_assessment'` travels with every verdict all the way into the UI, so a reader always knows whether a claim was checked or merely assessed.
 - **The extension's service worker inlines its constants.** Chrome MV3 module service workers can fail registration (`Status code: 2`) when imports cross generated chunk boundaries — a real bug hit and fixed here, documented in the file.
@@ -203,11 +211,12 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 
 ## Also in the box
 
-- **Rate limiting** — 3 analyses per install ID per 24h, backed by Upstash Redis with an in-memory fallback
-- **Translation layer** — `en` + `ar` message catalogues, with the app shell flipping to `dir="rtl"` for Arabic
+- **Rate limiting** — every request: 3 analyses per 24h per extension install, 10 per 24h per IP, backed by Upstash Redis with an in-memory fallback
+- **Dark mode** — a full token palette, a toggle in the nav, and a pre-paint script so the theme never flashes
+- **English + Arabic** — message catalogues with a language selector, a persisted choice, and `dir="rtl"` on the app shell
 - **Local history** — version-guarded, so reports written by the previous scoring engine are discarded rather than mis-rendered
 - **SEO** — OG image, `sitemap.ts`, `robots.ts`, full Open Graph and Twitter metadata
-- **Tests** — Vitest over the analysis generator: free-tier frames, paid-tier frames and verdict scoring, and the missing-key failure path
+- **Tests** — 13 Vitest cases over the analysis generator (free/paid frames, verdict scoring, missing-key failure) and the Groq client (retry on 429 and network error, no retry on 4xx, fence stripping, JSON recovery)
 
 ---
 
@@ -241,7 +250,7 @@ Load `extension/dist` at `chrome://extensions` with Developer Mode on. To point 
 
 This is a working prototype, not a finished product. Where it falls short:
 
-- **The `tier` field is client-supplied.** There is no auth yet, so the paid path is not actually gated — a real subscription check is the top of the roadmap.
+- **There is still no auth.** The tier is now decided server-side in `resolveTier()` instead of being read off the request body, but that function returns `paid` for everyone — the rate limit, not a subscription, is what bounds usage.
 - **The score is uncalibrated.** The weights are reasoned, not fitted. They need a labelled evaluation set before anyone treats the number as authoritative.
 - **The source database is a hand-curated file.** 32 outlets, no update mechanism.
 - **No persistence.** History is `localStorage`; clearing the browser clears the record.

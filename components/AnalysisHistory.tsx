@@ -12,8 +12,8 @@ interface AnalysisHistoryProps {
 
 function scoreColor(score: number): string {
   if (score >= 80) return 'var(--moss)'
-  if (score >= 60) return 'oklch(0.60 0.13 75)'
-  if (score >= 40) return 'oklch(0.62 0.18 55)'
+  if (score >= 60) return 'var(--mixed)'
+  if (score >= 40) return 'var(--misleading-soft)'
   return 'var(--vermillion)'
 }
 

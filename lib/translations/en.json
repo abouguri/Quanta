@@ -111,7 +111,12 @@
     "biasCenterLeft": "CENTER-LEFT",
     "biasCenter": "CENTER",
     "biasCenterRight": "CENTER-RIGHT",
-    "biasRight": "RIGHT"
+    "biasRight": "RIGHT",
+    "defaultTitle": "Article analysis",
+    "claimVerification": "Claim verification",
+    "claimVerificationPaid": "Claim verification — paid",
+    "claimsSummary": "{n} claims · {m} matched in fact-check database",
+    "structuralRedFlags": "Structural red flags"
   },
   "error": {
     "title": "Analysis error",
@@ -150,5 +155,13 @@
   },
   "empty": {
     "message": "Paste a URL or article text to analyze credibility"
+  },
+  "nav": {
+    "howItWorks": "How it works",
+    "methodology": "Methodology",
+    "pricing": "Pricing",
+    "forTeams": "For teams",
+    "api": "API",
+    "installExtension": "Install extension"
   }
 }

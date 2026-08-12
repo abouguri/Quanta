@@ -111,7 +111,12 @@
     "biasCenterLeft": "وسط-يسار",
     "biasCenter": "وسط",
     "biasCenterRight": "وسط-يمين",
-    "biasRight": "يمين"
+    "biasRight": "يمين",
+    "defaultTitle": "تحليل المقالة",
+    "claimVerification": "التحقق من الادعاءات",
+    "claimVerificationPaid": "التحقق من الادعاءات — مدفوع",
+    "claimsSummary": "{n} ادعاءات · {m} مطابقة في قاعدة تدقيق الحقائق",
+    "structuralRedFlags": "مؤشرات بنيوية حمراء"
   },
   "error": {
     "title": "خطأ في التحليل",
@@ -150,5 +155,13 @@
   },
   "empty": {
     "message": "الصق رابط أو نص مقالة لتحليل المصداقية"
+  },
+  "nav": {
+    "howItWorks": "كيف يعمل",
+    "methodology": "المنهجية",
+    "pricing": "الأسعار",
+    "forTeams": "للفرق",
+    "api": "واجهة برمجية",
+    "installExtension": "تثبيت الإضافة"
   }
 }

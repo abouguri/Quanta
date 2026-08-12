@@ -4,6 +4,7 @@ import { AnalysisResult, StructuralFlag, FactCheckResult } from '@/types/analysi
 import { getSourceCredibility } from '@/lib/sourceDatabase'
 import { useTranslation } from '@/lib/i18n'
 import { ClaimCard } from '@/components/ClaimCard'
+import { CopyButton } from '@/components/CopyButton'
 
 interface CredibilityReportProps {
   result: AnalysisResult
@@ -62,8 +63,11 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
         >
           {t('report.analyzeAnother')}
         </button>
-        <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-          REPORT · {reportDate} · ID #{reportId}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
+            REPORT · {reportDate} · ID #{reportId}
+          </div>
+          <CopyButton result={result} />
         </div>
       </div>
 
@@ -87,7 +91,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
             letterSpacing: '-0.025em',
             margin: '10px 0 0',
           }}>
-            {result.metadata.title || 'Article analysis'}
+            {result.metadata.title || t('report.defaultTitle')}
           </h2>
           <p style={{
             fontFamily: 'var(--serif)',
@@ -319,13 +323,14 @@ function SlateCell({ label, value, mono, span }: { label: string; value: string;
 }
 
 function ClaimsSection({ claims }: { claims: FactCheckResult[] }) {
+  const { t } = useTranslation()
   const dbHits = claims.filter(c => c.source === 'factcheck_db').length
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Claim verification</h3>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.claimVerification')}</h3>
         <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
-          {claims.length} claims · {dbHits} matched in fact-check database
+          {t('report.claimsSummary', { n: claims.length, m: dbHits })}
         </div>
       </div>
       <div style={{ display: 'grid', gap: 2, borderTop: '1px solid var(--ink)' }}>
@@ -336,6 +341,7 @@ function ClaimsSection({ claims }: { claims: FactCheckResult[] }) {
 }
 
 function FreeTierPrompt() {
+  const { t } = useTranslation()
   return (
     <div style={{
       marginTop: 44,
@@ -349,7 +355,7 @@ function FreeTierPrompt() {
       alignItems: 'center',
     }}>
       <div>
-        <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>Claim verification — paid</p>
+        <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>{t('report.claimVerificationPaid')}</p>
         <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, margin: '8px 0 0', lineHeight: 1.3, color: 'var(--ink)' }}>
           Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.
         </p>
@@ -365,14 +371,14 @@ function StructuralFlagsSection({ flags }: { flags: StructuralFlag[] }) {
   const { t } = useTranslation()
   const sevWeight = { high: 3, medium: 2, low: 1 }
   const sorted = [...flags].sort((a, b) => sevWeight[b.severity] - sevWeight[a.severity])
-  const sevColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'oklch(0.55 0.16 50)' : 'var(--ink-3)'
-  const dotColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'oklch(0.65 0.16 50)' : 'var(--ink-4)'
+  const sevColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'var(--misleading)' : 'var(--ink-3)'
+  const dotColor = (s: string) => s === 'high' ? 'var(--vermillion)' : s === 'medium' ? 'var(--misleading-soft)' : 'var(--ink-4)'
   const sevLabel = (s: string) => s === 'high' ? t('report.severityHigh') : s === 'medium' ? t('report.severityMedium') : t('report.severityLow')
 
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>Structural red flags</h3>
+        <h3 className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('report.structuralRedFlags')}</h3>
         <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', letterSpacing: '0.14em' }}>
           {sorted.filter(f => f.severity === 'high').length} {t('report.severityHigh')} &nbsp;·&nbsp;
           {sorted.filter(f => f.severity === 'medium').length} {t('report.severityMedium')} &nbsp;·&nbsp;

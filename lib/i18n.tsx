@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import en from './translations/en.json'
 import ar from './translations/ar.json'
 
@@ -20,8 +20,26 @@ const getNestedValue = (obj: any, path: string): string => {
   return path.split('.').reduce((current, prop) => current?.[prop], obj) || path
 }
 
+const STORAGE_KEY = 'language'
+
 export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en')
+  const [language, setLanguageState] = useState<Language>('en')
+
+  // Read on mount rather than during render — the server has no localStorage,
+  // and reading it in the initial state would desync hydration.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored === 'en' || stored === 'ar') setLanguageState(stored)
+    } catch { /* private mode */ }
+  }, [])
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang)
+    try {
+      localStorage.setItem(STORAGE_KEY, lang)
+    } catch { /* private mode */ }
+  }
 
   const t = (path: string, replacements?: Record<string, string | number>): string => {
     let value = getNestedValue(translations[language], path)

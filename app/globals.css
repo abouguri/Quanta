@@ -37,9 +37,62 @@
   --sans:  "Urbanist", "Inter", system-ui, -apple-system, Helvetica, sans-serif;
   --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
+  /* Verdict tints — pale washes behind claim cards and severity chips. */
+  --misleading:      oklch(0.52 0.19 35);
+  --misleading-soft: oklch(0.65 0.16 50);
+  --tint-verified:   oklch(0.96 0.02 145);
+  --tint-disputed:   oklch(0.97 0.02 15);
+  --tint-misleading: oklch(0.97 0.02 50);
+  --tint-mixed:      oklch(0.97 0.02 80);
+
   --rule:     1px solid var(--fog);
   --rule-ink: 1px solid var(--ink);
+
+  color-scheme: light;
 }
+
+/*
+ * Dark theme. Only the base tokens are redefined — the aliases above are
+ * var() references, which CSS resolves at use time, so they follow along.
+ * Every component in the analysis flow paints from these tokens and needs
+ * no dark-specific code of its own.
+ */
+.dark {
+  --bone:         #0E1519;
+  --paper:        #151E24;
+  --mist:         #1C262D;
+  --fog:          #2C3841;
+
+  --ink:          #EDE8DC;
+  --ink-2:        rgba(237, 232, 220, 0.74);
+  --ink-3:        rgba(237, 232, 220, 0.52);
+  --ink-4:        #9AA6B0;
+  --graphite:     #C3CBD2;
+
+  --signal:       #5C9DD6;
+  --ember:        #E6A23C;
+
+  --verified:     #4FAE83;
+  --mixed:        #D8964E;
+  --disputed:     #E06B6B;
+  --unclear:      #8D949B;
+
+  /* Same hues, inverted: dark low-chroma washes instead of pale ones. */
+  --misleading:      #E08A5C;
+  --misleading-soft: #E09A6E;
+  --tint-verified:   oklch(0.27 0.04 150);
+  --tint-disputed:   oklch(0.27 0.05 20);
+  --tint-misleading: oklch(0.28 0.05 45);
+  --tint-mixed:      oklch(0.28 0.04 80);
+
+  color-scheme: dark;
+}
+
+/* The few spots that can't be expressed as a token swap. */
+.dark .q-btn:hover { background: #D6D0C2; }
+.dark .q-btn--ghost:hover { background: rgba(237, 232, 220, 0.08); }
+/* multiply erases the stamp against a dark ground */
+.dark .stamp { mix-blend-mode: normal; }
 
 /* === Quanta utility classes (ported from handoff site.css) === */
 .q-container { max-width: 1320px; margin: 0 auto; padding: 0 40px; }

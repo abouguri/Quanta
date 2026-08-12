@@ -8,10 +8,10 @@ interface ClaimCardProps {
 }
 
 const VERDICT_CONFIG: Record<Verdict, { label: string; color: string; bg: string }> = {
-  TRUE:        { label: 'VERIFIED',    color: 'var(--verified)',  bg: 'oklch(0.96 0.02 145)' },
-  FALSE:       { label: 'FALSE',       color: 'var(--disputed)',  bg: 'oklch(0.97 0.02 15)'  },
-  MISLEADING:  { label: 'MISLEADING',  color: 'oklch(0.52 0.19 35)', bg: 'oklch(0.97 0.02 50)' },
-  MIXED:       { label: 'MIXED',       color: 'var(--mixed)',     bg: 'oklch(0.97 0.02 80)'  },
+  TRUE:        { label: 'VERIFIED',    color: 'var(--verified)',   bg: 'var(--tint-verified)'   },
+  FALSE:       { label: 'FALSE',       color: 'var(--disputed)',   bg: 'var(--tint-disputed)'   },
+  MISLEADING:  { label: 'MISLEADING',  color: 'var(--misleading)', bg: 'var(--tint-misleading)' },
+  MIXED:       { label: 'MIXED',       color: 'var(--mixed)',      bg: 'var(--tint-mixed)'      },
   UNVERIFIED:  { label: 'UNVERIFIED',  color: 'var(--ink-3)',     bg: 'var(--paper-2)'       },
 }
 

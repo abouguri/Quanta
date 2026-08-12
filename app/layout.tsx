@@ -55,6 +55,16 @@ export default function RootLayout({
         />
       </head>
       <body>
+        {/*
+          Applies the stored theme before first paint. Without this the page
+          renders light, then flips once ThemeProvider mounts — a white flash
+          on every load for anyone using dark mode.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+          }}
+        />
         <ThemeProvider>
           <TranslationProvider>
             {children}

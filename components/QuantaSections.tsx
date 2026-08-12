@@ -1,5 +1,9 @@
 'use client'
 
+import { useTranslation } from '@/lib/i18n'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { LanguageSelector } from '@/components/LanguageSelector'
+
 const TONE_HEX: Record<string, string> = {
   verified: '#2E7D5B',
   mixed:    '#C77A2E',
@@ -8,6 +12,14 @@ const TONE_HEX: Record<string, string> = {
 }
 
 export function QuantaNav({ onHome }: { onHome: () => void }) {
+  const { t } = useTranslation()
+  const links: Array<[string, string]> = [
+    [t('nav.howItWorks'), '#how'],
+    [t('nav.methodology'), '#method'],
+    [t('nav.pricing'), '#pricing'],
+    [t('nav.forTeams'), '#teams'],
+    [t('nav.api'), '#api'],
+  ]
   return (
     <header style={{
       position: 'sticky',
@@ -36,18 +48,14 @@ export function QuantaNav({ onHome }: { onHome: () => void }) {
           </span>
         </button>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          {[
-            ['How it works', '#how'],
-            ['Methodology', '#method'],
-            ['Pricing', '#pricing'],
-            ['For teams', '#teams'],
-            ['API', '#api'],
-          ].map(([l, h]) => (
+          {links.map(([l, h]) => (
             <a key={l} href={h} style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)' }}>{l}</a>
           ))}
         </nav>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <a href="#cta" className="q-btn">Install extension</a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <LanguageSelector />
+          <ThemeToggle />
+          <a href="#cta" className="q-btn">{t('nav.installExtension')}</a>
         </div>
       </div>
     </header>
