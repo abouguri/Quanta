@@ -21,9 +21,17 @@ const RATE_LIMIT_WINDOW_S = 24 * 60 * 60
 // Disabled outside production so local development isn't throttled.
 const RATE_LIMIT_ENABLED = process.env.NODE_ENV === 'production'
 
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? Redis.fromEnv()
-  : null
+// Constructed defensively: a malformed URL would otherwise throw at module
+// load and take every request down with an opaque 500.
+const redis = (() => {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null
+  try {
+    return Redis.fromEnv()
+  } catch (error) {
+    console.error('Upstash config invalid, using in-memory rate limiting:', error instanceof Error ? error.message : error)
+    return null
+  }
+})()
 
 const inMemoryStore = new Map<string, number[]>()
 
@@ -47,14 +55,23 @@ async function checkRateLimit(bucket: { key: string; max: number }): Promise<Rat
   const { key, max } = bucket
 
   if (redis) {
-    const redisKey = `quanta:rl:${key}`
-    const count = await redis.incr(redisKey)
-    if (count === 1) await redis.expire(redisKey, RATE_LIMIT_WINDOW_S)
-    if (count > max) {
-      const ttl = await redis.ttl(redisKey)
-      return { ok: false, retryAfter: Math.max(ttl, 1) }
+    try {
+      const redisKey = `quanta:rl:${key}`
+      const count = await redis.incr(redisKey)
+      if (count === 1) await redis.expire(redisKey, RATE_LIMIT_WINDOW_S)
+      if (count > max) {
+        const ttl = await redis.ttl(redisKey)
+        return { ok: false, retryAfter: Math.max(ttl, 1) }
+      }
+      return { ok: true, remaining: max - count }
+    } catch (error) {
+      // An unreachable limiter must never take the API down with it. Upstash
+      // free databases are deleted after inactivity, which used to surface as
+      // a bare 500 to every caller that carried an install ID. Fall through
+      // to the in-memory counter: weaker (per-instance, resets on deploy) but
+      // still bounded, and the request survives.
+      console.error('Rate limit store unavailable, falling back to memory:', error instanceof Error ? error.message : error)
     }
-    return { ok: true, remaining: max - count }
   }
 
   const now = Date.now()
