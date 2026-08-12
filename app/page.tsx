@@ -40,7 +40,8 @@ function HomeInner() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
     try {
-      const body = url ? { articleUrl: url, language, tier: 'paid' } : { articleText: text, language, tier: 'paid' }
+      // Tier is resolved server-side — the client doesn't get a say.
+      const body = url ? { articleUrl: url, language } : { articleText: text, language }
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

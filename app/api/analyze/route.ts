@@ -6,10 +6,20 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, X-Quanta-Install-Id',
+  'Access-Control-Expose-Headers': 'X-RateLimit-Remaining, Retry-After',
 }
 
-const RATE_LIMIT_MAX = 3
+// Analyses per 24h. Extension installs identify themselves and get the tighter
+// quota; everyone else is bucketed by IP, which is coarse (shared NAT, offices)
+// so it is deliberately more generous.
+const RATE_LIMIT_INSTALL_MAX = 3
+const RATE_LIMIT_IP_MAX = 10
 const RATE_LIMIT_WINDOW_S = 24 * 60 * 60
+
+// Every request runs the full pipeline against paid third-party APIs, so the
+// limit is the only thing standing between a public endpoint and our API keys.
+// Disabled outside production so local development isn't throttled.
+const RATE_LIMIT_ENABLED = process.env.NODE_ENV === 'production'
 
 const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
   ? Redis.fromEnv()
@@ -17,29 +27,60 @@ const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_RE
 
 const inMemoryStore = new Map<string, number[]>()
 
-async function checkRateLimit(installId: string): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+/**
+ * Identifies the caller. An install ID is self-reported and trivially forged —
+ * it exists to give honest extension users a stable bucket, not to authenticate.
+ * The IP bucket is the actual floor.
+ */
+function rateLimitBucket(request: Request): { key: string; max: number } {
+  const installId = request.headers.get('x-quanta-install-id')
+  if (installId) return { key: `install:${installId.slice(0, 64)}`, max: RATE_LIMIT_INSTALL_MAX }
+
+  const forwarded = request.headers.get('x-forwarded-for') ?? ''
+  const ip = forwarded.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown'
+  return { key: `ip:${ip}`, max: RATE_LIMIT_IP_MAX }
+}
+
+type RateLimitVerdict = { ok: true; remaining: number } | { ok: false; retryAfter: number }
+
+async function checkRateLimit(bucket: { key: string; max: number }): Promise<RateLimitVerdict> {
+  const { key, max } = bucket
+
   if (redis) {
-    const key = `quanta:rl:${installId}`
-    const count = await redis.incr(key)
-    if (count === 1) await redis.expire(key, RATE_LIMIT_WINDOW_S)
-    if (count > RATE_LIMIT_MAX) {
-      const ttl = await redis.ttl(key)
+    const redisKey = `quanta:rl:${key}`
+    const count = await redis.incr(redisKey)
+    if (count === 1) await redis.expire(redisKey, RATE_LIMIT_WINDOW_S)
+    if (count > max) {
+      const ttl = await redis.ttl(redisKey)
       return { ok: false, retryAfter: Math.max(ttl, 1) }
     }
-    return { ok: true }
+    return { ok: true, remaining: max - count }
   }
 
   const now = Date.now()
   const windowMs = RATE_LIMIT_WINDOW_S * 1000
   const cutoff = now - windowMs
-  const recent = (inMemoryStore.get(installId) ?? []).filter(t => t > cutoff)
-  if (recent.length >= RATE_LIMIT_MAX) {
-    inMemoryStore.set(installId, recent)
+  const recent = (inMemoryStore.get(key) ?? []).filter(t => t > cutoff)
+  if (recent.length >= max) {
+    inMemoryStore.set(key, recent)
     return { ok: false, retryAfter: Math.ceil((recent[0] + windowMs - now) / 1000) }
   }
   recent.push(now)
-  inMemoryStore.set(installId, recent)
-  return { ok: true }
+  inMemoryStore.set(key, recent)
+  return { ok: true, remaining: max - recent.length }
+}
+
+/**
+ * The tier is decided here and nowhere else. It used to be read straight off
+ * the request body, which meant any caller could switch on the full paid
+ * pipeline. There is no auth yet, so everyone gets `paid` within their quota —
+ * but the decision now has one server-side home for a subscription check to
+ * slot into.
+ *
+ * TODO: return 'free' unless the session carries an active subscription.
+ */
+function resolveTier(): 'free' | 'paid' {
+  return 'paid'
 }
 
 function json(body: unknown, init: ResponseInit = {}): Response {
@@ -55,25 +96,25 @@ export function OPTIONS(): Response {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const installId = request.headers.get('x-quanta-install-id')
-    if (installId) {
-      const rl = await checkRateLimit(installId)
+    let remaining: number | null = null
+    if (RATE_LIMIT_ENABLED) {
+      const rl = await checkRateLimit(rateLimitBucket(request))
       if (!rl.ok) {
         return json(
           { error: 'Daily free limit reached. Try again later.', retryAfter: rl.retryAfter },
           { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
         )
       }
+      remaining = rl.remaining
     }
 
     const body = await request.json() as {
       articleUrl?: string
       articleText?: string
       language?: string
-      // TODO: replace with server-side subscription check once auth is wired up
-      tier?: 'free' | 'paid'
     }
-    const { articleUrl, articleText, language = 'en', tier = 'paid' } = body
+    const { articleUrl, articleText, language = 'en' } = body
+    const tier = resolveTier()
 
     if (!articleUrl && !articleText) {
       return json({ error: 'Either articleUrl or articleText is required' }, { status: 400 })
@@ -127,6 +168,7 @@ export async function POST(request: Request): Promise<Response> {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
+        ...(remaining === null ? {} : { 'X-RateLimit-Remaining': String(remaining) }),
         ...CORS_HEADERS,
       },
     })
