@@ -1,53 +1,43 @@
 import { Claim, FactCheckResult } from '@/types/analysis'
 import { SYNTHESIS_PROMPT } from './prompts'
+import { callGroq, parseJsonResponse } from './groq'
 
-async function callGroq(systemPrompt: string, userMessage: string): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY
-  if (!apiKey) throw new Error('GROQ_API_KEY is not set')
+const VERDICTS = new Set(['TRUE', 'FALSE', 'MISLEADING', 'MIXED', 'UNVERIFIED'])
+const CONFIDENCES = new Set(['high', 'medium', 'low'])
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-      temperature: 0.3,
-      max_tokens: 512,
-    }),
-  })
-
-  if (!response.ok) throw new Error(`Groq API error ${response.status}`)
-
-  const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
-  const text = data.choices?.[0]?.message?.content
-  if (!text) throw new Error('Groq API returned no output')
-  return text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
-}
-
+/**
+ * Last resort for claims no fact-checker has covered. Never throws: an
+ * unusable assessment degrades to UNVERIFIED so one bad claim can't sink the
+ * whole report.
+ */
 export async function synthesizeClaim(claim: Claim, articleContext: string): Promise<FactCheckResult> {
   const context = articleContext.substring(0, 800)
   const userMessage = `Claim: "${claim.text}"\n\nArticle context (excerpt):\n${context}`
 
+  const unverified = (summary: string): FactCheckResult => ({
+    claim,
+    verdict: 'UNVERIFIED',
+    confidence: 'low',
+    source: 'llm_assessment',
+    summary,
+  })
+
   try {
-    const raw = await callGroq(SYNTHESIS_PROMPT, userMessage)
-    const parsed = JSON.parse(raw) as { verdict: string; confidence: string; reasoning: string }
+    const raw = await callGroq(SYNTHESIS_PROMPT, userMessage, { maxTokens: 512 })
+    const parsed = parseJsonResponse<{ verdict: string; confidence: string; reasoning: string }>(raw)
+
+    if (!parsed || !VERDICTS.has(parsed.verdict)) {
+      return unverified('No independent fact-check found, and the assessment could not be parsed.')
+    }
+
     return {
       claim,
       verdict: parsed.verdict as FactCheckResult['verdict'],
-      confidence: parsed.confidence as FactCheckResult['confidence'],
+      confidence: CONFIDENCES.has(parsed.confidence) ? parsed.confidence as FactCheckResult['confidence'] : 'low',
       source: 'llm_assessment',
-      summary: parsed.reasoning,
+      summary: parsed.reasoning || 'No reasoning returned.',
     }
   } catch {
-    return {
-      claim,
-      verdict: 'UNVERIFIED',
-      confidence: 'low',
-      source: 'llm_assessment',
-      summary: 'No independent fact-check found. Assessment unavailable.',
-    }
+    return unverified('No independent fact-check found. Assessment unavailable.')
   }
 }
