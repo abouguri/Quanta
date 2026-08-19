@@ -1,5 +1,5 @@
 import { load } from 'cheerio'
-import { ScrapedArticle } from '@/types/analysis'
+import { AnalysisErrorCode, ScrapedArticle } from '@/types/analysis'
 import { assertSafeUrl, UnsafeUrlError } from './urlGuard'
 
 const FETCH_TIMEOUT_MS = 12_000
@@ -143,17 +143,18 @@ export async function scrapeArticle(url: string): Promise<ScrapedArticle> {
 }
 
 /**
- * Turns whatever `scrapeArticle` threw into one sentence fit for the UI.
- * Errors used to be wrapped twice on the way out ("Failed to scrape article:
- * Failed to scrape article: ...").
+ * Turns whatever `scrapeArticle` threw into a code the client can translate
+ * plus one sentence to fall back on. Errors used to be wrapped twice on the way
+ * out ("Failed to scrape article: Failed to scrape article: ...").
  */
-export function describeScrapeFailure(error: unknown): string {
-  if (error instanceof UnsafeUrlError || error instanceof ScrapeError) return error.message
+export function describeScrapeFailure(error: unknown): { code: AnalysisErrorCode; message: string } {
+  if (error instanceof UnsafeUrlError) return { code: 'url_invalid', message: error.message }
+  if (error instanceof ScrapeError) return { code: 'scrape_failed', message: error.message }
   if (error instanceof Error) {
     if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-      return 'That page took too long to respond.'
+      return { code: 'fetch_failed', message: 'That page took too long to respond.' }
     }
-    return `Could not fetch that page: ${error.message}`
+    return { code: 'fetch_failed', message: `Could not fetch that page: ${error.message}` }
   }
-  return 'Could not fetch that page.'
+  return { code: 'fetch_failed', message: 'Could not fetch that page.' }
 }

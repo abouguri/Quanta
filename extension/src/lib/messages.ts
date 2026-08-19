@@ -1,4 +1,4 @@
-import type { AnalysisResult, ExtractedArticle } from './types'
+import type { AnalysisErrorCode, AnalysisResult, ExtractedArticle } from './types'
 
 // content <-> popup
 export type ContentMessage = { type: 'EXTRACT' }
@@ -12,6 +12,6 @@ export type PopupToBackground =
 export type BackgroundToPopup =
   | { type: 'PROGRESS'; status: string; progress: number; pass?: number; step?: string; label?: string }
   | { type: 'RESULT'; data: AnalysisResult }
-  | { type: 'ERROR'; message: string; retryAfter?: number; status?: number }
+  | { type: 'ERROR'; message: string; code?: AnalysisErrorCode; retryAfter?: number; status?: number }
 
 export const ANALYZE_PORT = 'analyze'

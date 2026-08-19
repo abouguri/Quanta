@@ -1,4 +1,5 @@
 import type { BackgroundToPopup, PopupToBackground } from '@/lib/messages'
+import type { AnalysisErrorCode } from '@/lib/types'
 
 // Inlined to keep the service worker free of shared chunks — Chrome MV3 module
 // SWs can fail to register ("Status code: 2") when their imports cross
@@ -43,11 +44,12 @@ chrome.runtime.onConnect.addListener((port) => {
       })
 
       if (!response.ok) {
-        let payload: { error?: string; retryAfter?: number } = {}
+        let payload: { error?: string; code?: AnalysisErrorCode; retryAfter?: number } = {}
         try { payload = await response.json() as typeof payload } catch { /* non-JSON */ }
         send({
           type: 'ERROR',
           message: payload.error ?? `HTTP ${response.status}`,
+          code: payload.code,
           retryAfter: payload.retryAfter,
           status: response.status,
         })
@@ -75,7 +77,7 @@ chrome.runtime.onConnect.addListener((port) => {
           try {
             const parsed = JSON.parse(frame.slice(6))
             if (parsed && typeof parsed.error === 'string') {
-              send({ type: 'ERROR', message: parsed.error })
+              send({ type: 'ERROR', message: parsed.error, code: parsed.code })
             } else if (parsed && typeof parsed.overallScore === 'number') {
               send({ type: 'RESULT', data: parsed })
             } else if (parsed && typeof parsed.progress === 'number') {

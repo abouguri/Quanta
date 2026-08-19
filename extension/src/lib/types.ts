@@ -81,3 +81,14 @@ export interface HistoryEntry {
   timestamp: number
   result: AnalysisResult
 }
+
+export type AnalysisErrorCode =
+  | 'bad_request'
+  | 'url_invalid'
+  | 'text_too_short'
+  | 'text_too_long'
+  | 'fetch_failed'
+  | 'scrape_failed'
+  | 'rate_limited'
+  | 'analysis_failed'
+  | 'server_error'

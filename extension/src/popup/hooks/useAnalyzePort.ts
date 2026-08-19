@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ANALYZE_PORT, type BackgroundToPopup } from '@/lib/messages'
 import { getInstallId, recordAnalysisAttempt, saveAnalysis } from '@/lib/storage'
+import { resolveErrorMessage } from '@/lib/errorMessages'
 import type { AnalysisResult, ExtractedArticle } from '@/lib/types'
 
 export type AnalyzePhase = 'idle' | 'measuring' | 'result' | 'error' | 'limit'
@@ -47,10 +48,13 @@ export function useAnalyzePort() {
         void saveAnalysis(msg.data, article.url)
         setState({ phase: 'result', progress: 100, currentPass: 4, result: msg.data, error: null, retryAfter: null })
       } else if (msg.type === 'ERROR') {
-        if (msg.status === 429) {
-          setState({ phase: 'limit', progress: 0, currentPass: 0, result: null, error: msg.message, retryAfter: msg.retryAfter ?? null })
+        // The raw message can be an internal string ("Groq API error 503");
+        // the code is what decides the copy the user actually sees.
+        const text = resolveErrorMessage(msg.code, msg.message)
+        if (msg.status === 429 || msg.code === 'rate_limited') {
+          setState({ phase: 'limit', progress: 0, currentPass: 0, result: null, error: text, retryAfter: msg.retryAfter ?? null })
         } else {
-          setState({ phase: 'error', progress: 0, currentPass: 0, result: null, error: msg.message, retryAfter: null })
+          setState({ phase: 'error', progress: 0, currentPass: 0, result: null, error: text, retryAfter: null })
         }
       }
     })

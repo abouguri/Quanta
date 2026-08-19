@@ -64,3 +64,25 @@ export interface ScrapedArticle {
   publishedDate?: string
   source?: string
 }
+
+/**
+ * Stable machine-readable reasons a request can fail. Clients switch on these
+ * to show a translated message; the accompanying `error` string stays as the
+ * fallback for codes a client does not know.
+ */
+export type AnalysisErrorCode =
+  | 'bad_request'
+  | 'url_invalid'
+  | 'text_too_short'
+  | 'text_too_long'
+  | 'fetch_failed'
+  | 'scrape_failed'
+  | 'rate_limited'
+  | 'analysis_failed'
+  | 'server_error'
+
+export interface AnalysisErrorBody {
+  error: string
+  code: AnalysisErrorCode
+  retryAfter?: number
+}

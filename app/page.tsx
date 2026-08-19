@@ -9,6 +9,7 @@ import { AnalysisHistory } from '@/components/AnalysisHistory'
 import { AnalysisResult } from '@/types/analysis'
 import { AnalysisHistory as AnalysisHistoryEntry, saveAnalysis } from '@/lib/history'
 import { useTranslation } from '@/lib/i18n'
+import { AnalysisFailure, resolveErrorMessage } from '@/lib/errorMessages'
 import {
   QuantaNav, TrustStrip, HowItWorks, ComparePreview,
   Methodology, QuoteStrip, CTAFooter,
@@ -16,13 +17,21 @@ import {
 
 type Stage = 'input' | 'analyzing' | 'report'
 
+/** Carries the API's failure code alongside its message. */
+class AnalysisRequestError extends Error {
+  constructor(readonly failure: AnalysisFailure) {
+    super(failure.message ?? 'Analysis failed')
+    this.name = 'AnalysisRequestError'
+  }
+}
+
 function HomeInner() {
   const [stage, setStage] = useState<Stage>('input')
   const [target, setTarget] = useState('')
   const [analyzeSteps, setAnalyzeSteps] = useState<Array<{ step: string; label: string; done: boolean }>>([])
   const [activeStepLabel, setActiveStepLabel] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [failure, setFailure] = useState<AnalysisFailure | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const { language, t } = useTranslation()
@@ -33,7 +42,7 @@ function HomeInner() {
     setTarget(tgt)
     setCurrentUrl(url)
     setResult(null)
-    setError(null)
+    setFailure(null)
     setAnalyzeSteps([])
     setActiveStepLabel('')
     setStage('analyzing')
@@ -48,8 +57,8 @@ function HomeInner() {
         body: JSON.stringify(body),
       })
       if (!response.ok) {
-        const errorData = await response.json() as { error?: string }
-        throw new Error(errorData.error || 'Analysis failed')
+        const body = await response.json().catch(() => ({})) as AnalysisFailure
+        throw new AnalysisRequestError(body)
       }
       const reader = response.body?.getReader()
       if (!reader) throw new Error('No response stream')
@@ -60,7 +69,7 @@ function HomeInner() {
       const decoder = new TextDecoder('utf-8')
       let buffer = ''
       let finalResult: AnalysisResult | null = null
-      let streamError: Error | null = null
+      let streamError: AnalysisRequestError | null = null
 
       while (true) {
         const { done, value } = await reader.read()
@@ -75,7 +84,7 @@ function HomeInner() {
           buffer = buffer.slice(sep + 2)
           if (!frame.startsWith('data: ')) continue
 
-          let data: Partial<AnalysisResult> & { step?: string; label?: string; progress?: number; error?: string }
+          let data: Partial<AnalysisResult> & { step?: string; label?: string; progress?: number; error?: string; code?: string }
           try {
             data = JSON.parse(frame.slice(6))
           } catch {
@@ -83,7 +92,7 @@ function HomeInner() {
           }
 
           if (data.error) {
-            streamError = new Error(data.error)
+            streamError = new AnalysisRequestError({ code: data.code, message: data.error })
             break
           }
           if (data.step && data.label) {
@@ -110,7 +119,11 @@ function HomeInner() {
         setStage('report')
       } else throw new Error('No analysis result received')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed')
+      setFailure(
+        err instanceof AnalysisRequestError
+          ? err.failure
+          : { message: err instanceof Error ? err.message : undefined },
+      )
       setStage('input')
     }
   }, [language])
@@ -120,7 +133,7 @@ function HomeInner() {
     setResult(null)
     setTarget('')
     setCurrentUrl(null)
-    setError(null)
+    setFailure(null)
     setAnalyzeSteps([])
     setActiveStepLabel('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -153,7 +166,7 @@ function HomeInner() {
 
       <section style={{ padding: '72px 0 96px' }}>
         <div className="q-container">
-          {error && (
+          {failure && (
             <div style={{
               border: '0.5px solid var(--disputed)',
               borderLeft: '3px solid var(--disputed)',
@@ -167,7 +180,7 @@ function HomeInner() {
               <div className="q-eyebrow" style={{ color: 'var(--disputed)', marginBottom: 4 }}>
                 {t('error.title')}
               </div>
-              {error}
+              {resolveErrorMessage(failure, t)}
             </div>
           )}
 

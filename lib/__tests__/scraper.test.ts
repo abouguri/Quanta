@@ -123,25 +123,34 @@ describe('scrapeArticle', () => {
 })
 
 describe('describeScrapeFailure', () => {
-  it('passes our own messages through unwrapped', () => {
-    expect(describeScrapeFailure(new ScrapeError('The page returned HTTP 404.'))).toBe(
-      'The page returned HTTP 404.',
-    )
-    expect(describeScrapeFailure(new UnsafeUrlError('That URL points at a private address.'))).toBe(
-      'That URL points at a private address.',
-    )
+  it('passes our own messages through unwrapped, with a code', () => {
+    expect(describeScrapeFailure(new ScrapeError('The page returned HTTP 404.'))).toEqual({
+      code: 'scrape_failed',
+      message: 'The page returned HTTP 404.',
+    })
+    expect(describeScrapeFailure(new UnsafeUrlError('That URL points at a private address.'))).toEqual({
+      code: 'url_invalid',
+      message: 'That URL points at a private address.',
+    })
   })
 
   it('names a timeout for what it is', () => {
     const timeout = new Error('The operation was aborted due to timeout')
     timeout.name = 'TimeoutError'
-    expect(describeScrapeFailure(timeout)).toMatch(/took too long/)
+    expect(describeScrapeFailure(timeout)).toEqual({
+      code: 'fetch_failed',
+      message: expect.stringMatching(/took too long/),
+    })
   })
 
   it('falls back to a single wrapped sentence', () => {
-    expect(describeScrapeFailure(new Error('ECONNREFUSED'))).toBe(
-      'Could not fetch that page: ECONNREFUSED',
-    )
-    expect(describeScrapeFailure('weird')).toBe('Could not fetch that page.')
+    expect(describeScrapeFailure(new Error('ECONNREFUSED'))).toEqual({
+      code: 'fetch_failed',
+      message: 'Could not fetch that page: ECONNREFUSED',
+    })
+    expect(describeScrapeFailure('weird')).toEqual({
+      code: 'fetch_failed',
+      message: 'Could not fetch that page.',
+    })
   })
 })

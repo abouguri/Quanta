@@ -1,5 +1,6 @@
 import { analyzeArticle } from '@/lib/analyze'
 import { describeScrapeFailure, scrapeArticle } from '@/lib/scraper'
+import type { AnalysisErrorCode } from '@/types/analysis'
 import { Redis } from '@upstash/redis'
 
 const CORS_HEADERS = {
@@ -141,6 +142,15 @@ function json(body: unknown, init: ResponseInit = {}): Response {
   })
 }
 
+/**
+ * Every failure carries a stable `code` next to its sentence. Clients used to
+ * get only the raw message and render it verbatim, so an internal string like
+ * "Groq API error 503" reached the user untranslated.
+ */
+function fail(code: AnalysisErrorCode, error: string, status: number, headers?: HeadersInit): Response {
+  return json({ error, code }, { status, ...(headers ? { headers } : {}) })
+}
+
 export function OPTIONS(): Response {
   return new Response(null, { status: 204, headers: CORS_HEADERS })
 }
@@ -154,30 +164,31 @@ export async function POST(request: Request): Promise<Response> {
     try {
       body = await request.json() as typeof body
     } catch {
-      return json({ error: 'Request body must be valid JSON.' }, { status: 400 })
+      return fail('bad_request', 'Request body must be valid JSON.', 400)
     }
 
     const { articleUrl, articleText, language = 'en' } = body ?? {}
 
     if (!articleUrl && !articleText) {
-      return json({ error: 'Either articleUrl or articleText is required' }, { status: 400 })
+      return fail('bad_request', 'Either articleUrl or articleText is required', 400)
     }
     if (articleUrl !== undefined && typeof articleUrl !== 'string') {
-      return json({ error: 'articleUrl must be a string.' }, { status: 400 })
+      return fail('bad_request', 'articleUrl must be a string.', 400)
     }
     if (articleText !== undefined && typeof articleText !== 'string') {
-      return json({ error: 'articleText must be a string.' }, { status: 400 })
+      return fail('bad_request', 'articleText must be a string.', 400)
     }
     if (articleText && articleText.length > MAX_ARTICLE_TEXT_CHARS) {
-      return json(
-        { error: `Article text must be under ${MAX_ARTICLE_TEXT_CHARS.toLocaleString('en-US')} characters.` },
-        { status: 400 },
+      return fail(
+        'text_too_long',
+        `Article text must be under ${MAX_ARTICLE_TEXT_CHARS.toLocaleString('en-US')} characters.`,
+        400,
       )
     }
     // Pasted text is checked up front; scraped text can only be checked after
     // the fetch, which is why that case is handled below the quota claim.
     if (!articleUrl && articleText && articleText.trim().length < 100) {
-      return json({ error: 'Article text must be at least 100 characters' }, { status: 400 })
+      return fail('text_too_short', 'Article text must be at least 100 characters', 400)
     }
 
     const bucket = rateLimitBucket(request)
@@ -186,7 +197,7 @@ export async function POST(request: Request): Promise<Response> {
       const rl = await checkRateLimit(bucket)
       if (!rl.ok) {
         return json(
-          { error: 'Daily free limit reached. Try again later.', retryAfter: rl.retryAfter },
+          { error: 'Daily free limit reached. Try again later.', code: 'rate_limited', retryAfter: rl.retryAfter },
           { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
         )
       }
@@ -194,9 +205,9 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     /** Rejects after the quota was claimed, so it hands the slot back first. */
-    const refundAndFail = async (message: string): Promise<Response> => {
+    const refundAndFail = async (code: AnalysisErrorCode, message: string): Promise<Response> => {
       if (RATE_LIMIT_ENABLED) await refundRateLimit(bucket)
-      return json({ error: message }, { status: 400 })
+      return fail(code, message, 400)
     }
 
     const tier = resolveTier()
@@ -215,13 +226,15 @@ export async function POST(request: Request): Promise<Response> {
           publishedDate: scraped.publishedDate,
         }
       } catch (error) {
-        return refundAndFail(describeScrapeFailure(error))
+        const { code, message } = describeScrapeFailure(error)
+        return refundAndFail(code, message)
       }
     }
 
     const trimmedText = text.trim()
     if (trimmedText.length < 100) {
       return refundAndFail(
+        articleUrl ? 'scrape_failed' : 'text_too_short',
         articleUrl
           ? 'Not enough article text could be read from that page. Try pasting the text instead.'
           : 'Article text must be at least 100 characters',
@@ -240,7 +253,8 @@ export async function POST(request: Request): Promise<Response> {
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Analysis failed'
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: message })}\n\n`))
+          console.error('Analysis stream failed:', message)
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: message, code: 'analysis_failed' })}\n\n`))
         } finally {
           controller.close()
         }
@@ -259,6 +273,6 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('API error:', message)
-    return json({ error: message || 'Internal server error' }, { status: 500 })
+    return fail('server_error', 'Something went wrong on our end. Please try again.', 500)
   }
 }
