@@ -1,5 +1,5 @@
 import { analyzeArticle } from '@/lib/analyze'
-import { scrapeArticle } from '@/lib/scraper'
+import { describeScrapeFailure, scrapeArticle } from '@/lib/scraper'
 import { Redis } from '@upstash/redis'
 
 const CORS_HEADERS = {
@@ -20,6 +20,10 @@ const RATE_LIMIT_WINDOW_S = 24 * 60 * 60
 // limit is the only thing standing between a public endpoint and our API keys.
 // Disabled outside production so local development isn't throttled.
 const RATE_LIMIT_ENABLED = process.env.NODE_ENV === 'production'
+
+// The scraper already caps what it returns at 10k chars; this caps what a
+// caller can push in directly. Above this the request is not an article.
+const MAX_ARTICLE_TEXT_CHARS = 50_000
 
 // Constructed defensively: a malformed URL would otherwise throw at module
 // load and take every request down with an opaque 500.
@@ -88,6 +92,36 @@ async function checkRateLimit(bucket: { key: string; max: number }): Promise<Rat
 }
 
 /**
+ * Hands a consumed slot back.
+ *
+ * The quota is claimed before the article is fetched, so that concurrent
+ * requests can't both slip past the same check. When the work then fails for a
+ * reason that cost us nothing — a dead link, a paywall, a PDF — the caller
+ * should not lose one of three daily analyses over it.
+ */
+async function refundRateLimit(bucket: { key: string; max: number }): Promise<void> {
+  const { key } = bucket
+
+  if (redis) {
+    try {
+      const redisKey = `quanta:rl:${key}`
+      const count = await redis.decr(redisKey)
+      // decr on an expired key resurrects it at -1 with no TTL; drop it instead.
+      if (count <= 0) await redis.del(redisKey)
+      return
+    } catch (error) {
+      console.error('Rate limit refund failed:', error instanceof Error ? error.message : error)
+    }
+  }
+
+  const stamps = inMemoryStore.get(key)
+  if (stamps?.length) {
+    stamps.pop()
+    inMemoryStore.set(key, stamps)
+  }
+}
+
+/**
  * The tier is decided here and nowhere else. It used to be read straight off
  * the request body, which meant any caller could switch on the full paid
  * pipeline. There is no auth yet, so everyone gets `paid` within their quota —
@@ -113,9 +147,43 @@ export function OPTIONS(): Response {
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    // Everything that can be rejected for free is rejected before a quota slot
+    // is claimed. A typo'd URL or a two-word paste used to cost the caller one
+    // of three daily analyses.
+    let body: { articleUrl?: string; articleText?: string; language?: string }
+    try {
+      body = await request.json() as typeof body
+    } catch {
+      return json({ error: 'Request body must be valid JSON.' }, { status: 400 })
+    }
+
+    const { articleUrl, articleText, language = 'en' } = body ?? {}
+
+    if (!articleUrl && !articleText) {
+      return json({ error: 'Either articleUrl or articleText is required' }, { status: 400 })
+    }
+    if (articleUrl !== undefined && typeof articleUrl !== 'string') {
+      return json({ error: 'articleUrl must be a string.' }, { status: 400 })
+    }
+    if (articleText !== undefined && typeof articleText !== 'string') {
+      return json({ error: 'articleText must be a string.' }, { status: 400 })
+    }
+    if (articleText && articleText.length > MAX_ARTICLE_TEXT_CHARS) {
+      return json(
+        { error: `Article text must be under ${MAX_ARTICLE_TEXT_CHARS.toLocaleString('en-US')} characters.` },
+        { status: 400 },
+      )
+    }
+    // Pasted text is checked up front; scraped text can only be checked after
+    // the fetch, which is why that case is handled below the quota claim.
+    if (!articleUrl && articleText && articleText.trim().length < 100) {
+      return json({ error: 'Article text must be at least 100 characters' }, { status: 400 })
+    }
+
+    const bucket = rateLimitBucket(request)
     let remaining: number | null = null
     if (RATE_LIMIT_ENABLED) {
-      const rl = await checkRateLimit(rateLimitBucket(request))
+      const rl = await checkRateLimit(bucket)
       if (!rl.ok) {
         return json(
           { error: 'Daily free limit reached. Try again later.', retryAfter: rl.retryAfter },
@@ -125,17 +193,13 @@ export async function POST(request: Request): Promise<Response> {
       remaining = rl.remaining
     }
 
-    const body = await request.json() as {
-      articleUrl?: string
-      articleText?: string
-      language?: string
+    /** Rejects after the quota was claimed, so it hands the slot back first. */
+    const refundAndFail = async (message: string): Promise<Response> => {
+      if (RATE_LIMIT_ENABLED) await refundRateLimit(bucket)
+      return json({ error: message }, { status: 400 })
     }
-    const { articleUrl, articleText, language = 'en' } = body
-    const tier = resolveTier()
 
-    if (!articleUrl && !articleText) {
-      return json({ error: 'Either articleUrl or articleText is required' }, { status: 400 })
-    }
+    const tier = resolveTier()
 
     let text = articleText || ''
     let metadata: { title?: string; source?: string; author?: string; publishedDate?: string } = {}
@@ -151,14 +215,17 @@ export async function POST(request: Request): Promise<Response> {
           publishedDate: scraped.publishedDate,
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error'
-        return json({ error: `Failed to scrape article: ${message}` }, { status: 400 })
+        return refundAndFail(describeScrapeFailure(error))
       }
     }
 
     const trimmedText = text.trim()
     if (trimmedText.length < 100) {
-      return json({ error: 'Article text must be at least 100 characters' }, { status: 400 })
+      return refundAndFail(
+        articleUrl
+          ? 'Not enough article text could be read from that page. Try pasting the text instead.'
+          : 'Article text must be at least 100 characters',
+      )
     }
 
     const stream = new ReadableStream<Uint8Array>({
