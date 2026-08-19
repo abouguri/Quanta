@@ -1,33 +1,35 @@
 'use client'
 
 import { FactCheckResult, Verdict } from '@/types/analysis'
+import { useTranslation } from '@/lib/i18n'
 
 interface ClaimCardProps {
   result: FactCheckResult
   index: number
 }
 
-const VERDICT_CONFIG: Record<Verdict, { label: string; color: string; bg: string }> = {
-  TRUE:        { label: 'VERIFIED',    color: 'var(--verified)',   bg: 'var(--tint-verified)'   },
-  FALSE:       { label: 'FALSE',       color: 'var(--disputed)',   bg: 'var(--tint-disputed)'   },
-  MISLEADING:  { label: 'MISLEADING',  color: 'var(--misleading)', bg: 'var(--tint-misleading)' },
-  MIXED:       { label: 'MIXED',       color: 'var(--mixed)',      bg: 'var(--tint-mixed)'      },
-  UNVERIFIED:  { label: 'UNVERIFIED',  color: 'var(--ink-3)',     bg: 'var(--paper-2)'       },
+const VERDICT_CONFIG: Record<Verdict, { labelKey: string; color: string; bg: string }> = {
+  TRUE:        { labelKey: 'claim.verdictTrue',       color: 'var(--verified)',   bg: 'var(--tint-verified)'   },
+  FALSE:       { labelKey: 'claim.verdictFalse',      color: 'var(--disputed)',   bg: 'var(--tint-disputed)'   },
+  MISLEADING:  { labelKey: 'claim.verdictMisleading', color: 'var(--misleading)', bg: 'var(--tint-misleading)' },
+  MIXED:       { labelKey: 'claim.verdictMixed',      color: 'var(--mixed)',      bg: 'var(--tint-mixed)'      },
+  UNVERIFIED:  { labelKey: 'claim.verdictUnverified', color: 'var(--ink-3)',      bg: 'var(--paper-2)'         },
 }
 
-const SOURCE_LABEL: Record<FactCheckResult['source'], string> = {
-  factcheck_db:  'Fact-check database',
-  web_search:    'Web search',
-  llm_assessment: 'AI assessment',
+const SOURCE_KEY: Record<FactCheckResult['source'], string> = {
+  factcheck_db:   'claim.sourceFactcheckDb',
+  web_search:     'claim.sourceWebSearch',
+  llm_assessment: 'claim.sourceLlmAssessment',
 }
 
-const CONFIDENCE_LABEL: Record<FactCheckResult['confidence'], string> = {
-  high:   'High confidence',
-  medium: 'Medium confidence',
-  low:    'Low confidence — treat with caution',
+const CONFIDENCE_KEY: Record<FactCheckResult['confidence'], string> = {
+  high:   'claim.confidenceHigh',
+  medium: 'claim.confidenceMedium',
+  low:    'claim.confidenceLow',
 }
 
 export function ClaimCard({ result, index }: ClaimCardProps) {
+  const { t } = useTranslation()
   const cfg = VERDICT_CONFIG[result.verdict]
 
   return (
@@ -66,7 +68,7 @@ export function ClaimCard({ result, index }: ClaimCardProps) {
           writingMode: 'vertical-rl',
           transform: 'rotate(180deg)',
         }}>
-          {cfg.label}
+          {t(cfg.labelKey)}
         </span>
       </div>
 
@@ -139,11 +141,11 @@ export function ClaimCard({ result, index }: ClaimCardProps) {
                   textDecoration: 'underline', textUnderlineOffset: 3,
                 }}
               >
-                {result.factCheckPublisher ?? 'Fact-check source'} ↗
+                {result.factCheckPublisher ?? t('claim.factCheckSource')} ↗
               </a>
             ) : (
               <span className="mono" style={{ fontSize: 11, letterSpacing: '0.12em', color: 'var(--ink-3)' }}>
-                No external source found
+                {t('claim.noExternalSource')}
               </span>
             )}
             {result.factCheckRating && (
@@ -157,10 +159,10 @@ export function ClaimCard({ result, index }: ClaimCardProps) {
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
             <span className="mono" style={{ fontSize: 10, letterSpacing: '0.12em', color: 'var(--ink-3)' }}>
-              {SOURCE_LABEL[result.source]}
+              {t(SOURCE_KEY[result.source])}
             </span>
             <span className="mono" style={{ fontSize: 10, letterSpacing: '0.12em', color: 'var(--ink-3)' }}>
-              {CONFIDENCE_LABEL[result.confidence]}
+              {t(CONFIDENCE_KEY[result.confidence])}
             </span>
           </div>
         </div>

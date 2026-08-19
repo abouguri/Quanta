@@ -9,17 +9,23 @@ interface CopyButtonProps {
   result: AnalysisResult
 }
 
+type CopyState = 'idle' | 'copied' | 'failed'
+
 export function CopyButton({ result }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false)
+  const [state, setState] = useState<CopyState>('idle')
   const { t } = useTranslation()
 
   const handleCopy = async () => {
+    // The clipboard API rejects without permission or outside a secure
+    // context. The button used to swallow that and simply do nothing.
     const success = await copyResultsToClipboard(result)
-    if (success) {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+    setState(success ? 'copied' : 'failed')
+    setTimeout(() => setState('idle'), 2000)
   }
+
+  const accent = state === 'copied' ? 'var(--verified)'
+    : state === 'failed' ? 'var(--disputed)'
+    : null
 
   return (
     <button
@@ -33,13 +39,13 @@ export function CopyButton({ result }: CopyButtonProps) {
         borderRadius: 6,
         cursor: 'pointer',
         border: '0.5px solid var(--fog)',
-        color: copied ? 'var(--verified)' : 'var(--ink-2)',
-        borderColor: copied ? 'var(--verified)' : 'var(--fog)',
+        color: accent ?? 'var(--ink-2)',
+        borderColor: accent ?? 'var(--fog)',
         background: 'transparent',
         whiteSpace: 'nowrap',
       }}
     >
-      {copied ? t('copy.copied') : t('copy.button')}
+      {state === 'copied' ? t('copy.copied') : state === 'failed' ? t('copy.failed') : t('copy.button')}
     </button>
   )
 }

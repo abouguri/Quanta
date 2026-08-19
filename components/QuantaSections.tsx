@@ -5,10 +5,12 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 
 const TONE_HEX: Record<string, string> = {
-  verified: '#2E7D5B',
-  mixed:    '#C77A2E',
-  disputed: '#B33A3A',
-  unclear:  '#6B6B6B',
+  // Token references, not literals: the dark theme is a token swap, and a
+  // hardcoded hex here silently keeps the light value.
+  verified: 'var(--verified)',
+  mixed:    'var(--mixed)',
+  disputed: 'var(--disputed)',
+  unclear:  'var(--unclear)',
 }
 
 export function QuantaNav({ onHome }: { onHome: () => void }) {

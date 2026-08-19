@@ -1,35 +1,14 @@
 {
-  "header": {
-    "title": "Quanta",
-    "subtitle": "حلل مصداقية الأخبار، واكتشف المعلومات المضللة، وقيّم التحيز",
-    "liveStatus": "التحليل متاح الآن",
-    "method": "المنهجية ←",
-    "methodAlert": "Quanta — مراجعة هجينة للمصداقية: إشارات بنيوية ← استخراج الادعاءات ← البحث في تدقيق الحقائق ← تقييم احتياطي بالذكاء الاصطناعي. المصداقية من 0–100. ليس استشارة قانونية."
-  },
   "input": {
     "urlTab": "01 · بالرابط",
     "textTab": "02 · بالنص",
-    "urlPlaceholder": "https://example.com/article",
     "textPlaceholder": "الصق نص المقالة هنا. نحتاج 100 حرف على الأقل…",
     "submitButton": "تحليل ←",
-    "analyzingButton": "جاري التحليل...",
     "charactersLabel": "حرف",
     "enterHint": "اضغط ↵ للتحليل",
     "urlPrefix": "رابط ›",
     "charsNeedMore": "— تحتاج {n} أكثر",
-    "charsReady": "— جاهز",
-    "tryOneOf": "جرب أحد هذه",
-    "briefNo": "النشرة اليومية — العدد 0427",
-    "heroLine1": "الصق خبراً.",
-    "heroLine2": "سنقرأه",
-    "heroItalic": "سطراً بسطر",
-    "heroLine3": "ثم نخبرك",
-    "heroLine4": "بما وجدناه.",
-    "fourPasses": "مراحل التحليل",
-    "pass01": "الإشارات البنيوية",
-    "pass02": "استخراج الادعاءات",
-    "pass03": "البحث في تدقيق الحقائق",
-    "pass04": "النتيجة النهائية"
+    "charsReady": "— جاهز"
   },
   "analyzing": {
     "nowReading": "جاري القراءة",
@@ -37,27 +16,15 @@
     "articleSurface": "محتوى المقالة",
     "doNotRefresh": "لا تحدث الصفحة — تحليل جارٍ",
     "waitingResults": "— في انتظار النتائج…",
-    "pass01": "الإشارات البنيوية",
-    "pass01Detail": "فحص الكاتب والتاريخ والنطاق وبنية المقالة…",
-    "pass02": "استخراج الادعاءات",
-    "pass02Detail": "تحديد الادعاءات المحددة والقابلة للتحقق…",
-    "pass03": "البحث في تدقيق الحقائق",
-    "pass03Detail": "المقارنة مع قواعد بيانات تدقيق الحقائق…",
-    "pass04": "النتيجة النهائية",
-    "pass04Detail": "دمج الأدلة في درجة مصداقية…",
     "queued": "في الانتظار",
-    "done": "✓ تم",
-    "elapsed": "المنقضي",
-    "passes": "المراحل"
+    "done": "✓ تم"
   },
   "report": {
-    "title": "تحليل المصداقية",
     "analyzeAnother": "← تحليل آخر",
     "theVerdict": "الحكم",
     "overallCredibility": "المصداقية العامة",
     "redFlagCount": "{n} علم أحمر",
     "redFlagCountPlural": "{n} أعلام حمراء",
-    "credibilityScore": "{score}/100",
     "sourceOnFile": "المصدر في الملف",
     "noSourceUrl": "لم يُقدَّم رابط — لم تُستشر قاعدة بيانات المصادر.",
     "credibilityOnRecord": "المصداقية المسجلة",
@@ -71,25 +38,8 @@
     "labelByline": "الكاتب",
     "labelPublished": "تاريخ النشر",
     "labelSource": "المصدر",
-    "fourPassesDetail": "مراحل التحليل · تفاصيل",
-    "higherMoreRisky": "أعلى = أخطر",
-    "redFlagsFootnotes": "الأعلام الحمراء · الحواشي",
     "colophon": "المنهجية · مراجعة بنيوية هجينة، واستخراج ادعاءات، وبحث في تدقيق الحقائق، وتقييم احتياطي بالذكاء الاصطناعي. ليس استشارة قانونية. استخدم حكمك الشخصي.",
     "endOfReport": "نهاية التقرير — 30 —",
-    "pass01": "البنية",
-    "pass02": "الادعاءات",
-    "pass03": "تدقيق الحقائق",
-    "scoreExplanation": "تحصل هذه المقالة على {score}/100 في المصداقية. 80-100 موثوقة، 60-79 معتدلة، 40-59 مشكوك فيها، وأقل من 40 لها مخاطر عالية.",
-    "factRisk": "خطر الحقائق",
-    "factRiskHint": "أعلى = أخطر",
-    "bias": "مستوى التحيز",
-    "biasHint": "أعلى = أكثر تحيزاً",
-    "sensationalism": "الإثارة",
-    "sensationalismHint": "أعلى = أكثر استثارة",
-    "redFlags": "الأعلام الحمراء",
-    "redFlagsHint": "تحذيرات المصداقية",
-    "noRedFlags": "لم يتم العثور على أعلام حمراء",
-    "warnings": "التحذيرات",
     "reliable": "موثوق",
     "moderate": "معتدل",
     "questionable": "مشكوك فيه",
@@ -100,9 +50,6 @@
     "questionableTone": "تعامل معه بتشكك.",
     "lowTone": "مخاوف جدية في المصداقية.",
     "highRiskTone": "تعامل معه كمعلومة غير محققة.",
-    "source": "المصدر",
-    "author": "الكاتب",
-    "published": "تاريخ النشر",
     "severityHigh": "مرتفع",
     "severityMedium": "متوسط",
     "severityLow": "منخفض",
@@ -116,7 +63,9 @@
     "claimVerification": "التحقق من الادعاءات",
     "claimVerificationPaid": "التحقق من الادعاءات — مدفوع",
     "claimsSummary": "{n} ادعاءات · {m} مطابقة في قاعدة تدقيق الحقائق",
-    "structuralRedFlags": "مؤشرات بنيوية حمراء"
+    "structuralRedFlags": "مؤشرات بنيوية حمراء",
+    "freeTierUpsell": "قم بالترقية لمعرفة أي الادعاءات في هذا المقال موثّقة أو متنازع عليها أو غير مُتحقَّق منها — مع روابط إلى عمليات تدقيق مستقلة.",
+    "freeTierBadge": "الباقة المجانية"
   },
   "error": {
     "title": "خطأ في التحليل",
@@ -153,9 +102,6 @@
     "strengths": "نقاط القوة",
     "issues": "المشاكل البارزة"
   },
-  "empty": {
-    "message": "الصق رابط أو نص مقالة لتحليل المصداقية"
-  },
   "nav": {
     "howItWorks": "كيف يعمل",
     "methodology": "المنهجية",
@@ -163,5 +109,20 @@
     "forTeams": "للفرق",
     "api": "واجهة برمجية",
     "installExtension": "تثبيت الإضافة"
+  },
+  "claim": {
+    "verdictTrue": "موثّق",
+    "verdictFalse": "خاطئ",
+    "verdictMisleading": "مضلّل",
+    "verdictMixed": "مختلط",
+    "verdictUnverified": "غير مُتحقَّق",
+    "sourceFactcheckDb": "قاعدة تدقيق الحقائق",
+    "sourceWebSearch": "بحث الويب",
+    "sourceLlmAssessment": "تقييم الذكاء الاصطناعي",
+    "confidenceHigh": "ثقة مرتفعة",
+    "confidenceMedium": "ثقة متوسطة",
+    "confidenceLow": "ثقة منخفضة — تعامل معه بحذر",
+    "noExternalSource": "لم يُعثر على مصدر خارجي",
+    "factCheckSource": "مصدر تدقيق الحقائق"
   }
 }

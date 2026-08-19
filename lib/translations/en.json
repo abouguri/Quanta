@@ -1,35 +1,14 @@
 {
-  "header": {
-    "title": "Quanta",
-    "subtitle": "The credibility instrument for the internet. Measure bias, evidence, and source reliability.",
-    "liveStatus": "Live analysis online",
-    "method": "Method →",
-    "methodAlert": "Quanta — Hybrid credibility review: structural signals → claim extraction → fact-check lookup → LLM fallback. Credibility scored 0–100. We show our work. Not legal advice."
-  },
   "input": {
     "urlTab": "01 · By URL",
     "textTab": "02 · By Pasted Text",
-    "urlPlaceholder": "https://example.com/article-headline-goes-here",
     "textPlaceholder": "Paste the full article text here. We need at least 100 characters to do a useful pass…",
     "submitButton": "Analyze →",
-    "analyzingButton": "Analyzing...",
     "charactersLabel": "characters",
     "enterHint": "ENTER ↵ TO ANALYZE",
     "urlPrefix": "URL ›",
     "charsNeedMore": "— NEED {n} MORE",
-    "charsReady": "— READY",
-    "tryOneOf": "Try one of these",
-    "briefNo": "Today's Brief — No. 0427",
-    "heroLine1": "Paste a story.",
-    "heroLine2": "We will read it",
-    "heroItalic": "line by line",
-    "heroLine3": "then tell you",
-    "heroLine4": "what we found.",
-    "fourPasses": "The analysis stages",
-    "pass01": "STRUCTURAL SIGNALS",
-    "pass02": "CLAIM EXTRACTION",
-    "pass03": "FACT-CHECK LOOKUP",
-    "pass04": "FINAL SCORE"
+    "charsReady": "— READY"
   },
   "analyzing": {
     "nowReading": "Now reading",
@@ -37,27 +16,15 @@
     "articleSurface": "Article surface",
     "doNotRefresh": "DO NOT REFRESH — STREAMING ANALYSIS",
     "waitingResults": "— WAITING FOR RESULTS…",
-    "pass01": "STRUCTURAL SIGNALS",
-    "pass01Detail": "checking authorship, date, domain, and article shape …",
-    "pass02": "CLAIM EXTRACTION",
-    "pass02Detail": "finding concrete, verifiable claims …",
-    "pass03": "FACT-CHECK LOOKUP",
-    "pass03Detail": "cross-referencing fact-checker databases …",
-    "pass04": "FINAL SCORE",
-    "pass04Detail": "combining evidence into a credibility score …",
     "queued": "QUEUED",
-    "done": "✓ DONE",
-    "elapsed": "ELAPSED",
-    "passes": "PASSES"
+    "done": "✓ DONE"
   },
   "report": {
-    "title": "Credibility Analysis",
     "analyzeAnother": "← Analyze another",
     "theVerdict": "The verdict",
     "overallCredibility": "OVERALL CREDIBILITY",
     "redFlagCount": "{n} red flag",
     "redFlagCountPlural": "{n} red flags",
-    "credibilityScore": "{score}/100",
     "sourceOnFile": "Source on file",
     "noSourceUrl": "No URL provided — source database not consulted.",
     "credibilityOnRecord": "Credibility on record",
@@ -71,25 +38,8 @@
     "labelByline": "Byline",
     "labelPublished": "Published",
     "labelSource": "Source",
-    "fourPassesDetail": "Analysis stages · detail",
-    "higherMoreRisky": "HIGHER = MORE RISKY",
-    "redFlagsFootnotes": "Red flags · footnotes",
     "colophon": "Method · Hybrid structural review, claim extraction, fact-check lookup, and LLM fallback. Not legal advice. Use your own judgement.",
     "endOfReport": "END OF REPORT — 30 —",
-    "pass01": "STRUCTURE",
-    "pass02": "CLAIMS",
-    "pass03": "FACT-CHECKS",
-    "scoreExplanation": "This article scores {score}/100 on credibility. 80-100 is reliable, 60-79 is moderate, 40-59 is questionable, and below 40 has high misinformation risk.",
-    "factRisk": "Fact Risk",
-    "factRiskHint": "Higher = riskier",
-    "bias": "Bias Level",
-    "biasHint": "Higher = more biased",
-    "sensationalism": "Sensationalism",
-    "sensationalismHint": "Higher = more sensationalist",
-    "redFlags": "Red Flags",
-    "redFlagsHint": "Credibility warnings",
-    "noRedFlags": "No major red flags found",
-    "warnings": "Warnings",
     "reliable": "RELIABLE",
     "moderate": "MODERATE",
     "questionable": "QUESTIONABLE",
@@ -100,9 +50,6 @@
     "questionableTone": "Approach with skepticism.",
     "lowTone": "Substantial credibility concerns.",
     "highRiskTone": "Treat as unverified or worse.",
-    "source": "Source",
-    "author": "Author",
-    "published": "Published",
     "severityHigh": "HIGH",
     "severityMedium": "MEDIUM",
     "severityLow": "LOW",
@@ -116,7 +63,9 @@
     "claimVerification": "Claim verification",
     "claimVerificationPaid": "Claim verification — paid",
     "claimsSummary": "{n} claims · {m} matched in fact-check database",
-    "structuralRedFlags": "Structural red flags"
+    "structuralRedFlags": "Structural red flags",
+    "freeTierUpsell": "Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.",
+    "freeTierBadge": "FREE TIER"
   },
   "error": {
     "title": "Analysis error",
@@ -153,9 +102,6 @@
     "strengths": "Strengths",
     "issues": "Notable Issues"
   },
-  "empty": {
-    "message": "Paste a URL or article text to analyze credibility"
-  },
   "nav": {
     "howItWorks": "How it works",
     "methodology": "Methodology",
@@ -163,5 +109,20 @@
     "forTeams": "For teams",
     "api": "API",
     "installExtension": "Install extension"
+  },
+  "claim": {
+    "verdictTrue": "VERIFIED",
+    "verdictFalse": "FALSE",
+    "verdictMisleading": "MISLEADING",
+    "verdictMixed": "MIXED",
+    "verdictUnverified": "UNVERIFIED",
+    "sourceFactcheckDb": "Fact-check database",
+    "sourceWebSearch": "Web search",
+    "sourceLlmAssessment": "AI assessment",
+    "confidenceHigh": "High confidence",
+    "confidenceMedium": "Medium confidence",
+    "confidenceLow": "Low confidence — treat with caution",
+    "noExternalSource": "No external source found",
+    "factCheckSource": "Fact-check source"
   }
 }

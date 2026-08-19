@@ -379,11 +379,11 @@ function FreeTierPrompt() {
       <div>
         <p className="smcap" style={{ color: 'var(--ink-3)', margin: 0 }}>{t('report.claimVerificationPaid')}</p>
         <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, margin: '8px 0 0', lineHeight: 1.3, color: 'var(--ink)' }}>
-          Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.
+          {t('report.freeTierUpsell')}
         </p>
       </div>
       <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>
-        FREE TIER
+        {t('report.freeTierBadge')}
       </div>
     </div>
   )
