@@ -32,7 +32,6 @@ export function useAnalyzePort() {
   const start = useCallback(async (article: ExtractedArticle, language: string = 'en') => {
     setState({ phase: 'measuring', progress: 5, currentPass: 0, result: null, error: null, retryAfter: null })
     const installId = await getInstallId()
-    await recordAnalysisAttempt()
 
     const port = chrome.runtime.connect({ name: ANALYZE_PORT })
     portRef.current = port
@@ -45,12 +44,18 @@ export function useAnalyzePort() {
           currentPass: typeof msg.pass === 'number' ? msg.pass : s.currentPass,
         }))
       } else if (msg.type === 'RESULT') {
+        void recordAnalysisAttempt()
         void saveAnalysis(msg.data, article.url)
         setState({ phase: 'result', progress: 100, currentPass: 4, result: msg.data, error: null, retryAfter: null })
       } else if (msg.type === 'ERROR') {
         // The raw message can be an internal string ("Groq API error 503");
         // the code is what decides the copy the user actually sees.
         const text = resolveErrorMessage(msg.code, msg.message)
+        // The server hands a slot back for anything it rejected with a 400
+        // (dead link, unreadable page, too-short text), so the local counter
+        // must not charge for those either -- it used to, and drifted into
+        // showing 0 remaining while the server would still have answered.
+        if (msg.status !== 400) void recordAnalysisAttempt()
         if (msg.status === 429 || msg.code === 'rate_limited') {
           setState({ phase: 'limit', progress: 0, currentPass: 0, result: null, error: text, retryAfter: msg.retryAfter ?? null })
         } else {

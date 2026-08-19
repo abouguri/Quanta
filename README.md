@@ -206,6 +206,9 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 - **Prompts that are allowed to say "I don't know."** The synthesis prompt mandates `UNVERIFIED` with low confidence over a guess, and forbids fabricated citations — the failure mode that makes most LLM fact-checkers useless.
 - **Provenance is a first-class field.** `source: 'factcheck_db' | 'web_search' | 'llm_assessment'` travels with every verdict all the way into the UI, so a reader always knows whether a claim was checked or merely assessed.
 - **The extension's service worker inlines its constants.** Chrome MV3 module service workers can fail registration (`Status code: 2`) when imports cross generated chunk boundaries — a real bug hit and fixed here, documented in the file.
+- **A caller-supplied URL is treated as an attack surface.** The endpoint fetches whatever URL it is handed from inside the deployment and returns the body, so `lib/urlGuard.ts` rejects non-http schemes, private and link-local addresses (including IPv4-mapped IPv6), and hostnames whose DNS answers point anywhere internal. Redirects are followed by hand so every hop is re-checked.
+- **The quota is refunded when the work never happened.** Validation runs before a slot is claimed; the scrape runs after, and a dead link or a paywall hands the slot back rather than costing one of three daily analyses.
+- **Errors carry a code, not a stack.** Failures travel as a typed `code` plus a fallback sentence; each client renders its own translated copy, and internal strings never reach the screen.
 
 ---
 
@@ -213,10 +216,10 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 
 - **Rate limiting** — every request: 3 analyses per 24h per extension install, 10 per 24h per IP, backed by Upstash Redis with an in-memory fallback
 - **Dark mode** — a full token palette, a toggle in the nav, and a pre-paint script so the theme never flashes
-- **English + Arabic** — message catalogues with a language selector, a persisted choice, and `dir="rtl"` on the app shell
+- **English + Arabic** — message catalogues with a language selector, a persisted choice, and `lang`/`dir` on the document root
 - **Local history** — version-guarded, so reports written by the previous scoring engine are discarded rather than mis-rendered
 - **SEO** — OG image, `sitemap.ts`, `robots.ts`, full Open Graph and Twitter metadata
-- **Tests** — 13 Vitest cases over the analysis generator (free/paid frames, verdict scoring, missing-key failure) and the Groq client (retry on 429 and network error, no retry on 4xx, fence stripping, JSON recovery)
+- **Tests** — 112 Vitest cases: the analysis generator (free/paid frames, verdict scoring, missing-key failure), the Groq client (retry on 429 and network error, no retry on 4xx, fence stripping, JSON recovery), structural scoring, verdict normalisation, the SSRF guard, the scraper, and the route end to end (validation, streaming, rate-limit buckets, quota refunds)
 
 ---
 
@@ -227,6 +230,7 @@ npm install
 cp .env.local.example .env.local     # add keys — all of them optional except Groq
 npm run dev                          # http://localhost:3000
 npm test                             # vitest
+npm run check                        # typecheck + lint + test
 ```
 
 | Variable | Needed for | Without it |
