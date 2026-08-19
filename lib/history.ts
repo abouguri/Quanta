@@ -12,19 +12,20 @@ export interface AnalysisHistory {
 const HISTORY_KEY = 'quanta_analysis_history'
 const MAX_HISTORY = 50
 
+/** Returns null when there is no localStorage to write to (server render). */
 export function saveAnalysis(
   result: AnalysisResult,
   url?: string
-): AnalysisHistory {
-  if (typeof window === 'undefined') return null as any
+): AnalysisHistory | null {
+  if (typeof window === 'undefined') return null
 
   const history = getHistory()
   const entry: AnalysisHistory = {
-    id: Date.now().toString(),
+    id: newEntryId(),
     url: url,
     title: result.metadata.title,
     score: result.overallScore,
-    date: Date.now(),
+    date: result.analyzedAt ?? Date.now(),
     result,
   }
 
@@ -34,8 +35,19 @@ export function saveAnalysis(
     history.pop()
   }
 
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+  } catch {
+    // Quota exceeded or private mode — the report on screen is unaffected.
+    return null
+  }
   return entry
+}
+
+/** Date.now() alone collides for two analyses saved in the same millisecond. */
+function newEntryId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+  return `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
 }
 
 export function getHistory(): AnalysisHistory[] {

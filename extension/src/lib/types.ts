@@ -45,6 +45,11 @@ export interface AnalysisResult {
   version: 2
   tier: 'free' | 'paid'
   overallScore: number
+  /**
+   * When the analysis ran, epoch ms. Optional because reports saved before
+   * this field existed are still valid v2 results.
+   */
+  analyzedAt?: number
   structural: StructuralAnalysis
   claims?: FactCheckResult[]
   metadata: {

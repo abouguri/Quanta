@@ -4,6 +4,11 @@ const MODEL = 'llama-3.3-70b-versatile'
 const MAX_ATTEMPTS = 3
 const BASE_BACKOFF_MS = 400
 
+// A stalled connection is indistinguishable from a slow one from here, and the
+// analysis streams claim-by-claim — a single hung call would otherwise hold the
+// whole report open until the platform's function timeout kills it.
+const REQUEST_TIMEOUT_MS = 30_000
+
 /** Thrown when Groq is reachable but the response can't be used. */
 export class GroqError extends Error {
   constructor(message: string, readonly retryable: boolean) {
@@ -58,6 +63,7 @@ export async function callGroq(
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body,
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       })
     } catch (err) {
       // Network-level failure — always worth another attempt.
@@ -74,7 +80,16 @@ export async function callGroq(
       continue
     }
 
-    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+    let data: { choices?: Array<{ message?: { content?: string } }> }
+    try {
+      data = await response.json() as typeof data
+    } catch {
+      // A truncated or non-JSON 200 used to throw straight out of the retry
+      // loop, skipping the attempts we had left.
+      lastError = new GroqError('Groq API returned an unreadable body', true)
+      continue
+    }
+
     const text = data.choices?.[0]?.message?.content
     if (!text) {
       lastError = new GroqError('Groq API returned no output', true)

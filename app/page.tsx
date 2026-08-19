@@ -54,39 +54,57 @@ function HomeInner() {
       const reader = response.body?.getReader()
       if (!reader) throw new Error('No response stream')
 
+      // One decoder for the whole stream, in streaming mode: a fresh decoder per
+      // chunk mangles any multi-byte character that straddles a chunk boundary,
+      // which is most of an Arabic article.
+      const decoder = new TextDecoder('utf-8')
       let buffer = ''
       let finalResult: AnalysisResult | null = null
+      let streamError: Error | null = null
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        buffer += new TextDecoder().decode(value)
-        const lines = buffer.split('\n')
-        buffer = lines[lines.length - 1]
-        for (let i = 0; i < lines.length - 1; i++) {
-          const line = lines[i]
-          if (!line.startsWith('data: ')) continue
+        buffer += decoder.decode(value, { stream: true })
+
+        // SSE frames are separated by a blank line; anything after the last
+        // separator is a partial frame to carry into the next read.
+        let sep: number
+        while ((sep = buffer.indexOf('\n\n')) !== -1) {
+          const frame = buffer.slice(0, sep)
+          buffer = buffer.slice(sep + 2)
+          if (!frame.startsWith('data: ')) continue
+
+          let data: Partial<AnalysisResult> & { step?: string; label?: string; progress?: number; error?: string }
           try {
-            const data = JSON.parse(line.slice(6)) as Partial<AnalysisResult> & { step?: string; label?: string; progress?: number; error?: string }
-            if (data.error) throw new Error(data.error)
-            if (data.step && data.label) {
-              setAnalyzeSteps(prev => {
-                const existing = prev.find(s => s.step === data.step)
-                if (existing) return prev
-                const updated = prev.map(s => ({ ...s, done: true }))
-                return [...updated, { step: data.step!, label: data.label!, done: false }]
-              })
-              setActiveStepLabel(data.label)
-            } else if ((data as AnalysisResult).version === 2) {
-              finalResult = data as AnalysisResult
-              setAnalyzeSteps(prev => prev.map(s => ({ ...s, done: true })))
-              saveAnalysis(finalResult, url || undefined)
-              setHistoryRefreshKey(k => k + 1)
-            }
-          } catch (err) {
-            if (err instanceof Error && err.message !== 'Unexpected end of JSON input') throw err
+            data = JSON.parse(frame.slice(6))
+          } catch {
+            continue // not a frame we can use; the stream carries on
+          }
+
+          if (data.error) {
+            streamError = new Error(data.error)
+            break
+          }
+          if (data.step && data.label) {
+            const { step, label } = data
+            setAnalyzeSteps(prev =>
+              prev.some(s => s.step === step)
+                ? prev
+                : [...prev.map(s => ({ ...s, done: true })), { step, label, done: false }]
+            )
+            setActiveStepLabel(label)
+          } else if ((data as AnalysisResult).version === 2) {
+            finalResult = data as AnalysisResult
+            setAnalyzeSteps(prev => prev.map(s => ({ ...s, done: true })))
+            saveAnalysis(finalResult, url || undefined)
+            setHistoryRefreshKey(k => k + 1)
           }
         }
+        if (streamError) break
       }
+
+      if (streamError) throw streamError
       if (finalResult) {
         setResult(finalResult)
         setStage('report')

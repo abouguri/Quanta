@@ -46,6 +46,7 @@ export async function* analyzeArticle(
       data: {
         version: 2,
         tier: 'free',
+        analyzedAt: Date.now(),
         overallScore: structural.score,
         structural,
         metadata,
@@ -82,6 +83,7 @@ export async function* analyzeArticle(
     data: {
       version: 2,
       tier: 'paid',
+      analyzedAt: Date.now(),
       overallScore,
       structural,
       claims: results,

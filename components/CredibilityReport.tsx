@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { AnalysisResult, StructuralFlag, FactCheckResult } from '@/types/analysis'
 import { getSourceCredibility } from '@/lib/sourceDatabase'
 import { useTranslation } from '@/lib/i18n'
@@ -18,6 +19,21 @@ function scoreColor(score: number): string {
   if (score >= 40) return 'var(--mixed)'
   if (score >= 20) return 'var(--disputed)'
   return 'var(--disputed)'
+}
+
+/**
+ * A stable, human-quotable ID for a report. Derived from the analysis itself so
+ * the same report always carries the same number — including one reopened from
+ * history.
+ */
+function reportIdFor(result: AnalysisResult): string {
+  const seed = `${result.analyzedAt ?? 0}|${result.metadata.title ?? ''}|${result.metadata.source ?? ''}|${result.overallScore}`
+  let hash = 0x811c9dc5
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193) >>> 0
+  }
+  return hash.toString(16).toUpperCase().padStart(8, '0').slice(0, 6)
 }
 
 function biasIndex(bias: string): number {
@@ -41,8 +57,14 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
       : t('report.highRiskTone'),
   }
 
-  const reportId = Math.random().toString(16).slice(2, 8).toUpperCase()
-  const reportDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
+  // Both were computed fresh on every render: the ID reshuffled whenever
+  // anything re-rendered the page (a theme toggle was enough), and the date
+  // read "today" even on a report pulled out of history weeks later.
+  const analyzedAt = result.analyzedAt ?? null
+  const reportId = useMemo(() => reportIdFor(result), [result])
+  const reportDate = (analyzedAt ? new Date(analyzedAt) : new Date())
+    .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    .toUpperCase()
 
   const sourceLookupUrl = currentUrl || (result.metadata.source ? `https://${result.metadata.source}` : '')
   const source = sourceLookupUrl ? getSourceCredibility(sourceLookupUrl) : null

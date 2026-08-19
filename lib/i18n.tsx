@@ -34,6 +34,14 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     } catch { /* private mode */ }
   }, [])
 
+  // <html lang>/<dir> are what screen readers, search engines and the browser's
+  // own text rendering read. They were pinned to English while the UI switched
+  // to Arabic underneath.
+  useEffect(() => {
+    document.documentElement.lang = language
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
+  }, [language])
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     try {
