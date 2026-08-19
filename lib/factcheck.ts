@@ -16,12 +16,50 @@ interface GoogleFCResponse {
   claims?: GoogleFCClaim[]
 }
 
-function normalizeRating(rating: string): Verdict {
+/**
+ * Fact-check lookups are best-effort enrichment, never the reason an analysis
+ * fails. Every failure mode here — unreachable host, slow host, non-JSON body —
+ * degrades to `null` so the caller falls through to the next source.
+ */
+const LOOKUP_TIMEOUT_MS = 8_000
+
+async function fetchJson<T>(url: string, init: RequestInit = {}): Promise<T | null> {
+  try {
+    const response = await fetch(url, { ...init, signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS) })
+    if (!response.ok) return null
+    return await response.json() as T
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Maps a fact-checker's free-text rating onto our verdict scale.
+ *
+ * Order matters: the qualified ratings are tested first because "Mostly True"
+ * and "Half True" both contain "true", and used to come back as a clean TRUE —
+ * scoring a hedged rating as if the fact-checker had fully endorsed it.
+ */
+export function normalizeRating(rating: string): Verdict {
   const r = rating.toLowerCase()
-  if (/\b(true|accurate|correct|verified)\b/.test(r) && !/false|mislead|inaccur/.test(r)) return 'TRUE'
-  if (/\b(false|incorrect|wrong|fabricated|no evidence)\b/.test(r)) return 'FALSE'
-  if (/\b(mislead|distort|manipulat|out of context|twisted)\b/.test(r)) return 'MISLEADING'
-  if (/\b(mostly true|half|partially|mixed|partly|some)\b/.test(r)) return 'MIXED'
+
+  // Explicit negations first: "not true" / "not accurate" also contain the
+  // positive word they negate.
+  if (/\b(not (true|accurate|correct)|untrue|inaccurate)\b/.test(r)) return 'FALSE'
+
+  // These are word stems, so they take a leading boundary only: a trailing \b
+  // after "mislead" cannot match "misleading", which left this branch dead and
+  // every misleading rating scored as a bare UNVERIFIED.
+  if (/\b(mislead|distort|manipulat|cherry.?pick|missing context|out of context|twisted)/.test(r)) return 'MISLEADING'
+
+  if (/\b(mostly|half|partially|partly|mixture|mixed|barely|some truth)\b/.test(r)) return /\bmostly false\b/.test(r)
+    ? 'FALSE'
+    : 'MIXED'
+
+  if (/\b(false|incorrect|wrong|fabricated|no evidence|debunked|pants on fire|hoax)\b/.test(r)) return 'FALSE'
+
+  if (/\b(true|accurate|correct|verified|confirmed)\b/.test(r)) return 'TRUE'
+
   return 'UNVERIFIED'
 }
 
@@ -32,16 +70,9 @@ export async function searchFactCheckDB(claim: Claim): Promise<FactCheckResult |
   const query = encodeURIComponent(claim.text.substring(0, 200))
   const url = `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${query}&key=${apiKey}&languageCode=en&pageSize=3`
 
-  let response: Response
-  try {
-    response = await fetch(url)
-  } catch {
-    return null
-  }
+  const data = await fetchJson<GoogleFCResponse>(url)
+  if (!data) return null
 
-  if (!response.ok) return null
-
-  const data = await response.json() as GoogleFCResponse
   const hits = data.claims ?? []
   if (hits.length === 0) return null
 
@@ -72,22 +103,15 @@ export async function searchBrave(claim: Claim): Promise<FactCheckResult | null>
   const query = encodeURIComponent(`${terms} fact check`)
   const url = `https://api.search.brave.com/res/v1/web/search?q=${query}&count=3`
 
-  let response: Response
-  try {
-    response = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        'Accept-Encoding': 'gzip',
-        'X-Subscription-Token': apiKey,
-      },
-    })
-  } catch {
-    return null
-  }
+  const data = await fetchJson<{ web?: { results?: Array<{ url: string; title: string; description: string }> } }>(url, {
+    headers: {
+      Accept: 'application/json',
+      'Accept-Encoding': 'gzip',
+      'X-Subscription-Token': apiKey,
+    },
+  })
+  if (!data) return null
 
-  if (!response.ok) return null
-
-  const data = await response.json() as { web?: { results?: Array<{ url: string; title: string; description: string }> } }
   const results = data.web?.results ?? []
   const factCheckSites = ['snopes.com', 'politifact.com', 'factcheck.org', 'reuters.com/fact-check', 'apnews.com/APFactCheck', 'bbc.com/news/reality_check', 'fullfact.org', 'afp.com/en/news/1479']
 
