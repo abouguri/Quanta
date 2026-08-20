@@ -42,32 +42,43 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       boxShadow: '0 0 0 2px var(--bone), 0 4px 14px rgba(0,0,0,0.16)',
       width: 'fit-content',
     }}>
-      <nav style={{ display: 'flex', gap: 0, padding: '4px 6px', alignItems: 'center' }}>
-        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 0, cursor: 'pointer', padding: '4px 7px 4px 4px' }}>
-          <svg width="13" height="13" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <nav style={{ display: 'flex', gap: 2, padding: '6px 8px', alignItems: 'center' }}>
+        <button onClick={onHome} title="Quanta" aria-label="Quanta — home" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 8px 5px 6px' }}>
+          <svg width="16" height="16" viewBox="0 0 64 64" fill="none" aria-hidden="true">
             <circle cx="32" cy="30" r="13" stroke="#F1EEE7" strokeWidth="4" fill="none" />
             <circle cx="44" cy="42" r="4" fill="#E6A23C" />
           </svg>
-          <span className="mono" style={{ fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
         </button>
         {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 6px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
+          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
             {label}
           </a>
         ))}
-        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 6px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
-          {t('nav.history')}
+        <button
+          onClick={onOpenHistory}
+          title={t('nav.history')}
+          aria-label={t('nav.history')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <circle cx="10" cy="10" r="7.5" />
+            <path d="M10 6v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 3 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
           <LanguageSelector />
           <ThemeToggle />
         </div>
-        <a href="#access" className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 7px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
-          {t('nav.installExtension')}
+        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
+          {t('nav.installExtensionShort')}
         </a>
       </nav>
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
+      {/* position:relative/absolute, not overflow:hidden alone -- an in-flow
+          marquee this wide would otherwise inflate the pill's own
+          fit-content width and leave the compact nav row sitting
+          left-aligned inside a bar sized for the ticker instead of it. */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', position: 'relative', height: 21, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
           {wire.map((w, i) => (
             <span key={i} className="mono" style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#cbcbcb', whiteSpace: 'nowrap' }}>
               {w}

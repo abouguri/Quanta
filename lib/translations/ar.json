@@ -125,7 +125,7 @@
     "inspector": "المفتش",
     "method": "المنهجية",
     "history": "السجل",
-    "installExtension": "تثبيت الإضافة"
+    "installExtensionShort": "الإضافة"
   },
   "claim": {
     "verdictTrue": "موثّق",

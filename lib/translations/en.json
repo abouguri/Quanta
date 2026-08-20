@@ -125,7 +125,7 @@
     "inspector": "Inspector",
     "method": "Method",
     "history": "History",
-    "installExtension": "Install extension"
+    "installExtensionShort": "Extension"
   },
   "claim": {
     "verdictTrue": "VERIFIED",
