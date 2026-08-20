@@ -103,7 +103,7 @@ export function Popup() {
       </main>
 
       <footer className="shell-footer">
-        <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic' }}>Truth, measured.</span>
+        <span>truth, measured</span>
         <a href={API_BASE_URL} target="_blank" rel="noreferrer">quanta ↗</a>
       </footer>
     </div>

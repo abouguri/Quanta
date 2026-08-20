@@ -39,8 +39,8 @@ export function MeasuringCard({ currentPass, progress, onCancel }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
           <div className="measure-bars" aria-hidden><span /><span /><span /><span /></div>
-          <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--ink)', lineHeight: 1.35 }}>
-            Reading sentence by sentence…
+          <span style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--ink)', lineHeight: 1.35 }}>
+            Reading, then checking…
           </span>
         </div>
       </div>

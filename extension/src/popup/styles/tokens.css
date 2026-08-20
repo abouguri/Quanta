@@ -1,22 +1,31 @@
 :root {
-  --ink: #0F2233;
-  --ink-2: rgba(15, 34, 51, 0.72);
-  --ink-3: rgba(15, 34, 51, 0.50);
-  --ink-4: #5B6770;
+  /* Instrument v2 — mirrors app/globals.css's light palette. The popup has
+     no theme toggle, so only the light values are needed here. */
+  --ink: #232323;
+  --ink-2: rgba(35, 35, 35, 0.72);
+  --ink-3: rgba(35, 35, 35, 0.50);
+  --ink-4: #5B5A56;
   --graphite: #333E48;
 
-  --bone: #F4F1E9;
-  --paper: #FBF9F3;
+  --bone: #F1EEE7;
+  --paper: #FFFFFF;
   --mist: #EFEBE0;
-  --fog: #DDD7C6;
+  --fog: #DEDEDE;
 
   --ember: #E6A23C;
   --signal: #1A4D7A;
+  --deep: #000000;
+  --grey: #5B5A56;
+  --ghost: #DEDEDE;
+  --accent: var(--ember);
 
   --verified: #2E7D5B;
   --mixed: #C77A2E;
   --disputed: #B33A3A;
-  --unclear: #6B6B6B;
+  --unclear: #8A8985;
+  --contested: var(--mixed);
+  --unsupported: var(--disputed);
+  --unknown: #8A8985;
 
   --sans: "Urbanist", "Inter", system-ui, -apple-system, sans-serif;
   --serif: "Source Serif 4", Georgia, serif;

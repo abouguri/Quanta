@@ -60,11 +60,10 @@ export function MarketingHero({ onAnalyzeUrl }: HeroProps) {
         </h1>
 
         <p style={{
-          fontFamily: FONTS.serif,
-          fontStyle: 'italic',
-          fontSize: '22px',
-          lineHeight: 1.45,
-          color: COLORS.graphite,
+          fontFamily: FONTS.sans,
+          fontSize: '20px',
+          lineHeight: 1.5,
+          color: COLORS.slate,
           margin: `${SPACING[8]} 0 0`,
           maxWidth: '50ch',
         }}>
@@ -240,11 +239,11 @@ function ResultPanel({ data, onReset }: { data: typeof SAMPLE_ANALYSES[keyof typ
             </span>
           </div>
           <h2 style={{
-            fontFamily: FONTS.serif,
-            fontWeight: 400,
-            fontSize: '30px',
-            lineHeight: 1.18,
-            letterSpacing: '-0.01em',
+            fontFamily: FONTS.sans,
+            fontWeight: 500,
+            fontSize: '28px',
+            lineHeight: 1.2,
+            letterSpacing: '-0.015em',
             color: COLORS['ink-navy'],
             margin: '0 0 10px',
           }}>
@@ -355,9 +354,8 @@ function ResultPanel({ data, onReset }: { data: typeof SAMPLE_ANALYSES[keyof typ
         </div>
         <p style={{
           margin: 0,
-          fontFamily: FONTS.serif,
-          fontStyle: 'italic',
-          fontSize: '17px',
+          fontFamily: FONTS.sans,
+          fontSize: '16px',
           lineHeight: 1.5,
           color: COLORS['ink-navy'],
         }}>

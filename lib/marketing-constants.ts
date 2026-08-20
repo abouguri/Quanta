@@ -17,18 +17,19 @@ export const TONE_LABEL = {
 } as const
 
 export const COLORS = {
-  'ink-navy': '#0F2233',
-  bone: '#F4F1E9',
+  'ink-navy': '#232323',
+  bone: '#F1EEE7',
   ember: '#E6A23C',
-  paper: '#FBF9F3',
+  paper: '#FFFFFF',
   mist: '#EFEBE0',
-  fog: '#DDD7C6',
-  slate: '#5B6770',
+  fog: '#DEDEDE',
+  slate: '#5B5A56',
   graphite: '#333E48',
+  deep: '#000000',
   'verified-green': '#2E7D5B',
   'mixed-amber': '#C77A2E',
   'disputed-red': '#B33A3A',
-  'unclear-gray': '#6B6B6B',
+  'unclear-gray': '#8A8985',
 } as const
 
 export const FONTS = {

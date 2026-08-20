@@ -2,8 +2,8 @@ import { formatResetTime } from '../hooks/useRateLimit'
 
 export function RateLimitPill({ used, remaining }: { used: number; remaining: number }) {
   return (
-    <span className="q-mono" style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.16em' }}>
-      {remaining} of {used + remaining} free analyses left
+    <span className="q-mono" style={{ fontSize: 9, color: '#7d7b74', textTransform: 'uppercase', letterSpacing: '0.16em' }}>
+      {remaining} of {used + remaining} today
     </span>
   )
 }

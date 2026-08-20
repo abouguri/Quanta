@@ -25,7 +25,7 @@ export function IdleCard({ article, status, errorMessage, canAnalyze, onAnalyze 
       <>
         <div className="card">
           <div className="q-eyebrow">Not an article</div>
-          <p style={{ margin: '8px 0 0', fontFamily: 'var(--serif)', fontSize: 15, lineHeight: 1.45, color: 'var(--ink)' }}>
+          <p style={{ margin: '8px 0 0', fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.45, color: 'var(--ink)' }}>
             We couldn’t find readable article text on this page.
           </p>
           <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--ink-4)' }}>

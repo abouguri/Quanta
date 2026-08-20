@@ -240,8 +240,8 @@ export function ComparePreview() {
                   {r.host}
                 </span>
                 <span style={{
-                  fontFamily: FONTS.serif,
-                  fontSize: '16px',
+                  fontFamily: FONTS.sans,
+                  fontSize: '15px',
                   lineHeight: 1.3,
                   color: COLORS['ink-navy'],
                 }}>
@@ -296,11 +296,10 @@ export function ComparePreview() {
           </div>
           <p style={{
             margin: `${SPACING[2]} 0 0`,
-            fontFamily: FONTS.serif,
-            fontStyle: 'italic',
-            fontSize: '17px',
+            fontFamily: FONTS.sans,
+            fontSize: '16px',
             lineHeight: 1.5,
-            color: COLORS['ink-navy'],
+            color: COLORS.slate,
           }}>
             The same story, across eight outlets. Source diversity ranges from 2 to 14 unique citations. Framing variance is 3.4× the topic average.
           </p>
