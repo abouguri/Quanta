@@ -14,24 +14,12 @@ interface ArticleInputProps {
   onSubmit: (url: string | null, text: string) => void
 }
 
-function scoreBand(score: number): { verdict: string; tone: string } {
-  if (score >= 80) return { verdict: 'verified', tone: 'var(--verified)' }
-  if (score >= 60) return { verdict: 'mixed', tone: 'var(--contested)' }
-  if (score >= 40) return { verdict: 'mixed', tone: 'var(--contested)' }
-  return { verdict: 'false', tone: 'var(--unsupported)' }
-}
-
 export function ArticleInput({ onSubmit }: ArticleInputProps) {
   const { t } = useTranslation()
   const [tab, setTab] = useState<'url' | 'text'>('url')
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
-
-  // Real local history, not a demo feed — the "recent passes" panel only
-  // shows what this browser has actually measured.
-  const [recent, setRecent] = useState<ReturnType<typeof getHistory>>([])
-  useEffect(() => { setRecent(getHistory().slice(0, 12)) }, [])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -48,23 +36,12 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
     if (e.key === 'Enter' && !e.shiftKey) submit()
   }
 
-  const scores = recent.map(r => r.score)
-  const median = scores.length ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : null
-  const spread = scores.length ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
-
   return (
     <header
       className="animate-fadeUp"
       style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 0, borderBottom: '1px solid var(--ghost)' }}
     >
       <div style={{ padding: '24px 0 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 22 }}>
-          <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
-            <i style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--accent)', animation: 'statusPing 1.8s cubic-bezier(0,0,.2,1) infinite' }} />
-            <i style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--accent)' }} />
-          </span>
-          <span>{t('input.instrumentBadge')}</span>
-        </div>
         <h1 style={{
           fontFamily: 'var(--sans)',
           fontWeight: 400,
@@ -74,7 +51,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
           margin: 0,
           color: 'var(--ink)',
         }}>
-          {t('input.heroLine1')}<br />{t('input.heroLine2')}<br />{t('input.heroLine3')}<span style={{ color: 'var(--accent)' }}>.</span>
+          {t('input.heroLine1')}<br />{t('input.heroLine2')}
         </h1>
         <p style={{
           fontSize: 'clamp(16px, 1.3vw, 20px)',
@@ -178,45 +155,164 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
         </div>
       </div>
 
-      <div style={{ background: 'var(--deep)', position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420 }}>
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', height: '40%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(230,162,60,0.10) 50%, transparent 100%)',
-          animation: 'scanSweep 5s ease-in-out infinite',
-        }} />
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+      <SignalField />
+    </header>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Signal field — a mouse-tracked ambient panel. The word layers and the
+// central "reading" are decorative texture (same convention as the wire
+// ticker and the sample URLs above), not a claim about any real article; the
+// footer line is the one spot that reads as a specific metric, so it grounds
+// itself in this browser's actual local history instead of a made-up number.
+// ---------------------------------------------------------------------------
+
+const FIELD_WORDS_FAR = [
+  'claim 0412', 'no attribution', 'circular citation', 'byline missing', 'press release',
+  'correction logged', 'primary source', 'paywalled', 'caps ratio 3.1', 'excl density 0.4',
+  'archive hit', 'unnamed officials', 'study without link', 'image reused', 'headline mismatch',
+  'wire copy', 'op-ed', 'analyst note', 'regulatory filing', 'peer reviewed',
+  'db miss', 'db hit', 'stance shift', 'hedged claim', 'quote fragment',
+  'recency unknown', 'tld flagged', 'frame 06', 'frame 07', 'sse open',
+  'retry 429', 'fallback brave', 'model labelled', 'unverified', 'low confidence',
+]
+
+const FIELD_WORDS_NEAR: Array<[string, 'verified' | 'contested' | 'unsupported']> = [
+  ['theguardian.com 91', 'verified'], ['reuters.com 94', 'verified'], ['theatlantic.com 64', 'contested'],
+  ['apnews.com 78', 'verified'], ['breitbart.com 31', 'unsupported'], ['wsj.com 81', 'verified'],
+  ['nytimes.com 74', 'verified'], ['infowars.com 22', 'unsupported'], ['cnbc.com 84', 'verified'],
+  ['foxbusiness.com 52', 'contested'], ['buzzfeed.com 48', 'contested'], ['ft.com 88', 'verified'],
+]
+
+const FIELD_WORD_TONE: Record<(typeof FIELD_WORDS_NEAR)[number][1], string> = {
+  verified: 'rgba(79,174,131,0.55)',
+  contested: 'rgba(216,150,78,0.55)',
+  unsupported: 'rgba(224,107,107,0.55)',
+}
+
+/** Lerps toward the cursor position (as viewport fractions), idle at center until the pointer moves. */
+function useCursorField() {
+  const [pos, setPos] = useState({ x: 0.5, y: 0.5 })
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const target = { x: 0.5, y: 0.5 }
+    const cur = { x: 0.5, y: 0.5 }
+
+    const onMove = (e: MouseEvent) => {
+      target.x = e.clientX / window.innerWidth
+      target.y = e.clientY / window.innerHeight
+    }
+    window.addEventListener('mousemove', onMove)
+
+    let raf = 0
+    const tick = () => {
+      const k = reduceMotion ? 1 : 0.075
+      cur.x += (target.x - cur.x) * k
+      cur.y += (target.y - cur.y) * k
+      setPos(prev =>
+        Math.abs(cur.x - prev.x) > 0.0015 || Math.abs(cur.y - prev.y) > 0.0015
+          ? { x: cur.x, y: cur.y }
+          : prev
+      )
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return pos
+}
+
+function SignalField() {
+  const { t } = useTranslation()
+  const { x, y } = useCursorField()
+
+  const glowX = `${(x * 100).toFixed(2)}%`
+  const glowY = `${(y * 100).toFixed(2)}%`
+  const fieldFar = `translate3d(${((x - 0.5) * -26).toFixed(1)}px,${((y - 0.5) * -18).toFixed(1)}px,0)`
+  const fieldNear = `translate3d(${((x - 0.5) * 34).toFixed(1)}px,${((y - 0.5) * 24).toFixed(1)}px,0)`
+  const crosshairX = `translateX(${((x - 0.5) * 260).toFixed(1)}px)`
+  const crosshairY = `translateY(${((y - 0.5) * 200).toFixed(1)}px)`
+  const fieldReading = String(Math.round(31 + x * 63)).padStart(2, '0')
+  const band = x > 0.72 ? 'verified' : x > 0.42 ? 'contested' : 'unsupported'
+  const fieldCaption = `sample at ${(x * 100).toFixed(0)}/${(y * 100).toFixed(0)} · ${band} band`
+
+  const [recent, setRecent] = useState<ReturnType<typeof getHistory>>([])
+  useEffect(() => { setRecent(getHistory()) }, [])
+  const scores = recent.map(r => r.score)
+  const median = scores.length ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : null
+  const spread = scores.length ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
+
+  return (
+    <div style={{ background: 'var(--deep)', position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420, cursor: 'crosshair' }}>
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', height: '40%',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(230,162,60,0.10) 50%, transparent 100%)',
+        animation: 'scanSweep 5s ease-in-out infinite',
+      }} />
+
+      <div style={{
+        position: 'absolute', width: 520, height: 520, left: glowX, top: glowY, margin: '-260px 0 0 -260px',
+        pointerEvents: 'none', background: 'radial-gradient(circle, rgba(230,162,60,0.16) 0%, rgba(230,162,60,0.05) 38%, transparent 68%)',
+      }} />
+
+      <div style={{
+        position: 'absolute', inset: '-12% -8%', pointerEvents: 'none', transform: fieldFar, willChange: 'transform',
+        display: 'flex', flexWrap: 'wrap', gap: '18px 26px', alignContent: 'center', justifyContent: 'center',
+      }}>
+        {FIELD_WORDS_FAR.map(w => (
+          <span key={w} style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(241,238,231,0.09)', whiteSpace: 'nowrap' }}>
+            {w}
+          </span>
+        ))}
+      </div>
+
+      <div style={{
+        position: 'absolute', inset: '52% -4% -6% -4%', pointerEvents: 'none', transform: fieldNear, willChange: 'transform',
+        display: 'flex', flexWrap: 'wrap', gap: '16px 22px', alignContent: 'flex-end', justifyContent: 'center',
+      }}>
+        {FIELD_WORDS_NEAR.map(([w, tone]) => (
+          <span key={w} style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: FIELD_WORD_TONE[tone], whiteSpace: 'nowrap' }}>
+            {w}
+          </span>
+        ))}
+      </div>
+
+      <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(241,238,231,0.28), transparent)', transform: crosshairY, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'linear-gradient(180deg, transparent, rgba(241,238,231,0.28), transparent)', transform: crosshairX, pointerEvents: 'none' }} />
+
+      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 420 }}>
+        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74' }}>
           {t('input.signalPanelTitle')}
         </div>
 
-        {recent.length === 0 ? (
-          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.06em', color: '#7d7b74', lineHeight: 1.8 }}>
-            {t('input.signalPanelEmpty')}
+        <div style={{
+          transform: fieldNear, willChange: 'transform', margin: '28px 0', padding: '18px 22px 20px',
+          background: 'linear-gradient(90deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.7) 62%, transparent 100%)',
+          borderLeft: '1px solid var(--accent)', width: 'fit-content',
+        }}>
+          <div className="mono" style={{ fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
+            {fieldReading}
           </div>
-        ) : (
-          <div style={{ display: 'grid', gap: 7 }}>
-            {recent.map((r, i) => {
-              const band = scoreBand(r.score)
-              let host = r.result.metadata.source || ''
-              if (!host && r.url) { try { host = new URL(r.url).hostname } catch { host = r.url } }
-              return (
-                <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '52px minmax(110px,1fr) 84px 44px', gap: 12, alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', color: i < 4 ? '#e6e4de' : i < 8 ? '#a3a19b' : '#7d7b74' }}>
-                  <span>{String(r.date).slice(-4)}</span>
-                  <span style={{ textTransform: 'uppercase', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{host || '—'}</span>
-                  <span style={{ color: band.tone, textTransform: 'uppercase' }}>{band.verdict}</span>
-                  <span style={{ textAlign: 'right', color: band.tone }}>{r.score}</span>
-                </div>
-              )
-            })}
+          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#a3a19b', marginTop: 12 }}>
+            {fieldCaption}
           </div>
-        )}
+        </div>
 
-        <div style={{ marginTop: 26, paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
+        <div style={{ paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
           {median !== null
             ? t('input.signalPanelStats', { median, spread: spread ?? '—' })
             : t('input.signalPanelStatsEmpty')}
+          {' · '}{t('input.signalPanelHint')}
         </div>
       </div>
-    </header>
+    </div>
   )
 }
 

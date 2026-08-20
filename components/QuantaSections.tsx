@@ -98,7 +98,7 @@ export function CostSection() {
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
         <div style={{ background: 'var(--deep)', borderRadius: 8, padding: '26px 28px 22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
-            <span>structural checks · {INVENTORY.length} items</span><span>severity</span>
+            <span>structural checks</span><span>severity</span>
           </div>
           {INVENTORY.map(([num, label, sev]) => (
             <div key={num} style={{ display: 'grid', gridTemplateColumns: '44px 1fr 74px', gap: 14, alignItems: 'baseline', padding: '11px 0', borderBottom: '1px dashed rgba(255,255,255,0.16)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.04em', color: '#e6e4de' }}>
@@ -113,7 +113,7 @@ export function CostSection() {
         </div>
         <div>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
-            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>001</b> / the cost of reading blind
+            / the cost of reading blind
           </div>
           <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px', maxWidth: '22ch', color: 'var(--ink)' }}>
             Most of what fails an article is countable.
@@ -152,7 +152,7 @@ export function SignalsSection() {
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
         <div style={{ position: 'sticky', top: 120 }}>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
-            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>002</b> / what the instrument reads
+            / what the instrument reads
           </div>
           <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
             Two passes.<br />One number.<br />All of it auditable.
@@ -161,8 +161,7 @@ export function SignalsSection() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'rgba(255,255,255,0.14)' }}>
           {CAPABILITIES.map(([num, name, detail]) => (
             <div key={num} style={{ background: 'var(--deep)', padding: '26px 22px 30px' }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.18em', color: 'var(--accent)' }}>{num}</div>
-              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 14 }}>{name}</div>
+              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{name}</div>
               <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: '#a3a19b' }}>{detail}</p>
             </div>
           ))}
@@ -216,7 +215,7 @@ export function InspectorSection() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', flexWrap: 'wrap', gap: 20, marginBottom: 26 }}>
           <div>
             <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 16 }}>
-              <b style={{ fontWeight: 400, color: 'var(--accent)' }}>003</b> / evidence inspector
+              / evidence inspector
             </div>
             <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0, maxWidth: '24ch', color: 'var(--ink)' }}>
               Click a claim. Watch where it came from.
@@ -321,7 +320,7 @@ export function MethodSection() {
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
         <div>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
-            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>004</b> / method &amp; limits
+            / method &amp; limits
           </div>
           <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
             What this can be wrong about.
@@ -365,7 +364,7 @@ export function AccessSection() {
       <div className="q-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 40, flexWrap: 'wrap' }}>
         <div>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
-            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>005</b> / access
+            / access
           </div>
           <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(34px,4.4vw,64px)', lineHeight: 1.02, letterSpacing: '-0.03em', margin: 0, maxWidth: '20ch', color: 'var(--ink)' }}>
             Three passes a day. No account.
