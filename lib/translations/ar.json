@@ -120,10 +120,10 @@
   },
   "source": {},
   "nav": {
-    "cost": "001 التكلفة",
-    "signals": "002 المؤشرات",
-    "inspector": "003 المفتش",
-    "method": "004 المنهجية",
+    "cost": "التكلفة",
+    "signals": "المؤشرات",
+    "inspector": "المفتش",
+    "method": "المنهجية",
     "history": "السجل",
     "installExtension": "تثبيت الإضافة"
   },

@@ -39,37 +39,37 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       color: '#fff',
       borderRadius: 8,
       overflow: 'hidden',
-      boxShadow: '0 0 0 2px var(--bone), 0 10px 30px rgba(0,0,0,0.28)',
+      boxShadow: '0 0 0 2px var(--bone), 0 4px 14px rgba(0,0,0,0.16)',
       width: 'fit-content',
     }}>
-      <nav style={{ display: 'flex', gap: 2, padding: '8px 10px', alignItems: 'center' }}>
-        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 10px 5px 6px' }}>
-          <svg width="16" height="16" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <nav style={{ display: 'flex', gap: 2, padding: '5px 8px', alignItems: 'center' }}>
+        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'transparent', border: 0, cursor: 'pointer', padding: '4px 8px 4px 5px' }}>
+          <svg width="14" height="14" viewBox="0 0 64 64" fill="none" aria-hidden="true">
             <circle cx="32" cy="30" r="13" stroke="#F1EEE7" strokeWidth="4" fill="none" />
             <circle cx="44" cy="42" r="4" fill="#E6A23C" />
           </svg>
-          <span className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
+          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
         </button>
         {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
+          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
             {label}
           </a>
         ))}
-        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
+        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
           {t('nav.history')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
           <LanguageSelector />
           <ThemeToggle />
         </div>
-        <a href="#access" className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 6 }}>
+        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 6 }}>
           {t('nav.installExtension')}
         </a>
       </nav>
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
         <div style={{ display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
           {wire.map((w, i) => (
-            <span key={i} className="mono" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '5px 20px', color: '#cbcbcb', whiteSpace: 'nowrap' }}>
+            <span key={i} className="mono" style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#cbcbcb', whiteSpace: 'nowrap' }}>
               {w}
             </span>
           ))}

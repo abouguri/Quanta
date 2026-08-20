@@ -120,10 +120,10 @@
   },
   "source": {},
   "nav": {
-    "cost": "001 Cost",
-    "signals": "002 Signals",
-    "inspector": "003 Inspector",
-    "method": "004 Method",
+    "cost": "Cost",
+    "signals": "Signals",
+    "inspector": "Inspector",
+    "method": "Method",
     "history": "History",
     "installExtension": "Install extension"
   },
