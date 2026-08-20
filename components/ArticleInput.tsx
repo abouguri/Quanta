@@ -41,7 +41,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
       className="animate-fadeUp"
       style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 0, borderBottom: '1px solid var(--ghost)' }}
     >
-      <div style={{ padding: '24px 0 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div style={{ padding: '24px 48px 40px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{
           fontFamily: 'var(--sans)',
           fontWeight: 400,
