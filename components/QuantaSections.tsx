@@ -1,288 +1,128 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 
-const TONE_HEX: Record<string, string> = {
-  // Token references, not literals: the dark theme is a token swap, and a
-  // hardcoded hex here silently keeps the light value.
-  verified: 'var(--verified)',
-  mixed:    'var(--mixed)',
-  disputed: 'var(--disputed)',
-  unclear:  'var(--unclear)',
-}
+// ---------------------------------------------------------------------------
+// Nav — the fixed dark instrument panel, home logo, section links, a live
+// wire ticker built from real recent history, and the extension CTA.
+// ---------------------------------------------------------------------------
 
-export function QuantaNav({ onHome }: { onHome: () => void }) {
+const WIRE: string[] = [
+  'structural checks · zero model calls',
+  'claims verified against Google Fact Check Tools first',
+  'no match → Brave Search over known fact-check domains',
+  'still no match → model, labelled, uncertainty-first',
+  '10 passes / 24h per IP · no account',
+]
+
+export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpenHistory: () => void }) {
   const { t } = useTranslation()
   const links: Array<[string, string]> = [
-    [t('nav.howItWorks'), '#how'],
-    [t('nav.methodology'), '#method'],
-    [t('nav.pricing'), '#pricing'],
-    [t('nav.forTeams'), '#teams'],
-    [t('nav.api'), '#api'],
+    [t('nav.cost'), '#cost'],
+    [t('nav.signals'), '#signals'],
+    [t('nav.inspector'), '#inspector'],
+    [t('nav.method'), '#method'],
   ]
+  const wire = [...WIRE, ...WIRE]
+
   return (
-    <header style={{
+    <div style={{
       position: 'sticky',
-      top: 0,
+      top: 14,
       zIndex: 50,
-      background: 'color-mix(in oklab, var(--bone) 88%, transparent)',
-      backdropFilter: 'saturate(140%) blur(8px)',
-      WebkitBackdropFilter: 'saturate(140%) blur(8px)',
-      borderBottom: '0.5px solid var(--fog)',
+      margin: '0 auto',
+      maxWidth: 'calc(100vw - 28px)',
+      background: 'var(--deep)',
+      color: '#fff',
+      borderRadius: 8,
+      overflow: 'hidden',
+      boxShadow: '0 0 0 2px var(--bone), 0 10px 30px rgba(0,0,0,0.28)',
+      width: 'fit-content',
     }}>
-      <div className="q-container" style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 40px',
-      }}>
-        <button onClick={onHome} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, cursor: 'pointer', background: 'transparent', border: 0 }}>
-          <svg width="36" height="36" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <rect width="64" height="64" rx="14" fill="#0F2233"/>
-            <circle cx="32" cy="30" r="13" stroke="#F4F1E9" strokeWidth="2.5" fill="none"/>
-            <circle cx="44" cy="42" r="3.2" fill="#E6A23C"/>
+      <nav style={{ display: 'flex', gap: 2, padding: '8px 10px', alignItems: 'center' }}>
+        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 10px 5px 6px' }}>
+          <svg width="16" height="16" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <circle cx="32" cy="30" r="13" stroke="#F1EEE7" strokeWidth="4" fill="none" />
+            <circle cx="44" cy="42" r="4" fill="#E6A23C" />
           </svg>
-          <span style={{
-            fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 22,
-            letterSpacing: '-0.02em', color: 'var(--ink)',
-          }}>
-            Quanta<span className="q-dot">.</span>
-          </span>
+          <span className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
         </button>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          {links.map(([l, h]) => (
-            <a key={l} href={h} style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink)' }}>{l}</a>
-          ))}
-        </nav>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {links.map(([label, href]) => (
+          <a key={label} href={href} className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
+            {label}
+          </a>
+        ))}
+        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
+          {t('nav.history')}
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
           <LanguageSelector />
           <ThemeToggle />
-          <a href="#cta" className="q-btn">{t('nav.installExtension')}</a>
+        </div>
+        <a href="#access" className="mono" style={{ fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 6 }}>
+          {t('nav.installExtension')}
+        </a>
+      </nav>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
+          {wire.map((w, i) => (
+            <span key={i} className="mono" style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '5px 20px', color: '#cbcbcb', whiteSpace: 'nowrap' }}>
+              {w}
+            </span>
+          ))}
         </div>
       </div>
-    </header>
+    </div>
   )
 }
 
-export function TrustStrip() {
-  const stats: Array<[string, React.ReactNode]> = [
-    ['Articles measured', '2,418,036'],
-    ['Outlets indexed',   '14,820'],
-    ['Languages',         '118'],
-    ['Median analysis time', <>4.3<span style={{ fontSize: 16, color: 'var(--ink-4)', marginLeft: 4 }}>sec</span></>],
-  ]
+// ---------------------------------------------------------------------------
+// 001 · Cost of reading blind — deterministic structural checks, free tier
+// ---------------------------------------------------------------------------
+
+const INVENTORY: Array<[string, string, string]> = [
+  ['001', 'No byline or author credit', 'high'],
+  ['002', 'No machine-readable publish date', 'medium'],
+  ['003', 'ALL-CAPS well above normal prose', 'high'],
+  ['004', 'Exclamation marks well above normal prose', 'medium'],
+  ['005', 'Domain uses a TLD common to low-credibility sites', 'high'],
+  ['006', 'Article too short to carry real context', 'medium'],
+]
+
+export function CostSection() {
   return (
-    <section style={{
-      borderTop: '0.5px solid var(--fog)',
-      borderBottom: '0.5px solid var(--fog)',
-      background: 'var(--mist)',
-    }}>
-      <div className="q-container" style={{
-        padding: '24px 40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 28,
-      }}>
-        {stats.map(([label, value], i) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 28, flex: i < 3 ? '1 1 0' : 'none' }}>
-            <div>
-              <div className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.16em' }}>{label}</div>
-              <div style={{ fontFamily: 'var(--sans)', fontSize: 28, fontWeight: 500, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{value}</div>
+    <section id="cost" className="q-anchor" style={{ padding: '96px 0' }}>
+      <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
+        <div style={{ background: 'var(--deep)', borderRadius: 8, padding: '26px 28px 22px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
+            <span>structural checks · {INVENTORY.length} items</span><span>severity</span>
+          </div>
+          {INVENTORY.map(([num, label, sev]) => (
+            <div key={num} style={{ display: 'grid', gridTemplateColumns: '44px 1fr 74px', gap: 14, alignItems: 'baseline', padding: '11px 0', borderBottom: '1px dashed rgba(255,255,255,0.16)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.04em', color: '#e6e4de' }}>
+              <span style={{ color: '#7d7b74' }}>{num}</span>
+              <span>{label}</span>
+              <span style={{ textAlign: 'right', color: sev === 'high' ? 'var(--unsupported)' : 'var(--contested)', textTransform: 'uppercase' }}>{sev}</span>
             </div>
-            {i < 3 && <span style={{ height: 32, borderLeft: '0.5px solid var(--fog)' }} />}
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-const SIGNALS = [
-  { code: '01', name: 'Evidence',
-    short: 'How well-supported are the central claims?',
-    detail: 'Every claim is identified and traced. We count primary citations, secondary citations, and unsupported assertions. A claim without a verifiable source isn’t flagged as false — it’s flagged as unverified.',
-    sample: { Verified: 14, Partial: 5, Unsupported: 2 }, tone: 'verified' },
-  { code: '02', name: 'Source provenance',
-    short: 'Where do the citations actually lead?',
-    detail: 'Citations are followed. A press release counts differently than a peer-reviewed study or a regulatory filing. Circular citations — where outlets cite each other instead of the source — are surfaced.',
-    sample: { Primary: 9, Secondary: 6, Circular: 2 }, tone: 'verified' },
-  { code: '03', name: 'Framing',
-    short: 'Whose perspective is missing?',
-    detail: 'We map the named voices, attribution patterns, and which side of an issue receives more space. Framing isn’t left vs. right — it’s a fingerprint that shows what the article emphasizes.',
-    sample: { 'Voices A': 62, 'Voices B': 28, Neutral: 10 }, tone: 'mixed' },
-  { code: '04', name: 'Confidence',
-    short: 'How sure are we of our own analysis?',
-    detail: 'Every score comes with a confidence interval. A short opinion piece gets lower confidence than a 2,000-word investigation. We’d rather say "we don’t know yet" than guess.',
-    sample: { '± conf.': '94%' }, tone: 'verified' },
-]
-
-function SignalCard({ s }: { s: typeof SIGNALS[number] }) {
-  const tone = TONE_HEX[s.tone]
-  return (
-    <article style={{
-      display: 'flex', flexDirection: 'column',
-      background: 'var(--paper)',
-      border: '0.5px solid var(--fog)',
-      borderRadius: 12,
-      padding: '26px 28px 28px',
-      minHeight: 320,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <span className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Signal {s.code}</span>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: tone, display: 'inline-block' }} />
-      </div>
-      <h3 style={{
-        margin: '14px 0 6px',
-        fontFamily: 'var(--sans)', fontWeight: 500, fontSize: 26,
-        letterSpacing: '-0.015em', color: 'var(--ink)',
-      }}>{s.name}</h3>
-      <div style={{
-        fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 17,
-        color: 'var(--graphite)', lineHeight: 1.4, marginBottom: 14,
-      }}>{s.short}</div>
-      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--ink-4)' }}>{s.detail}</p>
-      <div style={{
-        marginTop: 'auto', paddingTop: 20,
-        borderTop: '0.5px solid var(--fog)',
-        display: 'flex', flexWrap: 'wrap', gap: 18, alignItems: 'baseline',
-      }}>
-        {Object.entries(s.sample).map(([k, v]) => (
-          <div key={k}>
-            <div className="q-mono" style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>{k}</div>
-            <div style={{
-              fontFamily: 'var(--sans)', fontWeight: 500, fontSize: 24,
-              color: 'var(--ink)', fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '-0.02em', marginTop: 2,
-            }}>{v}</div>
-          </div>
-        ))}
-      </div>
-    </article>
-  )
-}
-
-export function HowItWorks() {
-  return (
-    <section id="how" className="q-anchor" style={{ padding: '120px 0 96px' }}>
-      <div className="q-container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start', marginBottom: 56 }}>
-          <div>
-            <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>How it works</div>
-            <h2 style={{
-              fontFamily: 'var(--sans)', fontWeight: 500,
-              fontSize: 'clamp(36px, 4vw, 56px)',
-              margin: '14px 0 0',
-              color: 'var(--ink)',
-              letterSpacing: '-0.025em', lineHeight: 1.04,
-            }}>
-              Bias is a<br/>fingerprint,<br/>not a slider.
-            </h2>
-          </div>
-          <div>
-            <p style={{
-              margin: 0, fontFamily: 'var(--serif)',
-              fontSize: 22, fontStyle: 'italic', lineHeight: 1.5,
-              color: 'var(--graphite)',
-            }}>
-              Every Quanta analysis decomposes an article into four measurements. None of them is a verdict.
-              All of them are auditable down to the sentence.
-            </p>
-            <p style={{ marginTop: 18, fontSize: 16, lineHeight: 1.6, color: 'var(--ink-4)' }}>
-              We don’t say <em>true</em> or <em>false</em>. We say <span className="q-mono" style={{ color: 'var(--ink)' }}>78% confidence</span>, with these citations,
-              on this methodology. Confidence intervals beat verdicts.
-            </p>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 16, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#fff' }}>
+            <span>free tier</span><span style={{ color: 'var(--accent)' }}>zero model calls</span>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-          {SIGNALS.map(s => <SignalCard key={s.code} s={s} />)}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-const COMPARE_ROWS = [
-  { host: 'apnews.com',      headline: 'Federal Reserve holds rates steady amid mixed inflation signals',  score: 78, framing: 'Neutral',     tone: 'verified' },
-  { host: 'reuters.com',     headline: 'Fed leaves rates unchanged as policymakers weigh inflation risks', score: 89, framing: 'Neutral',     tone: 'verified' },
-  { host: 'wsj.com',         headline: 'Fed Stands Pat. Wall Street Recalibrates.',                         score: 81, framing: 'Pro-market',  tone: 'verified' },
-  { host: 'nytimes.com',     headline: 'A cautious Fed signals the easy money era is over',                 score: 74, framing: 'Skeptical',   tone: 'verified' },
-  { host: 'foxbusiness.com', headline: 'Powell holds the line as Trump pressure mounts',                    score: 52, framing: 'Political',   tone: 'mixed' },
-  { host: 'breitbart.com',   headline: 'Fed refuses to cut rates, ignoring families struggling with prices',score: 31, framing: 'Adversarial', tone: 'disputed' },
-  { host: 'cnbc.com',        headline: 'Markets digest Fed pause; rate-cut odds slide to 24%',              score: 84, framing: 'Pro-market',  tone: 'verified' },
-  { host: 'theguardian.com', headline: 'US central bank holds rates as recession warnings grow',            score: 71, framing: 'Skeptical',   tone: 'verified' },
-]
-
-export function ComparePreview() {
-  return (
-    <section id="compare" className="q-anchor" style={{ padding: '24px 0 96px' }}>
-      <div className="q-container">
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22, flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>Compare · one story, eight outlets</div>
-            <h2 style={{
-              fontFamily: 'var(--sans)', fontWeight: 500,
-              margin: '12px 0 0', fontSize: 'clamp(30px, 3vw, 44px)',
-              color: 'var(--ink)', letterSpacing: '-0.02em',
-            }}>How the same story was framed.</h2>
+        <div>
+          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
+            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>001</b> / the cost of reading blind
           </div>
-          <span className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
-            Story · Fed holds rates · Apr 27, 2026
-          </span>
-        </div>
-        <div style={{
-          background: 'var(--paper)',
-          border: '0.5px solid var(--fog)',
-          borderRadius: 12,
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            display: 'grid', gridTemplateColumns: '160px 1fr 140px 100px 72px',
-            padding: '14px 24px', background: 'var(--mist)',
-            borderBottom: '0.5px solid var(--fog)',
-            alignItems: 'center', gap: 16,
-          }}>
-            {['Outlet', 'Headline', 'Framing', 'Score', ''].map(h => (
-              <div key={h} className="q-mono" style={{ fontSize: 10, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>{h}</div>
-            ))}
-          </div>
-          {COMPARE_ROWS.map((r, i) => {
-            const tone = TONE_HEX[r.tone]
-            return (
-              <div key={i} style={{
-                display: 'grid', gridTemplateColumns: '160px 1fr 140px 100px 72px',
-                padding: '16px 24px',
-                borderTop: i === 0 ? 0 : '0.5px solid var(--fog)',
-                alignItems: 'center', gap: 16,
-              }}>
-                <span className="q-mono" style={{ fontSize: 12, color: 'var(--ink)' }}>{r.host}</span>
-                <span style={{ fontFamily: 'var(--serif)', fontSize: 16, lineHeight: 1.3, color: 'var(--ink)' }}>{r.headline}</span>
-                <span style={{ fontSize: 13, color: 'var(--ink-4)' }}>{r.framing}</span>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                  <span style={{
-                    fontFamily: 'var(--sans)', fontWeight: 500, fontSize: 22,
-                    fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em', color: tone,
-                  }}>{r.score}</span>
-                  <span className="q-mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>/100</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <div style={{ width: 56, height: 4, borderRadius: 2, background: 'var(--mist)', overflow: 'hidden' }}>
-                    <div style={{ width: `${r.score}%`, height: '100%', background: tone, borderRadius: 2 }} />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div style={{ marginTop: 22, padding: '18px 22px', border: '0.5px dashed var(--fog)', borderRadius: 10 }}>
-          <div className="q-eyebrow">What this view shows</div>
-          <p style={{
-            margin: '8px 0 0', fontFamily: 'var(--serif)', fontStyle: 'italic',
-            fontSize: 17, lineHeight: 1.5, color: 'var(--ink)',
-          }}>
-            The same story, across eight outlets. Source diversity ranges from 2 to 14 unique citations.
-            Framing variance is 3.4&times; the topic average. The reporting is largely consistent;
-            the language is not.
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px', maxWidth: '22ch', color: 'var(--ink)' }}>
+            Most of what fails an article is countable.
+          </h2>
+          <p style={{ fontSize: 18, lineHeight: 1.5, color: 'var(--grey)', maxWidth: '52ch', margin: '0 0 14px' }}>
+            Every item on the left is a deterministic check — byline, date, caps ratio, exclamation density, TLD reputation. No model, no variance, no API cost. That pass alone is the free tier.
+          </p>
+          <p style={{ fontSize: 18, lineHeight: 1.5, color: 'var(--grey)', maxWidth: '52ch', margin: 0 }}>
+            The claims pass is where a model appears, and it is labelled every time it does: a verdict that came from a fact-check database says so, and one that came from the model says that instead.
           </p>
         </div>
       </div>
@@ -290,230 +130,265 @@ export function ComparePreview() {
   )
 }
 
-export function Methodology() {
-  return (
-    <section id="method" className="q-anchor" style={{
-      background: 'var(--ink)',
-      color: 'var(--bone)',
-      padding: '120px 0',
-      position: 'relative',
-    }}>
-      <div className="q-container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
-          <div>
-            <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>● Methodology</div>
-            <h2 style={{
-              fontFamily: 'var(--sans)', fontWeight: 500,
-              fontSize: 'clamp(40px, 5vw, 68px)',
-              margin: '16px 0 0', color: 'var(--bone)',
-              letterSpacing: '-0.025em', lineHeight: 1.04,
-            }}>
-              Show the work<br/>
-              <span style={{ color: 'var(--ember)' }}>—</span> every time.
-            </h2>
-            <p style={{
-              marginTop: 28, fontFamily: 'var(--serif)', fontStyle: 'italic',
-              fontSize: 22, lineHeight: 1.5, color: '#CFCFC2', maxWidth: '32ch',
-            }}>
-              If Quanta can’t defend an output, Quanta doesn’t produce it. Every score traces to specific
-              sentences, citations, and reasoning. The user can audit us.
-            </p>
-            <div style={{ marginTop: 36, display: 'grid', gap: 14, maxWidth: 460 }}>
-              {[
-                ['Calibrated, not categorical', 'Confidence intervals, never verdicts.'],
-                ['Article-level, not outlet-level', 'We rate the piece in front of you.'],
-                ['Multi-dimensional, not a slider', 'Five signals, one fingerprint.'],
-                ['Auditable down to the sentence', 'Click any score to see the language.'],
-              ].map(([title, d]) => (
-                <div key={title} style={{
-                  display: 'grid', gridTemplateColumns: '24px 1fr',
-                  gap: 14, alignItems: 'baseline',
-                  padding: '14px 0', borderTop: '0.5px solid #1F3D5A',
-                }}>
-                  <span style={{ color: 'var(--ember)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.04em' }}>→</span>
-                  <div>
-                    <div style={{ fontWeight: 500, fontSize: 16, color: 'var(--bone)' }}>{title}</div>
-                    <div style={{ marginTop: 2, fontSize: 14, color: '#A6B3C4' }}>{d}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{
-            background: '#142F4A',
-            border: '0.5px solid #1F3D5A',
-            borderRadius: 14,
-            padding: '24px 28px',
-            boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 80px rgba(0,0,0,0.32)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-              <span className="q-mono" style={{ fontSize: 11, color: '#A6B3C4', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Methodology / Framing</span>
-              <span className="q-mono" style={{ fontSize: 10, color: 'var(--ember)' }}>v 1.4.0</span>
-            </div>
-            <h3 style={{
-              margin: 0, fontFamily: 'var(--serif)',
-              fontWeight: 400, fontSize: 26, color: 'var(--bone)',
-              letterSpacing: '-0.01em', lineHeight: 1.25,
-            }}>
-              &ldquo;The Fed’s decision was widely expected by economists.&rdquo;{' '}
-              <span style={{ color: '#A6B3C4', fontStyle: 'italic', fontSize: 18 }}>— attributed once, sourced from an analyst note.</span>
-            </h3>
-            <div style={{ marginTop: 24, paddingTop: 22, borderTop: '0.5px solid #1F3D5A', display: 'grid', gap: 14 }}>
-              {[
-                { code: 'F-01', name: 'Voice diversity',     w: 70 },
-                { code: 'F-02', name: 'Attribution density', w: 56 },
-                { code: 'F-03', name: 'Sentiment loading',   w: 31 },
-                { code: 'F-04', name: 'Hedging language',    w: 82 },
-              ].map((r) => (
-                <div key={r.code} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr 40px', gap: 14, alignItems: 'center' }}>
-                  <span className="q-mono" style={{ fontSize: 11, color: 'var(--ember)' }}>{r.code}</span>
-                  <span style={{ fontSize: 13, color: 'var(--bone)' }}>{r.name}</span>
-                  <div style={{ height: 3, background: '#1F3D5A', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${r.w}%`, height: '100%', background: 'var(--ember)' }} />
-                  </div>
-                  <span className="q-mono" style={{ fontSize: 12, color: 'var(--bone)', textAlign: 'right' }}>{r.w}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{
-              marginTop: 24, padding: '14px 16px',
-              background: 'rgba(230,162,60,0.07)',
-              border: '0.5px solid rgba(230,162,60,0.4)',
-              borderRadius: 8,
-            }}>
-              <div className="q-mono" style={{ fontSize: 10, color: 'var(--ember)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Weighting</div>
-              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#CFCFC2', lineHeight: 1.55 }}>
-                Framing balance contributes 18% to the overall score. Weights are documented at{' '}
-                <span className="q-mono" style={{ color: 'var(--bone)' }}>quanta.news/methodology</span> and updated quarterly with a public changelog.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0,
-        height: 1, background: 'linear-gradient(90deg, transparent, var(--ember), transparent)',
-        opacity: 0.6,
-      }} />
-    </section>
-  )
-}
+// ---------------------------------------------------------------------------
+// 002 · What the instrument reads — the real pass list
+// ---------------------------------------------------------------------------
 
-export function QuoteStrip() {
-  return (
-    <section style={{ padding: '96px 0 40px' }}>
-      <div className="q-narrow" style={{ textAlign: 'center' }}>
-        <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>What it sounds like</div>
-        <p style={{
-          margin: '20px auto 0',
-          fontFamily: 'var(--serif)',
-          fontSize: 'clamp(28px, 3vw, 40px)',
-          fontWeight: 400, lineHeight: 1.25, letterSpacing: '-0.015em',
-          color: 'var(--ink)', maxWidth: '24ch',
-        }}>
-          &ldquo;78% confidence. Three of five citations led to primary sources.
-          The framing leans slightly <span style={{ fontStyle: 'italic' }}>—</span> read another view too.&rdquo;
-        </p>
-        <div className="q-mono" style={{ marginTop: 22, fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
-          — Quanta, on a typical Tuesday
-        </div>
-      </div>
-    </section>
-  )
-}
+const CAPABILITIES: Array<[string, string, string]> = [
+  ['001', 'Structural signals', 'Byline, date, caps ratio, exclamation density, TLD reputation — no model involved.'],
+  ['002', 'Claim extraction', '3–5 checkable statements isolated from opinion and framing.'],
+  ['003', 'Fact-check lookup', 'Google Fact Check Tools first — real ratings from PolitiFact, Snopes, FactCheck.org, Full Fact.'],
+  ['004', 'Search fallback', 'No database hit → Brave Search restricted to known fact-check domains.'],
+  ['005', 'Model fallback', 'Still no match → the model assesses the claim, instructed to say UNVERIFIED over a guess.'],
+  ['006', 'Provenance labelling', 'Database, search or model — recorded on every verdict, shown on every card.'],
+  ['007', 'Confidence levels', 'High, medium or low — never a false sense of certainty on a thin source.'],
+  ['008', 'Weighted scoring', 'Structural × 0.3 + claims × 0.7 — reproducible by hand from the numbers on the report.'],
+  ['009', 'Live streaming', 'Every pass streams over SSE as it completes — nothing waits behind a spinner.'],
+]
 
-export function CTAFooter() {
+export function SignalsSection() {
   return (
-    <footer id="cta" className="q-anchor" style={{
-      background: 'var(--mist)',
-      borderTop: '0.5px solid var(--fog)',
-      padding: '96px 0 40px',
-      marginTop: 40,
-    }}>
-      <div className="q-container">
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 64, alignItems: 'end',
-          paddingBottom: 64, borderBottom: '0.5px solid var(--fog)',
-        }}>
-          <div>
-            <div className="q-eyebrow" style={{ color: 'var(--ember)' }}>● Start reading</div>
-            <h2 style={{
-              fontFamily: 'var(--sans)', fontWeight: 500,
-              fontSize: 'clamp(40px, 5vw, 72px)',
-              margin: '16px 0 0', color: 'var(--ink)',
-              letterSpacing: '-0.025em', lineHeight: 1.02,
-            }}>
-              A measurement instrument <span style={{ color: 'var(--ember)' }}>—</span> in your pocket.
-            </h2>
-            <p style={{
-              marginTop: 22, maxWidth: '50ch',
-              fontFamily: 'var(--serif)', fontStyle: 'italic',
-              fontSize: 20, lineHeight: 1.5, color: 'var(--graphite)',
-            }}>
-              Install the extension, paste a link, or pipe articles through the API. Three free
-              analyses a day, forever. No card required.
-            </p>
+    <section id="signals" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0' }}>
+      <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
+        <div style={{ position: 'sticky', top: 120 }}>
+          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>002</b> / what the instrument reads
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'flex-start' }}>
-            <a href="#" className="q-btn" style={{ padding: '16px 24px', fontSize: 15 }}>
-              Install the browser extension
-            </a>
-            <a href="#" className="q-btn q-btn--ghost" style={{ padding: '16px 24px', fontSize: 15 }}>
-              Open quanta.news →
-            </a>
-            <div className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.16em', marginTop: 6 }}>
-              Chrome · Safari · Firefox · Edge
-            </div>
-          </div>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
+            Two passes.<br />One number.<br />All of it auditable.
+          </h2>
         </div>
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1fr',
-          gap: 40, padding: '48px 0 32px',
-        }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
-                <rect width="64" height="64" rx="14" fill="#0F2233"/>
-                <circle cx="32" cy="30" r="13" stroke="#F4F1E9" strokeWidth="2.5" fill="none"/>
-                <circle cx="44" cy="42" r="3.2" fill="#E6A23C"/>
-              </svg>
-              <span style={{ fontFamily: 'var(--sans)', fontWeight: 600, fontSize: 20, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
-                Quanta<span className="q-dot">.</span>
-              </span>
-            </div>
-            <p style={{ marginTop: 18, fontSize: 14, color: 'var(--ink-4)', lineHeight: 1.55, maxWidth: '32ch' }}>
-              Quanta is the credibility layer for the internet. Independent and ad-free —
-              revenue from subscriptions and the API.
-            </p>
-          </div>
-          {([
-            ['Product', ['Web app', 'Browser extension', 'Mobile (iOS, Android)', 'API', 'Pricing']],
-            ['For',     ['Readers', 'Students & educators', 'Journalists', 'Newsrooms', 'Researchers']],
-            ['Open',    ['Methodology', 'Changelog', 'Advisory board', 'Bias audits', 'Research papers']],
-            ['Company', ['About', 'Manifesto', 'Press', 'Careers', 'Contact']],
-          ] as Array<[string, string[]]>).map(([title, items]) => (
-            <div key={title}>
-              <div className="q-eyebrow">{title}</div>
-              <ul style={{ margin: '14px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 10 }}>
-                {items.map(it => (
-                  <li key={it}><a href="#" style={{ fontSize: 14, color: 'var(--ink)' }}>{it}</a></li>
-                ))}
-              </ul>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'rgba(255,255,255,0.14)' }}>
+          {CAPABILITIES.map(([num, name, detail]) => (
+            <div key={num} style={{ background: 'var(--deep)', padding: '26px 22px 30px' }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.18em', color: 'var(--accent)' }}>{num}</div>
+              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 14 }}>{name}</div>
+              <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: '#a3a19b' }}>{detail}</p>
             </div>
           ))}
         </div>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          paddingTop: 24, borderTop: '0.5px solid var(--fog)',
-        }}>
-          <span className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
-            Quanta · v1.4.0 · © 2026 · Measure. Understand. Elevate.
-          </span>
-          <span className="q-mono" style={{ fontSize: 11, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
-            status: <span style={{ color: '#2E7D5B' }}>● all systems measuring</span>
+      </div>
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 003 · Evidence inspector — a worked demo of one real report's claim ledger
+// ---------------------------------------------------------------------------
+
+const DEMO_CLAIMS = [
+  {
+    verdict: 'VERIFIED', tone: 'var(--verified)',
+    short: 'Rate held at 4.25–4.5%',
+    text: 'The central bank left its benchmark rate unchanged at 4.25–4.5% for a fourth consecutive meeting.',
+    summary: 'Matches the published policy statement from the same day; the range is unchanged from the prior meeting.',
+    publisher: 'fact-check db · rated "correct"',
+    provenance: 'fact-check database',
+    confidence: 'high confidence',
+  },
+  {
+    verdict: 'MIXED', tone: 'var(--contested)',
+    short: 'Every forecaster warning',
+    text: 'Recession warnings have grown louder across every major forecasting house this quarter.',
+    summary: 'Several forecasters raised recession odds; at least two of the largest lowered theirs. "Every" overstates the picture.',
+    publisher: 'no fact-check found · web search',
+    provenance: 'web search',
+    confidence: 'medium confidence',
+  },
+  {
+    verdict: 'UNVERIFIED', tone: 'var(--unknown)',
+    short: 'Cut before end of summer',
+    text: 'Officials privately expect a first rate cut before the end of the summer.',
+    summary: 'No independent source found. Single-sourced to unnamed officials — this assessment is the model’s, not a fact-checker’s.',
+    publisher: 'ai assessment · not a verdict',
+    provenance: 'llm assessment',
+    confidence: 'low confidence',
+  },
+]
+
+export function InspectorSection() {
+  const [selected, setSelected] = useState(0)
+  const sel = DEMO_CLAIMS[selected]
+
+  return (
+    <section id="inspector" className="q-anchor" style={{ padding: '96px 0' }}>
+      <div className="q-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', flexWrap: 'wrap', gap: 20, marginBottom: 26 }}>
+          <div>
+            <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 16 }}>
+              <b style={{ fontWeight: 400, color: 'var(--accent)' }}>003</b> / evidence inspector
+            </div>
+            <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0, maxWidth: '24ch', color: 'var(--ink)' }}>
+              Click a claim. Watch where it came from.
+            </h2>
+          </div>
+          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+            worked example · not a live analysis
+          </div>
+        </div>
+
+        <div style={{ border: '1px solid var(--ink)', borderRadius: 8, overflow: 'hidden', background: 'var(--white)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '240px minmax(0,1fr) 300px', minHeight: 360 }}>
+            <div style={{ borderRight: '1px solid var(--ghost)', background: 'var(--bone)' }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
+                claim tree
+              </div>
+              {DEMO_CLAIMS.map((c, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelected(i)}
+                  style={{
+                    width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '16px 1fr', gap: 10,
+                    alignItems: 'start', padding: '12px 16px', border: 0, borderBottom: '1px solid var(--ghost)',
+                    cursor: 'pointer', background: i === selected ? 'var(--white)' : 'transparent',
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.tone, marginTop: 5 }} />
+                  <span>
+                    <span className="mono" style={{ display: 'block', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+                      claim {i + 1} · {c.verdict}
+                    </span>
+                    <span style={{ display: 'block', fontSize: 13, lineHeight: 1.35, color: 'var(--ink)', marginTop: 4 }}>{c.short}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div style={{ padding: '22px 26px', borderRight: '1px solid var(--ghost)' }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 14 }}>
+                article · selected claim highlighted
+              </div>
+              <p style={{ fontSize: 17, lineHeight: 1.62, margin: '0 0 14px', color: 'var(--ink)' }}>
+                {sel.text}
+              </p>
+              <p style={{ fontSize: 17, lineHeight: 1.62, margin: 0, color: 'var(--grey)' }}>
+                {sel.summary}
+              </p>
+            </div>
+
+            <div style={{ background: 'var(--bone)' }}>
+              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
+                provenance
+              </div>
+              <div style={{ padding: 16 }}>
+                <div style={{ border: '1px solid var(--ink)', background: 'var(--white)', borderRadius: 4, padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: sel.tone }}>
+                    <span>{sel.verdict}</span><span>{sel.confidence}</span>
+                  </div>
+                  <div style={{ marginTop: 10, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--grey)' }}>
+                    {sel.provenance}
+                  </div>
+                  <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: sel.tone }}>
+                    {sel.publisher}
+                  </div>
+                </div>
+                <div style={{ marginTop: 14, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)', lineHeight: 1.9 }}>
+                  Lookup order<br />
+                  01 google fact check tools<br />
+                  02 brave search · known domains<br />
+                  03 model · labelled, uncertainty-first
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 20px', background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+            <span>engine v2 · llama 3.3 70b · groq</span>
+            <span>{DEMO_CLAIMS.length} claims shown</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 004 · Method & limits — FAQ
+// ---------------------------------------------------------------------------
+
+const FAQ: Array<[string, string, string]> = [
+  ['Q.001', 'What can Quanta be wrong about?', 'The 30/70 weighting is reasoned, not fitted to a labelled evaluation set — the number is a comparison tool, not an authority. Scraping also fails on paywalls, heavy JS and bot protection; a failed read is reported as a failed read, never scored anyway.'],
+  ['Q.002', 'Where does a verdict actually come from?', 'Claims are checked against the Google Fact Check Tools API first — real ratings from PolitiFact, Snopes, FactCheck.org, Full Fact. Only if that misses does Brave Search run over known fact-check domains, and only if both miss does the model assess the claim — the card always says which one answered.'],
+  ['Q.003', 'Why is the structural score only 30%?', 'A well-formatted lie should not outscore a scruffy truth. Structure is cheap to fake and cheap to measure; the claims themselves carry more weight because they are what the article is actually asserting.'],
+  ['Q.004', 'What happens when a service is missing a key?', 'The chain degrades instead of breaking: no fact-check key falls through to search, no search key falls through to the model. Missing keys reduce the depth of the analysis, and the provenance field on every claim records which rung answered.'],
+  ['Q.005', 'Does the model ever guess?', 'It is instructed to answer UNVERIFIED with low confidence rather than invent a verdict, and forbidden from fabricating citations. A claim whose assessment cannot be parsed also degrades to UNVERIFIED rather than failing the whole report.'],
+  ['Q.006', 'What does Quanta never do?', 'It never rates an outlet in place of the piece in front of you, never returns a number without the structural flags and claims that produced it, and never claims to be an oracle. Read the report, not just the score.'],
+]
+
+export function MethodSection() {
+  const [open, setOpen] = useState(0)
+  return (
+    <section id="method" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0' }}>
+      <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
+        <div>
+          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>004</b> / method &amp; limits
+          </div>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
+            What this can be wrong about.
+          </h2>
+          <p style={{ fontSize: 17, lineHeight: 1.55, color: '#a3a19b', maxWidth: '36ch', margin: 0 }}>
+            A credibility instrument that hides its limits is just another confident voice. These are ours, in plain words.
+          </p>
+        </div>
+        <div>
+          {FAQ.map(([num, question, answer], i) => (
+            <div key={num} style={{ borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
+              <button
+                onClick={() => setOpen(open === i ? -1 : i)}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, padding: '20px 0', background: 'transparent', border: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--paper)' }}
+              >
+                <span className="mono" style={{ fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  <span style={{ color: 'var(--accent)', marginRight: 14 }}>{num}</span>{question}
+                </span>
+                <span className="mono" style={{ fontSize: 16, color: 'var(--accent)' }}>{open === i ? '−' : '+'}</span>
+              </button>
+              <div style={{ display: 'grid', gridTemplateRows: open === i ? '1fr' : '0fr', transition: 'grid-template-rows 200ms cubic-bezier(0,0,.2,1)' }}>
+                <div style={{ overflow: 'hidden' }}>
+                  <p style={{ margin: '0 0 22px', fontSize: 16, lineHeight: 1.6, color: '#a3a19b', maxWidth: '70ch' }}>{answer}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 005 · Access — install CTA, matching the real quota and platform support
+// ---------------------------------------------------------------------------
+
+export function AccessSection() {
+  return (
+    <section id="access" className="q-anchor" style={{ padding: '80px 0 64px' }}>
+      <div className="q-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 40, flexWrap: 'wrap' }}>
+        <div>
+          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
+            <b style={{ fontWeight: 400, color: 'var(--accent)' }}>005</b> / access
+          </div>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(34px,4.4vw,64px)', lineHeight: 1.02, letterSpacing: '-0.03em', margin: 0, maxWidth: '20ch', color: 'var(--ink)' }}>
+            Three passes a day. No account.
+          </h2>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+          <a href="https://chrome.google.com/webstore" target="_blank" rel="noreferrer" style={{ display: 'flex', gap: 2, textDecoration: 'none' }}>
+            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '8px 2px 2px 8px' }}>
+              Install
+            </span>
+            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '2px 8px 8px 2px' }}>
+              Extension
+            </span>
+          </a>
+          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+            chrome mv3 · readability · sse
           </span>
         </div>
       </div>
-    </footer>
+      <div className="q-container" style={{ marginTop: 64, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ghost)', paddingTop: 22, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+        <span>Quanta · engine v2</span>
+        <span>Truth, measured</span>
+      </div>
+    </section>
   )
 }

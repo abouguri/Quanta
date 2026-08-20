@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 :root {
-  /* Quanta brand palette (handoff-tuned) */
-  --bone:         #F4F1E9;
-  --paper:        #FBF9F3;
+  /* Quanta brand palette — Instrument v2 */
+  --bone:         #F1EEE7;
+  --paper:        #FFFFFF;
   --mist:         #EFEBE0;
-  --fog:          #DDD7C6;
+  --fog:          #DEDEDE;
 
-  --ink:          #0F2233;
-  --ink-2:        rgba(15, 34, 51, 0.72);
-  --ink-3:        rgba(15, 34, 51, 0.50);
-  --ink-4:        #5B6770;
+  --ink:          #232323;
+  --ink-2:        rgba(35, 35, 35, 0.72);
+  --ink-3:        rgba(35, 35, 35, 0.50);
+  --ink-4:        #5B5A56;
   --graphite:     #333E48;
 
   --signal:       #1A4D7A;
@@ -22,7 +22,7 @@
   --verified:     #2E7D5B;
   --mixed:        #C77A2E;
   --disputed:     #B33A3A;
-  --unclear:      #6B6B6B;
+  --unclear:      #8A8985;
 
   /* Aliases to preserve existing component references */
   --paper-2:      var(--mist);
@@ -32,6 +32,20 @@
   --vermillion-2: var(--mixed);
   --amber:        var(--ember);
   --stamp:        var(--disputed);
+
+  /* Instrument tokens — a fixed near-black "hardware panel" surface (nav,
+     dark hero blocks, footers) that does not swap with the theme, plus the
+     mock's own naming so ported markup can read var(--grey)/var(--ghost)
+     directly instead of the handoff aliases above. */
+  --deep:         #000000;
+  --grey:         #5B5A56;
+  --mid:          #CBCBCB;
+  --ghost:        #DEDEDE;
+  --white:        #FFFFFF;
+  --accent:       var(--ember);
+  --contested:    var(--mixed);
+  --unsupported:  var(--disputed);
+  --unknown:      #8A8985;
 
   --serif: "Source Serif 4", "Georgia", serif;
   --sans:  "Urbanist", "Inter", system-ui, -apple-system, Helvetica, sans-serif;
@@ -58,15 +72,15 @@
  * no dark-specific code of its own.
  */
 .dark {
-  --bone:         #0E1519;
-  --paper:        #151E24;
+  --bone:         #161616;
+  --paper:        #232323;
   --mist:         #1C262D;
-  --fog:          #2C3841;
+  --fog:          #333330;
 
-  --ink:          #EDE8DC;
-  --ink-2:        rgba(237, 232, 220, 0.74);
-  --ink-3:        rgba(237, 232, 220, 0.52);
-  --ink-4:        #9AA6B0;
+  --ink:          #F1EEE7;
+  --ink-2:        rgba(241, 238, 231, 0.74);
+  --ink-3:        rgba(241, 238, 231, 0.52);
+  --ink-4:        #A3A19B;
   --graphite:     #C3CBD2;
 
   --signal:       #5C9DD6;
@@ -75,7 +89,7 @@
   --verified:     #4FAE83;
   --mixed:        #D8964E;
   --disputed:     #E06B6B;
-  --unclear:      #8D949B;
+  --unclear:      #9A9993;
 
   /* Same hues, inverted: dark low-chroma washes instead of pale ones. */
   --misleading:      #E08A5C;
@@ -84,6 +98,14 @@
   --tint-disputed:   oklch(0.27 0.05 20);
   --tint-misleading: oklch(0.28 0.05 45);
   --tint-mixed:      oklch(0.28 0.04 80);
+
+  /* --deep stays pure black in both themes — it's the fixed instrument-panel
+     surface, not part of the light/dark swap. */
+  --grey:         #A3A19B;
+  --mid:          #3A3A38;
+  --ghost:        #333330;
+  --white:        #232323;
+  --unknown:      #9A9993;
 
   color-scheme: dark;
 }
@@ -252,6 +274,15 @@ input:focus, textarea:focus { outline: none; }
 @keyframes scan {
   0%   { transform: translateY(-100%); }
   100% { transform: translateY(120%); }
+}
+@keyframes statusPing {
+  0%        { opacity: 0.5; transform: scale(1); }
+  75%, 100% { opacity: 0; transform: scale(2.6); }
+}
+@keyframes scanSweep {
+  0%          { opacity: 1; transform: translateY(-101%); }
+  30%         { opacity: 1; transform: translateY(0); }
+  38%, 100%   { opacity: 0; transform: translateY(0); }
 }
 @keyframes stampIn {
   0%   { transform: scale(2) rotate(-12deg); opacity: 0; }

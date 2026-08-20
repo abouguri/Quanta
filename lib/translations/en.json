@@ -8,7 +8,20 @@
     "enterHint": "ENTER ↵ TO ANALYZE",
     "urlPrefix": "URL ›",
     "charsNeedMore": "— NEED {n} MORE",
-    "charsReady": "— READY"
+    "charsReady": "— READY",
+    "instrumentBadge": "Instrument v2 · live",
+    "heroLine1": "Truth,",
+    "heroLine2": "measured —",
+    "heroLine3": "and shown",
+    "heroSubtitle": "Paste a URL. Quanta pulls the checkable claims, looks each one up against independent fact-checkers, measures the page's own structure, and streams back a 0–100 report that shows its work.",
+    "submitButtonNow": "Now",
+    "tryOneOf": "Try",
+    "statsLine": "2 scoring passes · 3-tier claim lookup (db → search → model)",
+    "quotaLine": "10 passes / 24h per IP · no account · history stored locally only",
+    "signalPanelTitle": "Recent passes · this browser",
+    "signalPanelEmpty": "No passes yet. Measure an article and a running local log of your last 12 reports appears here.",
+    "signalPanelStats": "Median {median} · range {spread} · this browser only",
+    "signalPanelStatsEmpty": "No local history yet"
   },
   "analyzing": {
     "nowReading": "Now reading",
@@ -17,7 +30,10 @@
     "doNotRefresh": "DO NOT REFRESH — STREAMING ANALYSIS",
     "waitingResults": "— WAITING FOR RESULTS…",
     "queued": "QUEUED",
-    "done": "✓ DONE"
+    "done": "✓ DONE",
+    "pass01": "Structural analysis",
+    "passes": "passes complete",
+    "frames": "SSE frames"
   },
   "report": {
     "analyzeAnother": "← Analyze another",
@@ -65,7 +81,29 @@
     "claimsSummary": "{n} claims · {m} matched in fact-check database",
     "structuralRedFlags": "Structural red flags",
     "freeTierUpsell": "Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.",
-    "freeTierBadge": "FREE TIER"
+    "freeTierBadge": "FREE TIER",
+    "readoutStructural": "Structural",
+    "readoutStructuralNote": "{n} flag · −{penalty}",
+    "readoutStructuralNotePlural": "{n} flags · −{penalty}",
+    "readoutStructuralNoteClean": "no flags",
+    "readoutClaims": "Claims",
+    "readoutClaimsNote": "{n} checked · {m} in db",
+    "readoutClaimsNoScore": "—",
+    "readoutClaimsNoteFree": "not run · free tier",
+    "readoutConfidence": "Confidence",
+    "readoutConfidenceHigh": "HIGH",
+    "readoutConfidenceMedium": "MEDIUM",
+    "readoutConfidenceLow": "LOW",
+    "readoutConfidenceNote": "byline + date + length",
+    "readoutWeighting": "Weighting",
+    "readoutWeightingValue": "30/70",
+    "readoutWeightingNote": "structural / claims",
+    "rescore": "recompute",
+    "ledgerTitle": "Claim ledger",
+    "flagsTitle": "Structural flags · computed, not guessed",
+    "flagsFormula": "structural 100 − Σ penalties",
+    "method": "method · structural × 0.3 + claims × 0.7 · reproducible by hand",
+    "noStructuralFlags": "No structural flags — byline, date, tone and length all checked out clean."
   },
   "error": {
     "title": "Analysis error",
@@ -103,11 +141,11 @@
     "issues": "Notable Issues"
   },
   "nav": {
-    "howItWorks": "How it works",
-    "methodology": "Methodology",
-    "pricing": "Pricing",
-    "forTeams": "For teams",
-    "api": "API",
+    "cost": "001 Cost",
+    "signals": "002 Signals",
+    "inspector": "003 Inspector",
+    "method": "004 Method",
+    "history": "History",
     "installExtension": "Install extension"
   },
   "claim": {

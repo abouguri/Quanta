@@ -11,8 +11,7 @@ import { AnalysisHistory as AnalysisHistoryEntry, saveAnalysis } from '@/lib/his
 import { useTranslation } from '@/lib/i18n'
 import { AnalysisFailure, resolveErrorMessage } from '@/lib/errorMessages'
 import {
-  QuantaNav, TrustStrip, HowItWorks, ComparePreview,
-  Methodology, QuoteStrip, CTAFooter,
+  QuantaNav, CostSection, SignalsSection, InspectorSection, MethodSection, AccessSection,
 } from '@/components/QuantaSections'
 
 type Stage = 'input' | 'analyzing' | 'report'
@@ -34,6 +33,7 @@ function HomeInner() {
   const [failure, setFailure] = useState<AnalysisFailure | null>(null)
   const [currentUrl, setCurrentUrl] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const { language, t } = useTranslation()
   const searchParams = useSearchParams()
 
@@ -161,54 +161,59 @@ function HomeInner() {
   const showMarketing = stage === 'input'
 
   return (
-    <div id="app" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <QuantaNav onHome={handleReset} />
+    <div id="app" dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ background: 'var(--bone)', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 14px 0' }}>
+        <QuantaNav onHome={handleReset} onOpenHistory={() => setHistoryOpen(true)} />
+      </div>
 
-      <section style={{ padding: '72px 0 96px' }}>
-        <div className="q-container">
-          {failure && (
-            <div style={{
-              border: '0.5px solid var(--disputed)',
-              borderLeft: '3px solid var(--disputed)',
-              padding: '14px 18px',
-              marginBottom: 36,
-              fontSize: 14,
-              borderRadius: 6,
-              color: 'var(--disputed)',
-              background: 'var(--paper)',
-            }}>
-              <div className="q-eyebrow" style={{ color: 'var(--disputed)', marginBottom: 4 }}>
-                {t('error.title')}
-              </div>
-              {resolveErrorMessage(failure, t)}
+      <AnalysisHistory
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onSelect={handleSelectHistory}
+        currentUrl={currentUrl}
+        refreshKey={historyRefreshKey}
+      />
+
+      {failure && (
+        <div className="q-container" style={{ paddingTop: 24 }}>
+          <div style={{
+            border: '0.5px solid var(--unsupported)',
+            borderLeft: '3px solid var(--unsupported)',
+            padding: '14px 18px',
+            fontSize: 14,
+            borderRadius: 6,
+            color: 'var(--unsupported)',
+            background: 'var(--white)',
+          }}>
+            <div className="q-eyebrow" style={{ color: 'var(--unsupported)', marginBottom: 4 }}>
+              {t('error.title')}
             </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: 64 }}>
-            <main style={{ minWidth: 0 }}>
-              {stage === 'input' && <ArticleInput onSubmit={handleAnalyze} />}
-              {stage === 'analyzing' && <AnalyzingStage target={target} steps={analyzeSteps} activeLabel={activeStepLabel} />}
-              {stage === 'report' && result && (
-                <CredibilityReport result={result} currentUrl={currentUrl} onReset={handleReset} />
-              )}
-            </main>
-            <AnalysisHistory
-              onSelect={handleSelectHistory}
-              currentUrl={currentUrl}
-              refreshKey={historyRefreshKey}
-            />
+            {resolveErrorMessage(failure, t)}
           </div>
         </div>
-      </section>
+      )}
+
+      {stage === 'input' && (
+        <div className="q-container">
+          <ArticleInput onSubmit={handleAnalyze} />
+        </div>
+      )}
+      {stage === 'analyzing' && (
+        <AnalyzingStage target={target} steps={analyzeSteps} activeLabel={activeStepLabel} />
+      )}
+      {stage === 'report' && result && (
+        <div className="q-container" style={{ paddingTop: 24 }}>
+          <CredibilityReport result={result} currentUrl={currentUrl} onReset={handleReset} />
+        </div>
+      )}
 
       {showMarketing && (
         <>
-          <TrustStrip />
-          <HowItWorks />
-          <ComparePreview />
-          <Methodology />
-          <QuoteStrip />
-          <CTAFooter />
+          <CostSection />
+          <SignalsSection />
+          <InspectorSection />
+          <MethodSection />
+          <AccessSection />
         </>
       )}
     </div>

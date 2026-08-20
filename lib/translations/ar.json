@@ -8,7 +8,20 @@
     "enterHint": "اضغط ↵ للتحليل",
     "urlPrefix": "رابط ›",
     "charsNeedMore": "— تحتاج {n} أكثر",
-    "charsReady": "— جاهز"
+    "charsReady": "— جاهز",
+    "instrumentBadge": "الأداة v2 · مباشر",
+    "heroLine1": "الحقيقة،",
+    "heroLine2": "مقيسة —",
+    "heroLine3": "ومعروضة",
+    "heroSubtitle": "الصق رابطًا. تستخرج Quanta الادعاءات القابلة للتحقق، وتراجع كل واحد منها مقابل مدققي حقائق مستقلين، وتقيس بنية الصفحة نفسها، ثم تبث تقريرًا من 0 إلى 100 يُظهر عمله.",
+    "submitButtonNow": "الآن",
+    "tryOneOf": "جرّب",
+    "statsLine": "مرحلتا تقييم · بحث ثلاثي المستويات عن الادعاءات (قاعدة بيانات ← بحث ← نموذج)",
+    "quotaLine": "10 عمليات / 24 ساعة لكل عنوان IP · بدون حساب · السجل محفوظ محليًا فقط",
+    "signalPanelTitle": "العمليات الأخيرة · هذا المتصفح",
+    "signalPanelEmpty": "لا توجد عمليات بعد. قِس مقالًا وسيظهر هنا سجل محلي متجدد لآخر 12 تقريرًا.",
+    "signalPanelStats": "الوسيط {median} · المدى {spread} · هذا المتصفح فقط",
+    "signalPanelStatsEmpty": "لا يوجد سجل محلي بعد"
   },
   "analyzing": {
     "nowReading": "جاري القراءة",
@@ -17,7 +30,10 @@
     "doNotRefresh": "لا تحدث الصفحة — تحليل جارٍ",
     "waitingResults": "— في انتظار النتائج…",
     "queued": "في الانتظار",
-    "done": "✓ تم"
+    "done": "✓ تم",
+    "pass01": "التحليل البنيوي",
+    "passes": "مرحلة مكتملة",
+    "frames": "إطارات SSE"
   },
   "report": {
     "analyzeAnother": "← تحليل آخر",
@@ -65,7 +81,29 @@
     "claimsSummary": "{n} ادعاءات · {m} مطابقة في قاعدة تدقيق الحقائق",
     "structuralRedFlags": "مؤشرات بنيوية حمراء",
     "freeTierUpsell": "قم بالترقية لمعرفة أي الادعاءات في هذا المقال موثّقة أو متنازع عليها أو غير مُتحقَّق منها — مع روابط إلى عمليات تدقيق مستقلة.",
-    "freeTierBadge": "الباقة المجانية"
+    "freeTierBadge": "الباقة المجانية",
+    "readoutStructural": "بنيوي",
+    "readoutStructuralNote": "علامة واحدة · −{penalty}",
+    "readoutStructuralNotePlural": "{n} علامات · −{penalty}",
+    "readoutStructuralNoteClean": "لا علامات",
+    "readoutClaims": "الادعاءات",
+    "readoutClaimsNote": "{n} فحص · {m} في قاعدة البيانات",
+    "readoutClaimsNoScore": "—",
+    "readoutClaimsNoteFree": "لم يُشغّل · الباقة المجانية",
+    "readoutConfidence": "الثقة",
+    "readoutConfidenceHigh": "مرتفعة",
+    "readoutConfidenceMedium": "متوسطة",
+    "readoutConfidenceLow": "منخفضة",
+    "readoutConfidenceNote": "الكاتب + التاريخ + الطول",
+    "readoutWeighting": "الوزن",
+    "readoutWeightingValue": "30/70",
+    "readoutWeightingNote": "بنيوي / ادعاءات",
+    "rescore": "إعادة الحساب",
+    "ledgerTitle": "سجل الادعاءات",
+    "flagsTitle": "المؤشرات البنيوية · محسوبة، ليست مخمّنة",
+    "flagsFormula": "بنيوي 100 − مجموع الخصومات",
+    "method": "الطريقة · بنيوي × 0.3 + ادعاءات × 0.7 · قابلة للحساب يدويًا",
+    "noStructuralFlags": "لا توجد مؤشرات بنيوية — الكاتب والتاريخ والنبرة والطول كلها سليمة."
   },
   "error": {
     "title": "خطأ في التحليل",
@@ -103,11 +141,11 @@
     "issues": "المشاكل البارزة"
   },
   "nav": {
-    "howItWorks": "كيف يعمل",
-    "methodology": "المنهجية",
-    "pricing": "الأسعار",
-    "forTeams": "للفرق",
-    "api": "واجهة برمجية",
+    "cost": "001 التكلفة",
+    "signals": "002 المؤشرات",
+    "inspector": "003 المفتش",
+    "method": "004 المنهجية",
+    "history": "السجل",
     "installExtension": "تثبيت الإضافة"
   },
   "claim": {

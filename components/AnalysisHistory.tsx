@@ -8,16 +8,19 @@ interface AnalysisHistoryProps {
   onSelect: (entry: AnalysisHistoryEntry) => void
   currentUrl?: string | null
   refreshKey?: number
+  open: boolean
+  onClose: () => void
 }
 
 function scoreColor(score: number): string {
-  if (score >= 80) return 'var(--moss)'
-  if (score >= 60) return 'var(--mixed)'
+  if (score >= 80) return 'var(--verified)'
+  if (score >= 60) return 'var(--contested)'
   if (score >= 40) return 'var(--misleading-soft)'
-  return 'var(--vermillion)'
+  return 'var(--unsupported)'
 }
 
-export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHistoryProps) {
+/** A slide-over panel, not a persistent sidebar — opened from the nav's History button. */
+export function AnalysisHistory({ onSelect, currentUrl, refreshKey, open, onClose }: AnalysisHistoryProps) {
   const { t } = useTranslation()
   const [history, setHistory] = useState<AnalysisHistoryEntry[]>([])
   const [mounted, setMounted] = useState(false)
@@ -25,7 +28,7 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHi
   useEffect(() => {
     setHistory(getHistory())
     setMounted(true)
-  }, [refreshKey])
+  }, [refreshKey, open])
 
   const handleClear = () => {
     if (confirm(t('history.confirmClear'))) {
@@ -34,29 +37,53 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHi
     }
   }
 
+  const handleSelect = (entry: AnalysisHistoryEntry) => {
+    onSelect(entry)
+    onClose()
+  }
+
+  if (!open) return null
+
   return (
-    <aside style={{
-      borderLeft: '1px solid var(--paper-rule)',
-      paddingLeft: 28,
-      position: 'sticky',
-      top: 32,
-      alignSelf: 'start',
-      maxHeight: 'calc(100vh - 64px)',
-      overflowY: 'auto',
-    }}>
+    <>
+      <div
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 90 }}
+      />
+      <aside
+        className="animate-fadeIn"
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: 'min(400px, 100vw)',
+          background: 'var(--paper)',
+          borderLeft: '1px solid var(--ghost)',
+          padding: '28px 28px 40px',
+          overflowY: 'auto',
+          zIndex: 91,
+          boxShadow: '-24px 0 60px rgba(0,0,0,0.24)',
+        }}
+      >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
-        <p className="smcap" style={{ color: 'var(--vermillion)', margin: 0 }}>{t('history.title')}</p>
-        {mounted && history.length > 0 && (
-          <button
-            onClick={handleClear}
-            className="mono"
-            style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer' }}
-          >
-            {t('history.clearAll')}
+        <p className="smcap" style={{ color: 'var(--accent)', margin: 0 }}>{t('history.title')}</p>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          {mounted && history.length > 0 && (
+            <button
+              onClick={handleClear}
+              className="mono"
+              style={{ fontSize: 10, color: 'var(--grey)', letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer' }}
+            >
+              {t('history.clearAll')}
+            </button>
+          )}
+          <button onClick={onClose} className="mono" style={{ fontSize: 14, color: 'var(--grey)', cursor: 'pointer' }} aria-label="Close">
+            ✕
           </button>
-        )}
+        </div>
       </div>
-      <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', color: 'var(--ink-2)', margin: '0 0 18px', fontSize: 14 }}>
+      <p style={{ fontFamily: 'var(--sans)', color: 'var(--ink-2)', margin: '0 0 18px', fontSize: 14 }}>
         {t('history.subtitle')}
       </p>
 
@@ -80,12 +107,13 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey }: AnalysisHi
               key={entry.id}
               entry={entry}
               active={!!currentUrl && currentUrl === entry.url}
-              onSelect={onSelect}
+              onSelect={handleSelect}
             />
           ))}
         </ol>
       )}
-    </aside>
+      </aside>
+    </>
   )
 }
 
@@ -131,19 +159,19 @@ function HistoryItem({
         }}
       >
         <div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 32, lineHeight: 0.9, color: c, letterSpacing: '-0.02em' }}>
+          <div className="mono" style={{ fontSize: 30, lineHeight: 0.9, color: c, letterSpacing: '-0.02em' }}>
             {entry.score}
           </div>
-          <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', letterSpacing: '0.16em', marginTop: 2 }}>/100</div>
+          <div className="mono" style={{ fontSize: 9, color: 'var(--grey)', letterSpacing: '0.16em', marginTop: 2 }}>/100</div>
         </div>
         <div style={{ minWidth: 0 }}>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--grey)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
             {sourceName}{sourceName ? ' · ' : ''}{whenAgo}
           </div>
           <div style={{
-            fontFamily: 'var(--serif)',
+            fontFamily: 'var(--sans)',
             fontSize: 16,
-            lineHeight: 1.18,
+            lineHeight: 1.25,
             color: 'var(--ink)',
             marginTop: 4,
             display: '-webkit-box',
