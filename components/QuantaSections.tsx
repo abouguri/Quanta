@@ -42,27 +42,27 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       boxShadow: '0 0 0 2px var(--bone), 0 4px 14px rgba(0,0,0,0.16)',
       width: 'fit-content',
     }}>
-      <nav style={{ display: 'flex', gap: 2, padding: '5px 8px', alignItems: 'center' }}>
-        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'transparent', border: 0, cursor: 'pointer', padding: '4px 8px 4px 5px' }}>
-          <svg width="14" height="14" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <nav style={{ display: 'flex', gap: 0, padding: '4px 6px', alignItems: 'center' }}>
+        <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 0, cursor: 'pointer', padding: '4px 7px 4px 4px' }}>
+          <svg width="13" height="13" viewBox="0 0 64 64" fill="none" aria-hidden="true">
             <circle cx="32" cy="30" r="13" stroke="#F1EEE7" strokeWidth="4" fill="none" />
             <circle cx="44" cy="42" r="4" fill="#E6A23C" />
           </svg>
-          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
+          <span className="mono" style={{ fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#F1EEE7' }}>Quanta</span>
         </button>
         {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
+          <a key={label} href={href} className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 6px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
             {label}
           </a>
         ))}
-        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
+        <button onClick={onOpenHistory} className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 6px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}>
           {t('nav.history')}
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginLeft: 3 }}>
           <LanguageSelector />
           <ThemeToggle />
         </div>
-        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 6 }}>
+        <a href="#access" className="mono" style={{ fontSize: 9, letterSpacing: '0.03em', textTransform: 'uppercase', padding: '4px 7px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
           {t('nav.installExtension')}
         </a>
       </nav>

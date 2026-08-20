@@ -3,7 +3,7 @@
 import { useTheme } from '@/lib/theme'
 import { useEffect, useState } from 'react'
 
-const BOX = 30
+const BOX = 24
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -35,11 +35,11 @@ export function ThemeToggle() {
       }}
     >
       {theme === 'light' ? (
-        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
         </svg>
       ) : (
-        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
