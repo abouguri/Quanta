@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme'
 import { TranslationProvider } from '@/lib/i18n'
+import { AuthProvider } from '@/lib/supabase/auth-context'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://factnews-six.vercel.app'
 const TITLE = 'Quanta — Truth, measured.'
@@ -67,7 +68,9 @@ export default function RootLayout({
         />
         <ThemeProvider>
           <TranslationProvider>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </TranslationProvider>
         </ThemeProvider>
       </body>

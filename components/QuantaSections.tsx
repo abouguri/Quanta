@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
+import { useAuth } from '@/lib/supabase/auth-context'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 
@@ -69,6 +70,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           <LanguageSelector />
           <ThemeToggle />
         </div>
+        <AccountMenu />
         <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
           {t('nav.installExtensionShort')}
         </a>
@@ -86,6 +88,75 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+/** Signed-out: a plain sign-in link. Signed-in: an initial that opens a small menu with account + sign-out. */
+function AccountMenu() {
+  const { t } = useTranslation()
+  const { user, profile, loading } = useAuth()
+  const [open, setOpen] = useState(false)
+
+  if (loading) return <div style={{ width: 26, height: 26 }} />
+
+  if (!user) {
+    return (
+      <a
+        href="/auth/sign-in"
+        className="mono"
+        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}
+      >
+        {t('nav.signIn')}
+      </a>
+    )
+  }
+
+  const initial = (profile?.email ?? user.email ?? '?').charAt(0).toUpperCase()
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        title={profile?.email ?? user.email ?? undefined}
+        style={{
+          width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(255,255,255,0.14)', color: '#F1EEE7', border: 0, cursor: 'pointer',
+          fontFamily: 'var(--mono)', fontSize: 11,
+        }}
+      >
+        {initial}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
+          <div style={{
+            position: 'absolute', top: 32, right: 0, zIndex: 61, minWidth: 180,
+            background: 'var(--deep)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 6,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.32)', overflow: 'hidden',
+          }}>
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.14)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: '#a3a19b', wordBreak: 'break-all' }}>
+              {profile?.email ?? user.email}
+            </div>
+            <a
+              href="/account"
+              className="mono"
+              style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#F1EEE7' }}
+            >
+              {t('nav.account')}
+            </a>
+            <form action="/auth/sign-out" method="post">
+              <button
+                type="submit"
+                className="mono"
+                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#F1EEE7', background: 'transparent', border: 0, cursor: 'pointer' }}
+              >
+                {t('nav.signOut')}
+              </button>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -125,7 +125,10 @@
     "inspector": "المفتش",
     "method": "المنهجية",
     "history": "السجل",
-    "installExtensionShort": "الإضافة"
+    "installExtensionShort": "الإضافة",
+    "signIn": "تسجيل الدخول",
+    "account": "الحساب",
+    "signOut": "تسجيل الخروج"
   },
   "claim": {
     "verdictTrue": "موثّق",
