@@ -1,5 +1,8 @@
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const MODEL = 'llama-3.3-70b-versatile'
+// llama-3.3-70b-versatile was retired from Groq's catalog (calls started
+// failing with a 404 model_not_found) — this is its replacement, verified
+// against the real claim-extraction and synthesis prompts.
+const MODEL = 'openai/gpt-oss-120b'
 
 const MAX_ATTEMPTS = 3
 const BASE_BACKOFF_MS = 400
@@ -50,6 +53,11 @@ export async function callGroq(
     ],
     temperature: options.temperature ?? 0.3,
     max_tokens: options.maxTokens ?? 1024,
+    // gpt-oss is a reasoning model: its thinking goes in a separate
+    // `reasoning` field, but at default effort it can spend the whole
+    // max_tokens budget there and return empty `content`. Low effort keeps
+    // reasoning short enough that the JSON answer still fits.
+    reasoning_effort: 'low',
   })
 
   let lastError: GroqError = new GroqError('Groq request never ran', false)

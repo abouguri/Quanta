@@ -302,7 +302,7 @@ export function InspectorSection() {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 20px', background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            <span>engine v2 · llama 3.3 70b · groq</span>
+            <span>engine v2 · gpt-oss-120b · groq</span>
             <span>{DEMO_CLAIMS.length} claims shown</span>
           </div>
         </div>
