@@ -106,7 +106,7 @@ function HomeInner() {
           } else if ((data as AnalysisResult).version === 2) {
             finalResult = data as AnalysisResult
             setAnalyzeSteps(prev => prev.map(s => ({ ...s, done: true })))
-            saveAnalysis(finalResult, url || undefined)
+            await saveAnalysis(finalResult, url || undefined)
             setHistoryRefreshKey(k => k + 1)
           }
         }

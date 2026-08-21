@@ -111,7 +111,8 @@
     "justNow": "just now",
     "minutesAgo": "{count}m ago",
     "hoursAgo": "{count}h ago",
-    "daysAgo": "{count}d ago"
+    "daysAgo": "{count}d ago",
+    "loading": "LOADING…"
   },
   "copy": {
     "button": "Copy results",

@@ -111,7 +111,8 @@
     "justNow": "الآن",
     "minutesAgo": "منذ {count} د",
     "hoursAgo": "منذ {count} س",
-    "daysAgo": "منذ {count} أيام"
+    "daysAgo": "منذ {count} أيام",
+    "loading": "جارٍ التحميل…"
   },
   "copy": {
     "button": "نسخ النتائج",

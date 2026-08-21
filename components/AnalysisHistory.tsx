@@ -26,13 +26,16 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey, open, onClos
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setHistory(getHistory())
-    setMounted(true)
+    setMounted(false)
+    getHistory().then(h => {
+      setHistory(h)
+      setMounted(true)
+    })
   }, [refreshKey, open])
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (confirm(t('history.confirmClear'))) {
-      clearHistory()
+      await clearHistory()
       setHistory([])
     }
   }
@@ -87,7 +90,18 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey, open, onClos
         {t('history.subtitle')}
       </p>
 
-      {!mounted || history.length === 0 ? (
+      {!mounted ? (
+        <div style={{
+          padding: '32px 12px',
+          textAlign: 'center',
+          fontFamily: 'var(--mono)',
+          fontSize: 12,
+          color: 'var(--ink-3)',
+          letterSpacing: '0.1em',
+        }}>
+          {t('history.loading')}
+        </div>
+      ) : history.length === 0 ? (
         <div style={{
           padding: '32px 12px',
           textAlign: 'center',

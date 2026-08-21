@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from '@/lib/i18n'
-import { getHistory } from '@/lib/history'
+import { getHistory, type AnalysisHistory as HistoryEntry } from '@/lib/history'
+import { useAuth } from '@/lib/supabase/auth-context'
 
 const SAMPLE_URLS = [
   { url: 'https://apnews.com/article/election-night-recount-pennsylvania', label: 'AP News — election recount' },
@@ -243,8 +244,9 @@ function SignalField() {
   const band = x > 0.72 ? 'verified' : x > 0.42 ? 'contested' : 'unsupported'
   const fieldCaption = `sample at ${(x * 100).toFixed(0)}/${(y * 100).toFixed(0)} · ${band} band`
 
-  const [recent, setRecent] = useState<ReturnType<typeof getHistory>>([])
-  useEffect(() => { setRecent(getHistory()) }, [])
+  const { user } = useAuth()
+  const [recent, setRecent] = useState<HistoryEntry[]>([])
+  useEffect(() => { getHistory().then(setRecent) }, [user?.id])
   const scores = recent.map(r => r.score)
   const median = scores.length ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : null
   const spread = scores.length ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
