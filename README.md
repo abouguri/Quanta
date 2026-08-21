@@ -21,9 +21,9 @@
 
 ---
 
-![A Quanta credibility report](docs/screenshots/report-high.png)
+![The Quanta home screen — URL input beside a cursor-tracked signal field](docs/screenshots/app-input.png)
 
-<div align="center"><sub>A live <i>Guardian</i> article, measured — 91/100, one structural flag, five claims verified.</sub></div>
+<div align="center"><sub>Instrument v2: a mono-and-dark-panel redesign. The right-hand panel is a real thing, not decoration — move the cursor and it samples a reading; the numbers streaming past it are the same illustrative vocabulary as the "Try" links below the input, not live telemetry.</sub></div>
 
 ---
 
@@ -47,45 +47,47 @@ The score is arithmetic over those verdicts, not a vibe. You can read the formul
 
 ### 1 · Paste a URL or the article text
 
-The archive on the right is every pass you've run, kept in `localStorage` — no account needed, and the history never leaves the browser.
-
-![Article input](docs/screenshots/app-input.png)
+The nav's history button opens the archive — every pass you've run, kept in `localStorage`, no account needed. It never leaves the browser.
 
 ### 2 · Watch it think
 
-The API is a **Server-Sent Events** stream, so the UI names each step as the server reaches it — including one line per claim being verified. Nothing is a fake progress bar; step `06` is genuinely the sixth frame off the wire.
+The API is a **Server-Sent Events** stream, so the UI names each step as the server reaches it, and mirrors the raw frames on the right. Nothing is a fake progress bar — each line there is a frame that actually arrived off the wire.
 
-![Streaming analysis progress](docs/screenshots/analyzing.png)
+![Streaming analysis, live SSE frames on the right](docs/screenshots/analyzing.png)
 
 ### 3 · Read the verdict
 
-The report at the top of this page scored a *Guardian* piece at 91. Here is the same pipeline over a deliberately fabricated tabloid text: 40/100, four structural flags, four false claims — two of them matched directly against fact-check databases.
+A live BBC piece, scored 77/100 — "moderate," one structural flag (no byline), five claims checked and none of them pre-existing in a fact-check database, so every verdict below is a labelled AI assessment.
 
-![Credibility report for a fabricated article](docs/screenshots/report-low.png)
+![Credibility report for a live BBC article](docs/screenshots/report-high.png)
+
+Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text and the structural score collapses to 40 — four flags, −60 — but the overall lands at 68, "moderate," because the claims pass came back *misleading* and *unverified* rather than confidently false. That gap is not a bug to hide; it's the reason the structural pass is only 30% of the score and the claims pass is 70%: a model that won't guess can't hand out a false-positive "confirmed false," and the number should say so honestly rather than round down for effect.
+
+![Credibility report for a low-quality pasted article](docs/screenshots/report-low.png)
+
+<sub>Full-length version: [high-scoring](docs/screenshots/report-high-full.png) · [low-scoring](docs/screenshots/report-low-full.png)</sub>
 
 ### 4 · Every claim, with its receipt
 
-This is the part that matters. Each claim carries a verdict, a confidence, the publisher that issued the rating, a link to the original fact-check, and an honest `No external source found` marker when the assessment came from the model instead.
+The claim ledger is an accordion, not a card grid — click a row and it opens in place. Each one carries a verdict, a confidence, and either a publisher link or an honest `No external source found` when the assessment came from the model instead.
 
-![Claim verification cards](docs/screenshots/claims.png)
+![Claim ledger for the BBC article — three verified, one false, one unverified](docs/screenshots/claims.png)
 
 ### 5 · Structural signals, computed not guessed
 
-![Structural red flags](docs/screenshots/red-flags.png)
+![Structural red flags and the no-source-on-file fallback](docs/screenshots/red-flags.png)
 
 ### 6 · In the dark
 
-The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components. An inline script applies the stored preference before first paint, so there's no white flash on load.
+The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed near-black instrument panels (nav, claim ledger), which stay pure black in *both* themes on purpose. This run also shows a real fact-check database hit: USA Today rated the headline Apollo 11 claim "Missing Context," which is why it's marked `MISLEADING` instead of the model's own assessment.
 
-![The report in dark mode](docs/screenshots/report-dark.png)
+![The report in dark mode, with a real fact-check-database match](docs/screenshots/report-dark.png)
 
 ### 7 · Source dossier
 
 32 outlets are profiled locally — credibility score, editorial lean, track record, and the standing fact-checker note. Unknown domains degrade gracefully to "source database not consulted" rather than inventing a rating.
 
-<img src="docs/screenshots/source-dossier.png" width="380" alt="Source dossier for The Guardian" />
-
-> *The full-length version of a report is [here](docs/screenshots/report-low-full.png).*
+<img src="docs/screenshots/source-dossier.png" width="380" alt="Source dossier for the BBC" />
 
 ---
 
@@ -129,7 +131,7 @@ flowchart TD
     D --> E
     E --> F{"Tier"}
     F -- free --> G["Score = structural"]
-    F -- paid --> H["Claim extraction<br/>Llama 3.3 70B via Groq"]
+    F -- paid --> H["Claim extraction<br/>gpt-oss-120b via Groq"]
     H --> I["Google Fact Check Tools API"]
     I -- hit --> L["Verdict + publisher link"]
     I -- miss --> J["Brave Search<br/>known fact-check domains"]
@@ -160,14 +162,16 @@ Structural weight is deliberately low: a well-formatted lie should not outscore 
 
 ```
 app/api/analyze/route.ts   SSE endpoint · CORS · rate limit · scrape → stream
+lib/urlGuard.ts             SSRF guard on scraped URLs        (blocks private/link-local, re-checks redirects)
 lib/structural.ts          deterministic signals          (no network)
 lib/groq.ts                shared LLM client              (retry, fence + JSON recovery)
-lib/claims.ts              claim extraction               (Groq)
+lib/claims.ts               claim extraction               (Groq)
 lib/factcheck.ts           Google Fact Check → Brave      (graceful null on miss)
-lib/analyze.ts             async generator orchestrating the passes
+lib/analyze.ts              async generator orchestrating the passes
 lib/synthesize.ts          last-resort model assessment   (Groq, never throws)
+lib/errorMessages.ts        API error code → translated copy
 lib/sourceDatabase.ts      32 outlets: score, lean, record
-components/                report UI · claim cards · history · marketing
+components/                report UI · claim ledger · history drawer · marketing
 extension/                 MV3: content script · service worker · popup
 ```
 
@@ -209,6 +213,7 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 - **A caller-supplied URL is treated as an attack surface.** The endpoint fetches whatever URL it is handed from inside the deployment and returns the body, so `lib/urlGuard.ts` rejects non-http schemes, private and link-local addresses (including IPv4-mapped IPv6), and hostnames whose DNS answers point anywhere internal. Redirects are followed by hand so every hop is re-checked.
 - **The quota is refunded when the work never happened.** Validation runs before a slot is claimed; the scrape runs after, and a dead link or a paywall hands the slot back rather than costing one of three daily analyses.
 - **Errors carry a code, not a stack.** Failures travel as a typed `code` plus a fallback sentence; each client renders its own translated copy, and internal strings never reach the screen.
+- **The LLM provider is one constant, not a scattered assumption.** When Groq retired `llama-3.3-70b-versatile` from its catalog mid-project, every call site kept working off one swap in `lib/groq.ts` — including the `reasoning_effort` tuning the replacement model needs to keep its chain-of-thought from eating the whole token budget before emitting an answer.
 
 ---
 
@@ -255,7 +260,7 @@ Load `extension/dist` at `chrome://extensions` with Developer Mode on. To point 
 This is a working prototype, not a finished product. Where it falls short:
 
 - **There is still no auth.** The tier is now decided server-side in `resolveTier()` instead of being read off the request body, but that function returns `paid` for everyone — the rate limit, not a subscription, is what bounds usage.
-- **The score is uncalibrated.** The weights are reasoned, not fitted. They need a labelled evaluation set before anyone treats the number as authoritative.
+- **The score is uncalibrated.** The weights are reasoned, not fitted. The low-score example above shows why that matters in practice: four structural red flags still landed at a 68 overall, because the claims pass declined to confidently call anything false. That is the system working as designed — but "as designed" still isn't "validated against a labelled set," which is what it would take before anyone treats the number as authoritative.
 - **The source database is a hand-curated file.** 32 outlets, no update mechanism.
 - **No persistence.** History is `localStorage`; clearing the browser clears the record.
 - **Scraping fails on hard targets.** Paywalls, heavy JS, bot protection.
@@ -272,6 +277,6 @@ This is a working prototype, not a finished product. Where it falls short:
 
 Built with Next.js, TypeScript and Groq · MIT licensed
 
-<sub>Every report screenshot above is a real analysis of a live article, captured from the running app.</sub>
+<sub>Every report screenshot above is a real analysis of a live article or a real pasted text, captured from the running app.</sub>
 
 </div>
