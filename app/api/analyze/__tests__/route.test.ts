@@ -3,6 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const lookup = vi.hoisted(() => vi.fn())
 vi.mock('dns/promises', () => ({ lookup }))
 
+const getUser = vi.hoisted(() => vi.fn())
+const from = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({ auth: { getUser }, from }),
+}))
+
+/** A chainable stub matching enough of the supabase-js query builder surface for these tests. */
+function profileQuery(tier: 'free' | 'paid' | null) {
+  const result = tier === null ? { data: null, error: new Error('not found') } : { data: { tier }, error: null }
+  const builder: Record<string, unknown> = {
+    select: vi.fn(() => builder),
+    eq: vi.fn(() => builder),
+    single: vi.fn(() => Promise.resolve(result)),
+  }
+  return builder
+}
+
 const PUBLIC = [{ address: '93.184.216.34' }]
 
 const LONG_TEXT =
@@ -47,6 +64,10 @@ describe('POST /api/analyze', () => {
     delete process.env.BRAVE_SEARCH_API_KEY
     delete process.env.UPSTASH_REDIS_REST_URL
     delete process.env.UPSTASH_REDIS_REST_TOKEN
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    getUser.mockReset()
+    from.mockReset()
   })
 
   afterEach(() => {
@@ -286,5 +307,92 @@ describe('POST /api/analyze', () => {
     expect(response.status).toBe(204)
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
     expect(response.headers.get('Access-Control-Allow-Headers')).toContain('X-Quanta-Install-Id')
+  })
+
+  describe('accounts', () => {
+    const groqOk = () =>
+      vi.fn(async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: '{"claims":[]}' } }] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+
+    it('Supabase unconfigured: preserves the original paid-for-everyone behavior', async () => {
+      vi.stubGlobal('fetch', groqOk())
+      const { POST } = await loadRoute('production')
+
+      const response = await POST(post({ articleText: LONG_TEXT }))
+      const frames = await readFrames(response)
+
+      expect(frames.at(-1)).toMatchObject({ tier: 'paid' })
+      expect(getUser).not.toHaveBeenCalled()
+    })
+
+    it('signed out (Supabase configured, no session): free tier, IP bucket', async () => {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co'
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+      getUser.mockResolvedValue({ data: { user: null } })
+      vi.stubGlobal('fetch', groqOk())
+      const { POST } = await loadRoute('production')
+
+      const response = await POST(post({ articleText: LONG_TEXT }))
+      const frames = await readFrames(response)
+
+      expect(frames.at(-1)).toMatchObject({ tier: 'free' })
+      expect(from).not.toHaveBeenCalled()
+    })
+
+    it('signed in, free tier: user-scoped bucket, not IP', async () => {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co'
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+      getUser.mockResolvedValue({ data: { user: { id: 'user-free' } } })
+      from.mockReturnValue(profileQuery('free'))
+      vi.stubGlobal('fetch', groqOk())
+      const { POST } = await loadRoute('production')
+      const headers = { 'x-forwarded-for': '203.0.113.50' }
+
+      // 10 requests from this user succeed even though the shared IP bucket
+      // would also allow 10 -- proves it's user:user-free, not ip:203.0.113.50,
+      // by exhausting it from a second user next.
+      for (let i = 0; i < 10; i++) {
+        expect((await POST(post({ articleText: LONG_TEXT }, headers))).status).toBe(200)
+      }
+      expect((await POST(post({ articleText: LONG_TEXT }, headers))).status).toBe(429)
+
+      getUser.mockResolvedValue({ data: { user: { id: 'user-free-2' } } })
+      const other = await POST(post({ articleText: LONG_TEXT }, headers))
+      expect(other.status).toBe(200)
+    })
+
+    it('signed in, paid tier: raised limit, well past the free ceiling', async () => {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co'
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+      getUser.mockResolvedValue({ data: { user: { id: 'user-paid' } } })
+      from.mockReturnValue(profileQuery('paid'))
+      vi.stubGlobal('fetch', groqOk())
+      const { POST } = await loadRoute('production')
+
+      let lastResponse: Response | undefined
+      for (let i = 0; i < 15; i++) {
+        lastResponse = await POST(post({ articleText: LONG_TEXT }))
+      }
+      expect(lastResponse!.status).toBe(200)
+      const frames = await readFrames(lastResponse!)
+      expect(frames.at(-1)).toMatchObject({ tier: 'paid' })
+    })
+
+    it('a profile lookup miss degrades to free rather than throwing', async () => {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://project.supabase.co'
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+      getUser.mockResolvedValue({ data: { user: { id: 'user-no-profile' } } })
+      from.mockReturnValue(profileQuery(null))
+      vi.stubGlobal('fetch', groqOk())
+      const { POST } = await loadRoute('production')
+
+      const response = await POST(post({ articleText: LONG_TEXT }))
+      const frames = await readFrames(response)
+      expect(frames.at(-1)).toMatchObject({ tier: 'free' })
+    })
   })
 })

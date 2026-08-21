@@ -2,6 +2,8 @@ import { analyzeArticle } from '@/lib/analyze'
 import { describeScrapeFailure, scrapeArticle } from '@/lib/scraper'
 import type { AnalysisErrorCode } from '@/types/analysis'
 import { Redis } from '@upstash/redis'
+import { createClient } from '@/lib/supabase/server'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -15,6 +17,10 @@ const CORS_HEADERS = {
 // so it is deliberately more generous.
 const RATE_LIMIT_INSTALL_MAX = 3
 const RATE_LIMIT_IP_MAX = 10
+// Generous, not infinite: this endpoint calls paid third-party APIs (Groq,
+// Brave) on every request, so a single compromised paid account shouldn't be
+// an unlimited-spend vector.
+const RATE_LIMIT_PAID_MAX = 200
 const RATE_LIMIT_WINDOW_S = 24 * 60 * 60
 
 // Every request runs the full pipeline against paid third-party APIs, so the
@@ -41,11 +47,16 @@ const redis = (() => {
 const inMemoryStore = new Map<string, number[]>()
 
 /**
- * Identifies the caller. An install ID is self-reported and trivially forged —
- * it exists to give honest extension users a stable bucket, not to authenticate.
- * The IP bucket is the actual floor.
+ * Identifies the caller. A signed-in user gets their own bucket — a strict
+ * improvement over the IP bucket (which a whole household or office NAT
+ * shares), not a loosening — sized by tier. Otherwise: an install ID is
+ * self-reported and trivially forged; it exists to give honest extension
+ * users a stable bucket, not to authenticate. The IP bucket is the actual
+ * floor for everyone else.
  */
-function rateLimitBucket(request: Request): { key: string; max: number } {
+function rateLimitBucket(request: Request, userId: string | null, tier: 'free' | 'paid'): { key: string; max: number } {
+  if (userId) return { key: `user:${userId}`, max: tier === 'paid' ? RATE_LIMIT_PAID_MAX : RATE_LIMIT_IP_MAX }
+
   const installId = request.headers.get('x-quanta-install-id')
   if (installId) return { key: `install:${installId.slice(0, 64)}`, max: RATE_LIMIT_INSTALL_MAX }
 
@@ -125,14 +136,25 @@ async function refundRateLimit(bucket: { key: string; max: number }): Promise<vo
 /**
  * The tier is decided here and nowhere else. It used to be read straight off
  * the request body, which meant any caller could switch on the full paid
- * pipeline. There is no auth yet, so everyone gets `paid` within their quota —
- * but the decision now has one server-side home for a subscription check to
- * slot into.
+ * pipeline.
  *
- * TODO: return 'free' unless the session carries an active subscription.
+ * Accounts (lib/supabase) are opt-in infrastructure — until Supabase is
+ * configured, there is no way for anyone to actually be a paid subscriber, so
+ * real tier gating would just mean "free for everyone": a live behavior
+ * change nobody asked for the moment this deploys. So: unconfigured →
+ * preserve the original behavior (paid for everyone, bounded only by the
+ * rate limit) exactly as before this file had any auth awareness. Configured
+ * → resolve for real, from the signed-in session's profile.
  */
-function resolveTier(): 'free' | 'paid' {
-  return 'paid'
+async function resolveTier(): Promise<{ tier: 'free' | 'paid'; userId: string | null }> {
+  if (!isSupabaseConfigured()) return { tier: 'paid', userId: null }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { tier: 'free', userId: null }
+
+  const { data: profile } = await supabase.from('profiles').select('tier').eq('id', user.id).single()
+  return { tier: profile?.tier === 'paid' ? 'paid' : 'free', userId: user.id }
 }
 
 function json(body: unknown, init: ResponseInit = {}): Response {
@@ -191,7 +213,8 @@ export async function POST(request: Request): Promise<Response> {
       return fail('text_too_short', 'Article text must be at least 100 characters', 400)
     }
 
-    const bucket = rateLimitBucket(request)
+    const { tier, userId } = await resolveTier()
+    const bucket = rateLimitBucket(request, userId, tier)
     let remaining: number | null = null
     if (RATE_LIMIT_ENABLED) {
       const rl = await checkRateLimit(bucket)
@@ -209,8 +232,6 @@ export async function POST(request: Request): Promise<Response> {
       if (RATE_LIMIT_ENABLED) await refundRateLimit(bucket)
       return fail(code, message, 400)
     }
-
-    const tier = resolveTier()
 
     let text = articleText || ''
     let metadata: { title?: string; source?: string; author?: string; publishedDate?: string } = {}

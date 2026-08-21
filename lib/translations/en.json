@@ -68,7 +68,6 @@
     "claimVerificationPaid": "Claim verification — paid",
     "claimsSummary": "{n} claims · {m} matched in fact-check database",
     "freeTierUpsell": "Upgrade to see which specific claims in this article are verified, disputed, or unverified — with links to independent fact-checks.",
-    "freeTierBadge": "FREE TIER",
     "readoutStructural": "Structural",
     "readoutStructuralNote": "{n} flag · −{penalty}",
     "readoutStructuralNotePlural": "{n} flags · −{penalty}",
@@ -89,7 +88,9 @@
     "flagsTitle": "Structural flags · computed, not guessed",
     "flagsFormula": "structural 100 − Σ penalties",
     "method": "method · structural × 0.3 + claims × 0.7 · reproducible by hand",
-    "noStructuralFlags": "No structural flags — byline, date, tone and length all checked out clean."
+    "noStructuralFlags": "No structural flags — byline, date, tone and length all checked out clean.",
+    "freeTierUpgrade": "Upgrade",
+    "freeTierUpgrading": "Starting checkout…"
   },
   "error": {
     "title": "Analysis error",
@@ -129,7 +130,8 @@
     "installExtensionShort": "Extension",
     "signIn": "Sign in",
     "account": "Account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "upgrade": "Upgrade"
   },
   "claim": {
     "verdictTrue": "VERIFIED",

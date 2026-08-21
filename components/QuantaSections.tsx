@@ -145,6 +145,15 @@ function AccountMenu() {
             >
               {t('nav.account')}
             </a>
+            {profile?.tier !== 'paid' && (
+              <a
+                href="/account"
+                className="mono"
+                style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)' }}
+              >
+                {t('nav.upgrade')}
+              </a>
+            )}
             <form action="/auth/sign-out" method="post">
               <button
                 type="submit"

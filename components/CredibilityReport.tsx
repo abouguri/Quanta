@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/lib/supabase/auth-context'
 import { AnalysisResult, StructuralFlag, FactCheckResult } from '@/types/analysis'
 import { getSourceCredibility } from '@/lib/sourceDatabase'
 import { useTranslation } from '@/lib/i18n'
@@ -409,6 +410,28 @@ function ClaimsSection({ claims, dbHits }: { claims: FactCheckResult[]; dbHits: 
 
 function FreeTierPrompt() {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const [starting, setStarting] = useState(false)
+
+  const upgrade = async () => {
+    if (!user) {
+      window.location.href = '/auth/sign-up'
+      return
+    }
+    setStarting(true)
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST' })
+      const body = await res.json().catch(() => ({})) as { url?: string; error?: string }
+      if (body.url) {
+        window.location.href = body.url
+      } else {
+        setStarting(false)
+      }
+    } catch {
+      setStarting(false)
+    }
+  }
+
   return (
     <div style={{
       background: 'var(--bone)',
@@ -430,9 +453,18 @@ function FreeTierPrompt() {
             {t('report.freeTierUpsell')}
           </p>
         </div>
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', color: 'var(--grey)', whiteSpace: 'nowrap' }}>
-          {t('report.freeTierBadge')}
-        </div>
+        <button
+          onClick={upgrade}
+          disabled={starting}
+          className="mono"
+          style={{
+            fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+            background: 'var(--ink)', color: 'var(--paper)', padding: '12px 18px', border: 0,
+            cursor: starting ? 'not-allowed' : 'pointer', opacity: starting ? 0.6 : 1,
+          }}
+        >
+          {starting ? t('report.freeTierUpgrading') : t('report.freeTierUpgrade')}
+        </button>
       </div>
     </div>
   )
