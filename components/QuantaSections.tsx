@@ -194,7 +194,12 @@ export function CostSection() {
   return (
     <section id="cost" className="q-anchor" style={{ padding: '96px 0' }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
-        <div style={{ background: 'var(--deep)', borderRadius: 26, padding: '30px 32px 26px', boxShadow: '0 18px 60px rgba(3,79,70,.14)' }}>
+        <div style={{
+          backgroundColor: 'var(--deep)',
+          backgroundImage: 'radial-gradient(circle, rgba(240,215,255,.20) 1.8px, transparent 2px)',
+          backgroundSize: '28px 28px',
+          borderRadius: 26, padding: '30px 32px 26px', boxShadow: '0 18px 60px rgba(3,79,70,.14)',
+        }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
             <span>structural checks</span><span>severity</span>
           </div>
@@ -246,7 +251,12 @@ const CAPABILITIES: Array<[string, string, string]> = [
 
 export function SignalsSection() {
   return (
-    <section id="signals" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px' }}>
+    <section id="signals" className="q-anchor" style={{
+      backgroundColor: 'var(--deep)',
+      backgroundImage: 'radial-gradient(circle, rgba(240,215,255,.20) 1.8px, transparent 2px)',
+      backgroundSize: '28px 28px',
+      color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
+    }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
         <div style={{ position: 'sticky', top: 120 }}>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
@@ -414,7 +424,12 @@ const FAQ: Array<[string, string, string]> = [
 export function MethodSection() {
   const [open, setOpen] = useState(0)
   return (
-    <section id="method" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px' }}>
+    <section id="method" className="q-anchor" style={{
+      backgroundColor: 'var(--deep)',
+      backgroundImage: 'radial-gradient(circle, rgba(240,215,255,.20) 1.8px, transparent 2px)',
+      backgroundSize: '28px 28px',
+      color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
+    }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
         <div>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
