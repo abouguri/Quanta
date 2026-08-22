@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from '@/lib/i18n'
 import { useAuth } from '@/lib/supabase/auth-context'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -118,6 +119,30 @@ function AccountMenu() {
   const { t } = useTranslation()
   const { user, profile, loading } = useAuth()
   const [open, setOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null)
+
+  // The dropdown can't be a plain absolutely-positioned child of the button —
+  // the nav pill clips to its rounded corners (overflow:hidden, needed for
+  // the ticker) and the row itself is overflow-x:auto (needed so it scrolls
+  // instead of forcing the whole pill wide on a phone), and either one alone
+  // clips anything that pops out past the pill's own small height. Portaling
+  // to <body> with position:fixed, positioned from the button's own rect,
+  // sidesteps every ancestor's overflow instead of fighting them.
+  useLayoutEffect(() => {
+    if (!open || !btnRef.current) return
+    const update = () => {
+      const rect = btnRef.current!.getBoundingClientRect()
+      setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
+  }, [open])
 
   if (loading) return <div style={{ width: 26, height: 26 }} />
 
@@ -138,6 +163,7 @@ function AccountMenu() {
   return (
     <div style={{ position: 'relative' }}>
       <button
+        ref={btnRef}
         onClick={() => setOpen(o => !o)}
         title={profile?.email ?? user.email ?? undefined}
         aria-label={profile?.email ?? user.email ?? t('nav.account')}
@@ -151,11 +177,11 @@ function AccountMenu() {
       >
         {initial}
       </button>
-      {open && (
+      {open && pos && typeof document !== 'undefined' && createPortal(
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
-          <div style={{
-            position: 'absolute', top: 32, right: 0, zIndex: 61, minWidth: 180,
+          <div className="q-on-deep" style={{
+            position: 'fixed', top: pos.top, right: pos.right, zIndex: 61, minWidth: 180,
             background: 'var(--deep)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 16,
             boxShadow: '0 10px 30px rgba(0,0,0,0.32)', overflow: 'hidden',
           }}>
@@ -188,7 +214,8 @@ function AccountMenu() {
               </button>
             </form>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

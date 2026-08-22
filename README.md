@@ -13,6 +13,8 @@
 ![Next.js](https://img.shields.io/badge/Next.js_14-000?style=flat-square&logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React_18-149ECA?style=flat-square&logo=react&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white)
+![Lemon Squeezy](https://img.shields.io/badge/Lemon_Squeezy-FFC233?style=flat-square&logo=lemonsqueezy&logoColor=black)
 ![Chrome MV3](https://img.shields.io/badge/Chrome_MV3-4285F4?style=flat-square&logo=googlechrome&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-black?style=flat-square)
@@ -23,7 +25,7 @@
 
 ![The Quanta home screen — URL input beside a cursor-tracked signal field](docs/screenshots/app-input.png)
 
-<div align="center"><sub>Instrument v2: a mono-and-dark-panel redesign. The right-hand panel is a real thing, not decoration — move the cursor and it samples a reading; the numbers streaming past it are the same illustrative vocabulary as the "Try" links below the input, not live telemetry.</sub></div>
+<div align="center"><sub>Soft rebrand: cream, dark teal and lilac, with a fluffy Fredoka wordmark. The right-hand panel is a real thing, not decoration — move the cursor and it samples a reading, and the structural/claims sub-scores it prints are computed from the same 0.3/0.7 formula the report uses, not made up. The numbers streaming past it are the same illustrative vocabulary as the "Try" links below the input, not live telemetry.</sub></div>
 
 ---
 
@@ -47,7 +49,7 @@ The score is arithmetic over those verdicts, not a vibe. You can read the formul
 
 ### 1 · Paste a URL or the article text
 
-The nav's history button opens the archive — every pass you've run, kept in `localStorage`, no account needed. It never leaves the browser.
+The nav's history button opens the archive — every pass you've run. No account needed; it's kept in `localStorage` and never leaves the browser. Sign in and the same archive moves server-side instead, so it follows you across devices — see [Accounts & billing](#accounts--billing).
 
 ### 2 · Watch it think
 
@@ -79,7 +81,7 @@ The claim ledger is an accordion, not a card grid — click a row and it opens i
 
 ### 6 · In the dark
 
-The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed near-black instrument panels (nav, claim ledger), which stay pure black in *both* themes on purpose. This run also shows a real fact-check database hit: USA Today rated the headline Apollo 11 claim "Missing Context," which is why it's marked `MISLEADING` instead of the model's own assessment.
+The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed dark-teal instrument panels (nav, claim ledger), which stay a "hardware panel" surface in *both* themes on purpose while everything else — paper, ink, the accent color itself — flips. This run also shows a real fact-check database hit: USA Today rated the headline Apollo 11 claim "Missing Context," which is why it's marked `MISLEADING` instead of the model's own assessment.
 
 ![The report in dark mode, with a real fact-check-database match](docs/screenshots/report-dark.png)
 
@@ -107,6 +109,18 @@ Same engine, measured against whatever tab you're on. Mozilla **Readability** ex
 <td align="center"><sub><b>Report</b> — score, breakdown, signals, red flags</sub></td>
 </tr>
 </table>
+
+---
+
+## Accounts & billing
+
+Signing in is optional — every feature above works anonymously, rate-limited by IP. An account (Supabase auth, email + password) adds:
+
+- **Server-side history.** [`lib/history.ts`](lib/history.ts) is dual-mode: signed in and Supabase configured → reads and writes a Postgres `analyses` table, row-level-security-scoped to the caller regardless of what the client claims. Signed out, or Supabase not configured → the same `localStorage` behavior the app always had. No regression for anonymous use, no second data model to keep in sync.
+- **A real paid tier.** `resolveTier()` in the API route reads `profiles.tier` for the signed-in user instead of trusting anything the client sends. **Lemon Squeezy** checkout and a signature-verified webhook ([`app/api/webhooks/lemonsqueezy/route.ts`](app/api/webhooks/lemonsqueezy/route.ts)) keep that column in sync with the actual subscription — the Supabase user id rides along as `custom_data.user_id` on the checkout and comes back on every later webhook event, so Lemon Squeezy never needs to know anything about the account system.
+- **`/account`** — plan and subscription status, a link into the Lemon Squeezy billing portal, a language preference, and sign-out.
+
+Missing configuration degrades the same way every other integration in this project does: no Supabase → `resolveTier()` returns `paid` for everyone and history stays local; no Lemon Squeezy keys → checkout responds `503` instead of taking the page down.
 
 ---
 
@@ -161,18 +175,24 @@ Structural weight is deliberately low: a well-formatted lie should not outscore 
 ## Architecture
 
 ```
-app/api/analyze/route.ts   SSE endpoint · CORS · rate limit · scrape → stream
-lib/urlGuard.ts             SSRF guard on scraped URLs        (blocks private/link-local, re-checks redirects)
-lib/structural.ts          deterministic signals          (no network)
-lib/groq.ts                shared LLM client              (retry, fence + JSON recovery)
-lib/claims.ts               claim extraction               (Groq)
-lib/factcheck.ts           Google Fact Check → Brave      (graceful null on miss)
-lib/analyze.ts              async generator orchestrating the passes
-lib/synthesize.ts          last-resort model assessment   (Groq, never throws)
-lib/errorMessages.ts        API error code → translated copy
-lib/sourceDatabase.ts      32 outlets: score, lean, record
-components/                report UI · claim ledger · history drawer · marketing
-extension/                 MV3: content script · service worker · popup
+app/api/analyze/route.ts           SSE endpoint · CORS · rate limit · scrape → stream
+app/api/checkout/route.ts          Lemon Squeezy checkout · Supabase user id round-trips via custom_data
+app/api/billing-portal/route.ts    Lemon Squeezy customer-portal link
+app/api/webhooks/lemonsqueezy/     signature-verified subscription sync → profiles.tier
+app/account/, app/auth/            account settings · sign-in/up · callback · sign-out
+lib/supabase/                      client · server · admin clients · RLS-scoped auth context
+lib/urlGuard.ts                    SSRF guard on scraped URLs     (blocks private/link-local, re-checks redirects)
+lib/structural.ts                  deterministic signals          (no network)
+lib/groq.ts                        shared LLM client              (retry, fence + JSON recovery)
+lib/claims.ts                      claim extraction               (Groq)
+lib/factcheck.ts                   Google Fact Check → Brave      (graceful null on miss)
+lib/analyze.ts                     async generator orchestrating the passes
+lib/synthesize.ts                  last-resort model assessment   (Groq, never throws)
+lib/errorMessages.ts               API error code → translated copy
+lib/sourceDatabase.ts              32 outlets: score, lean, record
+lib/history.ts                     dual-mode: Postgres (signed in) ↔ localStorage (anonymous)
+components/                        report UI · claim ledger · history drawer · marketing
+extension/                         MV3: content script · service worker · popup
 ```
 
 Each of `structural`, `claims`, `factcheck` and `synthesize` is a pure module with one job, and `analyze.ts` is an `AsyncGenerator` that yields typed frames — which is why the same engine drives the web UI and the extension without a second code path.
@@ -214,6 +234,8 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 - **The quota is refunded when the work never happened.** Validation runs before a slot is claimed; the scrape runs after, and a dead link or a paywall hands the slot back rather than costing one of three daily analyses.
 - **Errors carry a code, not a stack.** Failures travel as a typed `code` plus a fallback sentence; each client renders its own translated copy, and internal strings never reach the screen.
 - **The LLM provider is one constant, not a scattered assumption.** When Groq retired `llama-3.3-70b-versatile` from its catalog mid-project, every call site kept working off one swap in `lib/groq.ts` — including the `reasoning_effort` tuning the replacement model needs to keep its chain-of-thought from eating the whole token budget before emitting an answer.
+- **The webhook verifies signature before anything else touches the body.** Lemon Squeezy's `X-Signature` header is checked against the raw request bytes with `timingSafeEqual`, not `===` — a naive comparison leaks how many leading bytes an attacker's guess got right, one request at a time.
+- **An inline style always outranks an external stylesheet rule of equal selector weight, media query or not.** This defeated a focus ring and a responsive layout rule twice in the same audit pass before the fix moved the property in question into CSS itself instead of trying to override it from further down the cascade.
 
 ---
 
@@ -222,9 +244,10 @@ The long-lived `chrome.runtime.Port` lives in the service worker on purpose: MV3
 - **Rate limiting** — every request: 3 analyses per 24h per extension install, 10 per 24h per IP, backed by Upstash Redis with an in-memory fallback
 - **Dark mode** — a full token palette, a toggle in the nav, and a pre-paint script so the theme never flashes
 - **English + Arabic** — message catalogues with a language selector, a persisted choice, and `lang`/`dir` on the document root
-- **Local history** — version-guarded, so reports written by the previous scoring engine are discarded rather than mis-rendered
+- **History** — server-side and cross-device for signed-in users, `localStorage` otherwise; either way it's version-guarded, so reports written by a previous scoring engine are discarded rather than mis-rendered
+- **Accounts & billing** — Supabase auth, Postgres profiles behind row-level security, Lemon Squeezy checkout and a signature-verified webhook — see [Accounts & billing](#accounts--billing)
 - **SEO** — OG image, `sitemap.ts`, `robots.ts`, full Open Graph and Twitter metadata
-- **Tests** — 112 Vitest cases: the analysis generator (free/paid frames, verdict scoring, missing-key failure), the Groq client (retry on 429 and network error, no retry on 4xx, fence stripping, JSON recovery), structural scoring, verdict normalisation, the SSRF guard, the scraper, and the route end to end (validation, streaming, rate-limit buckets, quota refunds)
+- **Tests** — 141 Vitest cases across 9 files: the analysis generator (free/paid frames, verdict scoring, missing-key failure), the Groq client (retry on 429 and network error, no retry on 4xx, fence stripping, JSON recovery), structural scoring, verdict normalisation, the SSRF guard, the scraper, history's dual-mode read/write path, the Lemon Squeezy webhook (signature verification, status mapping, missing-user-id handling), and the analyze route end to end (validation, streaming, rate-limit buckets, quota refunds)
 
 ---
 
@@ -244,6 +267,9 @@ npm run check                        # typecheck + lint + test
 | `GOOGLE_FACT_CHECK_API_KEY` | grounded verdicts w/ publisher links | falls through to Brave |
 | `BRAVE_SEARCH_API_KEY` | fallback fact-check search | falls through to the model |
 | `UPSTASH_REDIS_REST_URL` / `_TOKEN` | rate limits that survive a deploy | in-memory `Map` |
+| `NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY` | accounts, server-side history | signed-out everywhere; `resolveTier()` returns `paid` for all traffic |
+| `SUPABASE_SERVICE_ROLE_KEY` | webhook writes to `profiles` (bypasses RLS — server-only, never `NEXT_PUBLIC_`) | webhook can't update subscription status |
+| `LEMONSQUEEZY_API_KEY` / `_STORE_ID` / `_VARIANT_ID` / `_WEBHOOK_SECRET` | checkout + subscription sync | `/api/checkout` returns `503` |
 
 ### Extension
 
@@ -259,17 +285,17 @@ Load `extension/dist` at `chrome://extensions` with Developer Mode on. To point 
 
 This is a working prototype, not a finished product. Where it falls short:
 
-- **There is still no auth.** The tier is now decided server-side in `resolveTier()` instead of being read off the request body, but that function returns `paid` for everyone — the rate limit, not a subscription, is what bounds usage.
+- **Auth is real but minimal.** Email + password via Supabase, no OAuth providers, no self-service account deletion, no password-reset UI beyond Supabase's default email template. `resolveTier()` reads `profiles.tier` server-side rather than trusting the client, but if Supabase isn't configured at all it falls back to `paid` for everyone — the rate limit, not a subscription, is what bounds an unconfigured deployment.
 - **The score is uncalibrated.** The weights are reasoned, not fitted. The low-score example above shows why that matters in practice: four structural red flags still landed at a 68 overall, because the claims pass declined to confidently call anything false. That is the system working as designed — but "as designed" still isn't "validated against a labelled set," which is what it would take before anyone treats the number as authoritative.
 - **The source database is a hand-curated file.** 32 outlets, no update mechanism.
-- **No persistence.** History is `localStorage`; clearing the browser clears the record.
+- **Anonymous history is still `localStorage`.** Signing in gets you server-side, cross-device history; skip that and clearing the browser still clears the record, same as before accounts existed.
 - **Scraping fails on hard targets.** Paywalls, heavy JS, bot protection.
 - **The marketing landing page uses illustrative figures**, not live product metrics.
 - **Quanta is a reading aid, not an oracle.** It is at its most useful when it disagrees with your first instinct and shows you why.
 
 ## Roadmap
 
-`Auth + real tier gating` · `Server-side history and shareable report URLs` · `Calibration against a labelled set` · `Firefox / Safari builds` · `Error tracking` · `Public API`
+`Shareable report URLs` · `OAuth providers + self-service account deletion` · `Calibration against a labelled set` · `Firefox / Safari builds` · `Error tracking` · `Public API`
 
 ---
 

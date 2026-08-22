@@ -16,5 +16,13 @@ export default async function AccountPage() {
     .eq('id', user.id)
     .single()
 
-  return <AccountView email={profile?.email ?? user.email ?? ''} tier={profile?.tier ?? 'free'} subscriptionStatus={profile?.subscription_status ?? null} renewsAt={profile?.subscription_renews_at ?? null} />
+  return (
+    <AccountView
+      email={profile?.email ?? user.email ?? ''}
+      tier={profile?.tier ?? 'free'}
+      subscriptionStatus={profile?.subscription_status ?? null}
+      renewsAt={profile?.subscription_renews_at ?? null}
+      createdAt={user.created_at}
+    />
+  )
 }
