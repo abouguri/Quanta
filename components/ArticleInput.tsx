@@ -254,8 +254,8 @@ function SignalField() {
   return (
     <div style={{
       backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 0 20px, rgba(240,215,255,0.10) 21px 26px, transparent 27px)',
-      backgroundSize: '76px 76px',
+      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
+      backgroundSize: '78px 78px',
       position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420, cursor: 'crosshair',
       borderRadius: 26, margin: '0 0 -1px',
     }}>

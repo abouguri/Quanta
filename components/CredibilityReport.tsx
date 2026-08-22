@@ -390,9 +390,15 @@ function ClaimsSection({ claims, dbHits }: { claims: FactCheckResult[]; dbHits: 
   return (
     <section style={{
       backgroundColor: 'var(--deep)',
-      backgroundImage: 'linear-gradient(90deg, rgba(240,215,255,.14) 0 7px, transparent 7px)',
-      backgroundSize: '58px 58px',
-      backgroundPosition: '22px 15px',
+      backgroundImage: [
+        'radial-gradient(circle at 14% 31%, var(--lilac) 0 4px, transparent 5px)',
+        'radial-gradient(circle at 42% 68%, #FFFFEB 0 4px, transparent 5px)',
+        'radial-gradient(circle at 77% 28%, var(--lilac) 0 4px, transparent 5px)',
+        'radial-gradient(circle at 86% 78%, #FFFFEB 0 3px, transparent 4px)',
+        'linear-gradient(rgba(255,255,235,.09) 1px, transparent 1px)',
+        'linear-gradient(90deg, rgba(255,255,235,.09) 1px, transparent 1px)',
+      ].join(', '),
+      backgroundSize: 'auto, auto, auto, auto, 40px 40px, 40px 40px',
       color: 'var(--paper)', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 20, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }}>

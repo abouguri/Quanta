@@ -35,8 +35,8 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
   return (
     <section className="animate-fadeIn" style={{
       backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 0 20px, rgba(240,215,255,0.10) 21px 26px, transparent 27px)',
-      backgroundSize: '76px 76px',
+      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
+      backgroundSize: '78px 78px',
       color: 'var(--paper)', minHeight: '70vh', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
     }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 64, alignItems: 'start' }}>
