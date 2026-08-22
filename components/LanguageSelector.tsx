@@ -20,7 +20,7 @@ export function LanguageSelector() {
             onClick={() => setLanguage(code)}
             aria-pressed={active}
             title={code === 'en' ? 'English' : 'العربية'}
-            className="q-tap-target-sm"
+            className="q-tap-target"
             style={{
               fontFamily: 'var(--mono)',
               fontSize: 10,

@@ -11,21 +11,20 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 // wire ticker built from real recent history, and the extension CTA.
 // ---------------------------------------------------------------------------
 
-const WIRE: string[] = [
-  'structural checks · zero model calls',
-  'claims verified against Google Fact Check Tools first',
-  'no match → Brave Search over known fact-check domains',
-  'still no match → model, labelled, uncertainty-first',
-  '10 web passes / 24h per IP · no account',
-]
-
 export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpenHistory: () => void }) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const links: Array<[string, string]> = [
     [t('nav.cost'), '#cost'],
     [t('nav.signals'), '#signals'],
     [t('nav.inspector'), '#inspector'],
     [t('nav.method'), '#method'],
+  ]
+  const WIRE = [
+    t('nav.wireStructural'),
+    t('nav.wireFactcheck'),
+    t('nav.wireSearch'),
+    t('nav.wireModel'),
+    t('nav.wireQuota'),
   ]
   const wire = [...WIRE, ...WIRE]
 
@@ -87,14 +86,24 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           {t('nav.installExtensionShort')}
         </a>
       </nav>
+      {/* Below ~700px the inline links above are hidden (they'd force the
+          whole pill to scroll sideways); this is the only way to reach
+          Cost/Signals/Inspector/Method on a phone. */}
+      <div className="q-nav-links-mobile">
+        {links.map(([label, href]) => (
+          <a key={label} href={href} className="mono q-tap-target-sm" style={{ fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 8px', borderRadius: 10, color: '#FFFFEB', opacity: 0.85, flexShrink: 0, whiteSpace: 'nowrap' }}>
+            {label}
+          </a>
+        ))}
+      </div>
       {/* position:relative/absolute, not overflow:hidden alone -- an in-flow
           marquee this wide would otherwise inflate the pill's own
           fit-content width and leave the compact nav row sitting
           left-aligned inside a bar sized for the ticker instead of it. */}
-      <div dir="ltr" style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', position: 'relative', height: 21, overflow: 'hidden' }}>
+      <div className="q-ticker-mask" style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', position: 'relative', height: 21, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
           {wire.map((w, i) => (
-            <span key={i} className="mono" style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#e4eae6', whiteSpace: 'nowrap' }}>
+            <span key={i} className="mono" dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#e4eae6', whiteSpace: 'nowrap' }}>
               {w}
             </span>
           ))}

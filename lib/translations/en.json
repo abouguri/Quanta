@@ -17,6 +17,8 @@
     "quotaLine": "10 web passes / 24h per IP · no account · history stored locally only",
     "signalPanelTitle": "Signal field · live corpus",
     "signalPanelStats": "Median {median} · range {spread} · this browser only",
+    "signalPanelStatsOne": "One analysis · {score} · this browser only",
+    "signalPanelStatsFew": "{n} analyses · {list} · this browser only",
     "signalPanelStatsEmpty": "No local history yet",
     "signalPanelHint": "move the cursor to sweep the field",
     "urlLabel": "Article URL",
@@ -140,7 +142,12 @@
     "signIn": "Sign in",
     "account": "Account",
     "signOut": "Sign out",
-    "upgrade": "Upgrade"
+    "upgrade": "Upgrade",
+    "wireStructural": "structural checks · zero model calls",
+    "wireFactcheck": "claims verified against Google Fact Check Tools first",
+    "wireSearch": "no match → Brave Search over known fact-check domains",
+    "wireModel": "still no match → model, labelled, uncertainty-first",
+    "wireQuota": "10 web passes / 24h per IP · no account"
   },
   "claim": {
     "verdictTrue": "VERIFIED",

@@ -17,6 +17,8 @@
     "quotaLine": "10 عمليات عبر الويب / 24 ساعة لكل عنوان IP · بدون حساب · السجل محفوظ محليًا فقط",
     "signalPanelTitle": "حقل الإشارة · مجموعة حية",
     "signalPanelStats": "الوسيط {median} · المدى {spread} · هذا المتصفح فقط",
+    "signalPanelStatsOne": "تحليل واحد · {score} · هذا المتصفح فقط",
+    "signalPanelStatsFew": "{n} تحليلات · {list} · هذا المتصفح فقط",
     "signalPanelStatsEmpty": "لا يوجد سجل محلي بعد",
     "signalPanelHint": "حرّك المؤشر لمسح الحقل",
     "urlLabel": "رابط المقالة",
@@ -140,7 +142,12 @@
     "signIn": "تسجيل الدخول",
     "account": "الحساب",
     "signOut": "تسجيل الخروج",
-    "upgrade": "الترقية"
+    "upgrade": "الترقية",
+    "wireStructural": "فحوصات بنيوية · بلا استدعاءات نموذج",
+    "wireFactcheck": "الادعاءات تُراجَع أولاً عبر Google Fact Check Tools",
+    "wireSearch": "لا تطابق ← بحث Brave عبر نطاقات تدقيق حقائق معروفة",
+    "wireModel": "لا يزال بلا تطابق ← نموذج، موسوم، غير مؤكد أولًا",
+    "wireQuota": "10 عمليات عبر الويب / 24 ساعة لكل عنوان IP · بدون حساب"
   },
   "claim": {
     "verdictTrue": "موثّق",

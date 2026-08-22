@@ -206,16 +206,47 @@
 /* Expand the tap target without changing the visible control size — the
    compact nav stays compact, but the hit area clears WCAG 2.5.8's 24px
    floor (and gets close to the 44px platform guidance) either way. */
+/* -12px clears 44px even on the smallest nav glyph (the 20px-wide Arabic
+   toggle): 20 + 12 + 12 = 44. */
 .q-tap-target { position: relative; }
-.q-tap-target::after { content: ''; position: absolute; inset: -11px; }
+.q-tap-target::after { content: ''; position: absolute; inset: -12px; }
 .q-tap-target-sm { position: relative; }
-.q-tap-target-sm::after { content: ''; position: absolute; inset: -6px; }
+.q-tap-target-sm::after { content: ''; position: absolute; inset: -9px; }
 
-/* Nav — collapse the section-jump links below ~700px; they duplicate
-   what scrolling already does, and removing them is what keeps the pill
-   from forcing the whole document to scroll sideways on a phone. */
+/* Nav — the section-jump links move from an inline row to a horizontally
+   scrollable strip below ~700px (.q-nav-links-mobile in QuantaSections.tsx)
+   rather than disappearing; hiding them outright left mobile with no way to
+   reach Cost/Signals/Inspector/Method at all. */
 @media (max-width: 700px) {
   .q-nav-links { display: none !important; }
+}
+.q-nav-links-mobile { display: none; }
+@media (max-width: 700px) {
+  .q-nav-links-mobile {
+    display: flex;
+    gap: 4px;
+    padding: 2px 10px 8px;
+    overflow-x: auto;
+    border-top: 1px solid rgba(255,255,255,0.14);
+  }
+}
+
+/* Ticker — fades at both edges instead of being hard-clipped by the pill. */
+.q-ticker-mask {
+  mask-image: linear-gradient(90deg, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, black 20px, black calc(100% - 20px), transparent 100%);
+}
+
+/* The "URL ›" prefix repeats what the placeholder already says; below
+   ~1200px the two-column hero gives the input row too little width to
+   afford it, and it's what was squeezing the field to 169px at 1024px.
+   display lives here rather than in the element's own inline style —
+   an inline style always outranks an external media-query rule of equal
+   selector weight regardless of source order, so the hide would never
+   have taken effect otherwise. */
+.q-url-prefix { display: flex; align-items: center; }
+@media (max-width: 1200px) {
+  .q-url-prefix { display: none; }
 }
 
 .q-visually-hidden {
@@ -307,18 +338,26 @@ body {
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 input, textarea { font: inherit; color: inherit; }
 a, button { transition: opacity 150ms ease-out, color 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out; }
-input:focus, textarea:focus { outline: none; }
+/* :not(:focus-visible) so this only strips the ring for a mouse/touch click —
+   a bare `:focus` here has the same (0,1,1) specificity as a `:focus-visible`
+   rule below it and silently wins regardless of source order, cancelling the
+   keyboard ring on every input and textarea. */
+input:focus:not(:focus-visible), textarea:focus:not(:focus-visible) { outline: none; }
 
 :where(a, button, input, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 4px;
+  /* A second, softer ring — the 2px outline alone rounds down to ~1.6px
+     under some root font-size scales and reads as a hairline. */
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 25%, transparent);
 }
 /* Controls that sit on a --deep panel: an --ink ring is the same color as
    the panel in light mode, so it needs the fixed-bright accent instead. */
 .q-on-deep :focus-visible,
 .q-on-deep:focus-visible {
   outline-color: var(--lilac);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lilac) 25%, transparent);
 }
 
 ::placeholder {

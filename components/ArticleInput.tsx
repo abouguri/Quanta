@@ -20,7 +20,12 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
   const [tab, setTab] = useState<'url' | 'text'>('url')
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  // Both panels stay mounted (see the tabpanel markup below) so tab 02's
+  // aria-controls always resolves to a real element instead of dangling
+  // while tab 01 is active — which means each field needs its own ref;
+  // a single shared ref can't attach to two simultaneously-mounted nodes.
+  const urlInputRef = useRef<HTMLInputElement>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const prevTab = useRef(tab)
 
   // Only steal focus on an explicit tab switch, not on initial mount — auto-
@@ -31,7 +36,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
   // simple first-render guard.
   useEffect(() => {
     if (prevTab.current !== tab) {
-      inputRef.current?.focus()
+      (tab === 'url' ? urlInputRef.current : textAreaRef.current)?.focus()
     }
     prevTab.current = tab
   }, [tab])
@@ -90,83 +95,79 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
           <TabBtn id="tab-text" controls="panel-text" active={tab === 'text'} onClick={() => setTab('text')}>{t('input.textTab')}</TabBtn>
         </div>
 
-        {tab === 'url' ? (
-          <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" className="field q-url-row" style={{ display: 'flex', flexWrap: 'wrap', border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 20, overflow: 'hidden' }}>
-            <label htmlFor="article-url" className="q-visually-hidden">{t('input.urlLabel')}</label>
-            <span aria-hidden="true" style={{
-              fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--grey)',
-              padding: '0 16px', display: 'flex', alignItems: 'center', borderRight: '1px solid var(--ghost)',
-            }}>
-              {t('input.urlPrefix')}
+        <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" hidden={tab !== 'url'} className="field q-url-row" style={{ display: tab === 'url' ? 'flex' : 'none', flexWrap: 'wrap', border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 20, overflow: 'hidden' }}>
+          <label htmlFor="article-url" className="q-visually-hidden">{t('input.urlLabel')}</label>
+          <span aria-hidden="true" className="q-url-prefix" style={{
+            fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--grey)',
+            padding: '0 16px', borderRight: '1px solid var(--ghost)',
+          }}>
+            {t('input.urlPrefix')}
+          </span>
+          <input
+            id="article-url"
+            name="url"
+            ref={urlInputRef}
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="https://"
+            type="url"
+            inputMode="url"
+            autoComplete="url"
+            autoCapitalize="off"
+            spellCheck={false}
+            style={{ flex: '1 1 auto', minWidth: 260, border: 0, background: 'transparent', padding: '18px 16px', fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink)' }}
+          />
+          <button onClick={submit} disabled={!ready} className="q-url-submit" style={{ display: 'flex', flexDirection: 'column', border: 0, padding: 0, background: ready ? 'var(--ink)' : 'var(--ghost)', cursor: ready ? 'pointer' : 'not-allowed' }}>
+            <span style={{ color: ready ? 'var(--paper)' : 'var(--grey)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '13px 18px 2px' }}>
+              {t('input.submitButton')}
             </span>
-            <input
-              id="article-url"
-              name="url"
-              ref={inputRef as React.RefObject<HTMLInputElement>}
-              value={url}
-              onChange={e => setUrl(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="https://"
-              type="url"
-              inputMode="url"
-              autoComplete="url"
-              autoCapitalize="off"
-              spellCheck={false}
-              style={{ flex: 1, minWidth: 160, border: 0, outline: 'none', background: 'transparent', padding: '18px 16px', fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink)' }}
-            />
-            <button onClick={submit} disabled={!ready} className="q-url-submit" style={{ display: 'flex', gap: 2, border: 0, padding: 0, background: 'transparent', cursor: ready ? 'pointer' : 'not-allowed' }}>
-              <span style={{ background: ready ? 'var(--ink)' : 'var(--ghost)', color: ready ? 'var(--paper)' : 'var(--grey)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 18px' }}>
-                {t('input.submitButton')}
-              </span>
-              <span style={{ background: ready ? 'var(--ink)' : 'var(--ghost)', color: ready ? 'var(--paper)' : 'var(--grey)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px 16px 18px', position: 'relative' }}>
-                {t('input.submitButtonNow')}
-                <i style={{ position: 'absolute', top: 8, right: 7, width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
-              </span>
-            </button>
-          </div>
-        ) : null}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: ready ? 'var(--paper)' : 'var(--grey)', opacity: 0.75, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 18px 11px' }}>
+              <i style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
+              {t('input.submitButtonNow')}
+            </span>
+          </button>
+        </div>
         {tab === 'url' && !ready && (
           <div aria-live="polite" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', letterSpacing: '0.06em', marginTop: 8 }}>
             {t('input.urlHint')}
           </div>
         )}
-        {tab === 'text' ? (
-          <div id="panel-text" role="tabpanel" aria-labelledby="tab-text" className="field" style={{ border: '1px solid var(--ghost)', background: 'var(--white)' }}>
-            <label htmlFor="article-text" className="q-visually-hidden">{t('input.textLabel')}</label>
-            <textarea
-              id="article-text"
-              name="text"
-              ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-              value={text}
-              onChange={e => setText(e.target.value)}
-              placeholder={t('input.textPlaceholder')}
-              rows={7}
-              style={{ width: '100%', border: 0, background: 'transparent', padding: 18, fontSize: 14, fontFamily: 'var(--mono)', color: 'var(--ink)', resize: 'vertical', lineHeight: 1.55 }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: '1px solid var(--ghost)', fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', letterSpacing: '0.1em' }}>
-              <span aria-live="polite">
-                {text.length < 100
-                  ? t('input.charCountMin', { n: text.length })
-                  : t('input.charCountReady', { n: text.length })}
-                {text.length > 0 && text.length < 100 && (
-                  <span style={{ color: 'var(--unsupported)', marginLeft: 10 }}>{t('input.charsNeedMore', { n: 100 - text.length })}</span>
-                )}
-                {text.length >= 100 && <span style={{ color: 'var(--verified)', marginLeft: 10 }}>{t('input.charsReady')}</span>}
-              </span>
-              <button
-                onClick={submit}
-                disabled={!ready}
-                style={{
-                  background: ready ? 'var(--ink)' : 'transparent', color: ready ? 'var(--paper)' : 'var(--grey)',
-                  padding: '10px 22px', fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase',
-                  cursor: ready ? 'pointer' : 'not-allowed', border: ready ? 0 : '1px solid var(--ghost)',
-                }}
-              >
-                {t('input.submitButton')}
-              </button>
-            </div>
+        <div id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden={tab !== 'text'} className="field" style={{ border: '1px solid var(--ghost)', background: 'var(--white)' }}>
+          <label htmlFor="article-text" className="q-visually-hidden">{t('input.textLabel')}</label>
+          <textarea
+            id="article-text"
+            name="text"
+            ref={textAreaRef}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder={t('input.textPlaceholder')}
+            rows={7}
+            style={{ width: '100%', border: 0, background: 'transparent', padding: 18, fontSize: 14, fontFamily: 'var(--mono)', color: 'var(--ink)', resize: 'vertical', lineHeight: 1.55 }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: '1px solid var(--ghost)', fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', letterSpacing: '0.1em' }}>
+            <span aria-live="polite">
+              {text.length < 100
+                ? t('input.charCountMin', { n: text.length })
+                : t('input.charCountReady', { n: text.length })}
+              {text.length > 0 && text.length < 100 && (
+                <span style={{ color: 'var(--unsupported)', marginLeft: 10 }}>{t('input.charsNeedMore', { n: 100 - text.length })}</span>
+              )}
+              {text.length >= 100 && <span style={{ color: 'var(--verified)', marginLeft: 10 }}>{t('input.charsReady')}</span>}
+            </span>
+            <button
+              onClick={submit}
+              disabled={!ready}
+              style={{
+                background: ready ? 'var(--ink)' : 'transparent', color: ready ? 'var(--paper)' : 'var(--grey)',
+                padding: '10px 22px', fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase',
+                cursor: ready ? 'pointer' : 'not-allowed', border: ready ? 0 : '1px solid var(--ghost)',
+              }}
+            >
+              {t('input.submitButton')}
+            </button>
           </div>
-        ) : null}
+        </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', textTransform: 'uppercase', letterSpacing: '0.18em', marginRight: 4 }}>
@@ -315,16 +316,27 @@ function SignalField() {
   const fieldNear = `translate3d(${((x - 0.5) * 34).toFixed(1)}px,${((y - 0.5) * 24).toFixed(1)}px,0)`
   const crosshairX = `translateX(${((x - 0.5) * 260).toFixed(1)}px)`
   const crosshairY = `translateY(${((y - 0.5) * 200).toFixed(1)}px)`
-  const fieldReading = String(Math.round(31 + x * 63)).padStart(2, '0')
-  const band = x > 0.72 ? 'verified' : x > 0.42 ? 'contested' : 'unsupported'
-  const fieldCaption = `sample at ${(x * 100).toFixed(0)}/${(y * 100).toFixed(0)} · ${band} band`
+  // Sub-scores, not raw cursor coordinates — the page states its scoring
+  // formula (structural × 0.3 + claims × 0.7) two sections down, and a
+  // reader who checks this demo's own numbers against it should find they
+  // reconcile rather than land on a pair of unlabelled field coordinates.
+  const structuralSample = Math.round(20 + x * 80)
+  const claimsSample = Math.round(20 + y * 80)
+  const fieldReading = String(Math.round(structuralSample * 0.3 + claimsSample * 0.7)).padStart(2, '0')
+  const band = Number(fieldReading) >= 75 ? 'verified' : Number(fieldReading) >= 45 ? 'contested' : 'unsupported'
+  const fieldCaption = `structural ${structuralSample} · claims ${claimsSample} · ${band} band`
 
   const { user } = useAuth()
   const [recent, setRecent] = useState<HistoryEntry[]>([])
   useEffect(() => { getHistory().then(setRecent) }, [user?.id])
   const scores = recent.map(r => r.score)
-  const median = scores.length ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : null
-  const spread = scores.length ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
+  const median = scores.length >= 3 ? [...scores].sort((a, b) => a - b)[Math.floor(scores.length / 2)] : null
+  const spread = scores.length >= 3 ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
+  const statsText =
+    scores.length === 0 ? t('input.signalPanelStatsEmpty')
+    : scores.length === 1 ? t('input.signalPanelStatsOne', { score: scores[0] })
+    : scores.length === 2 ? t('input.signalPanelStatsFew', { n: scores.length, list: scores.join(', ') })
+    : t('input.signalPanelStats', { median: median ?? '—', spread: spread ?? '—' })
 
   return (
     <div style={{
@@ -377,8 +389,8 @@ function SignalField() {
         <div style={{
           position: 'relative',
           transform: fieldNear, willChange: 'transform', margin: '28px 0', padding: '18px 22px 20px',
-          background: 'rgba(15,12,8,0.92)',
-          borderLeft: '1px solid var(--accent)', width: 'fit-content',
+          background: 'rgba(2,31,27,0.88)', borderRadius: 16,
+          border: '1px solid var(--accent)', width: 'fit-content',
         }}>
           <QWormhole />
           <div className="mono" style={{ position: 'relative', fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
@@ -389,10 +401,13 @@ function SignalField() {
           </div>
         </div>
 
-        <div style={{ paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
-          {median !== null
-            ? t('input.signalPanelStats', { median, spread: spread ?? '—' })
-            : t('input.signalPanelStatsEmpty')}
+        {/* Opaque background, not just the near-field layer's own bottom
+            inset — a wrapped 2–3 line stats string (long locale strings,
+            narrow viewports) can extend taller than that inset reserves,
+            and with no fill here the corpus words behind it would show
+            through and collide with this text. */}
+        <div style={{ position: 'relative', zIndex: 1, background: 'var(--deep)', paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
+          {statsText}
           {' · '}{t('input.signalPanelHint')}
         </div>
       </div>
