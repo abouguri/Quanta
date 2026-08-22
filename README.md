@@ -59,11 +59,11 @@ The API is a **Server-Sent Events** stream, so the UI names each step as the ser
 
 ### 3 · Read the verdict
 
-A live BBC piece, scored 77/100 — "moderate," one structural flag (no byline), five claims checked and none of them pre-existing in a fact-check database, so every verdict below is a labelled AI assessment.
+A live BBC piece on a festival cancellation in Tigray, scored 90/100 — "reliable," one structural flag (no byline), five claims checked and none of them pre-existing in a fact-check database, so every verdict below is a labelled AI assessment.
 
 ![Credibility report for a live BBC article](docs/screenshots/report-high.png)
 
-Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text and the structural score collapses to 40 — four flags, −60 — but the overall lands at 68, "moderate," because the claims pass came back *misleading* and *unverified* rather than confidently false. That gap is not a bug to hide; it's the reason the structural pass is only 30% of the score and the claims pass is 70%: a model that won't guess can't hand out a false-positive "confirmed false," and the number should say so honestly rather than round down for effect.
+Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text and the structural score collapses to 40 — four flags, −60 — and this time the overall follows it down to 52, "questionable," because two of the three claims came back confidently *false*. Compare that against the dark-mode run below, where the claims pass is what saves an otherwise-similar structural score from collapsing further: same shape of penalty, opposite direction, because the formula doesn't know which way a given article will break — only the two passes, weighted 30/70, arithmetic all the way down.
 
 ![Credibility report for a low-quality pasted article](docs/screenshots/report-low.png)
 
@@ -73,7 +73,7 @@ Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text
 
 The claim ledger is an accordion, not a card grid — click a row and it opens in place. Each one carries a verdict, a confidence, and either a publisher link or an honest `No external source found` when the assessment came from the model instead.
 
-![Claim ledger for the BBC article — three verified, one false, one unverified](docs/screenshots/claims.png)
+![Claim ledger for the BBC article — three verified, two unverified](docs/screenshots/claims.png)
 
 ### 5 · Structural signals, computed not guessed
 
@@ -81,9 +81,9 @@ The claim ledger is an accordion, not a card grid — click a row and it opens i
 
 ### 6 · In the dark
 
-The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed dark-teal instrument panels (nav, claim ledger), which stay a "hardware panel" surface in *both* themes on purpose while everything else — paper, ink, the accent color itself — flips. This run also shows a real fact-check database hit: USA Today rated the headline Apollo 11 claim "Missing Context," which is why it's marked `MISLEADING` instead of the model's own assessment.
+The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed dark-teal instrument panels (nav, claim ledger), which stay a "hardware panel" surface in *both* themes on purpose while everything else — paper, ink, the accent color itself — flips. This run pastes in a paragraph of common health and election misinformation and shows two real fact-check-database hits: FactCheck.org rated both the vaccine-microchip and stolen-election claims "False," which is why they're marked `FACT-CHECK DATABASE` instead of the model's own assessment — the third claim, about 5G and coronavirus, had no database match and fell through to a labelled AI assessment instead.
 
-![The report in dark mode, with a real fact-check-database match](docs/screenshots/report-dark.png)
+![The report in dark mode, with two real fact-check-database matches](docs/screenshots/report-dark.png)
 
 ### 7 · Source dossier
 
@@ -126,7 +126,7 @@ Missing configuration degrades the same way every other integration in this proj
 
 ## Landing page
 
-A separate marketing surface at [`/landing`](https://factnews-six.vercel.app/landing), sharing the app's type system and design tokens.
+A separate marketing surface at [`/landing`](https://factnews-six.vercel.app/landing). It predates the soft rebrand and hasn't been carried over yet — `components/marketing/` still runs its own `COLORS`/`FONTS`/`SPACING` constants rather than `globals.css`'s tokens, which is why it doesn't match the cream/dark-teal/lilac palette everywhere else in this README.
 
 ![Quanta landing page](docs/screenshots/landing.png)
 
@@ -286,7 +286,7 @@ Load `extension/dist` at `chrome://extensions` with Developer Mode on. To point 
 This is a working prototype, not a finished product. Where it falls short:
 
 - **Auth is real but minimal.** Email + password via Supabase, no OAuth providers, no self-service account deletion, no password-reset UI beyond Supabase's default email template. `resolveTier()` reads `profiles.tier` server-side rather than trusting the client, but if Supabase isn't configured at all it falls back to `paid` for everyone — the rate limit, not a subscription, is what bounds an unconfigured deployment.
-- **The score is uncalibrated.** The weights are reasoned, not fitted. The low-score example above shows why that matters in practice: four structural red flags still landed at a 68 overall, because the claims pass declined to confidently call anything false. That is the system working as designed — but "as designed" still isn't "validated against a labelled set," which is what it would take before anyone treats the number as authoritative.
+- **The score is uncalibrated.** The weights are reasoned, not fitted, and 30/70 is a judgment call rather than something derived from a labelled dataset. Nothing stops a future run where a clean structural pass sits next to a claims pass that declines to confidently call anything false, landing well above what the article deserves — the same asymmetry that makes the claims pass 70% of the weight in the first place also means "as designed" isn't yet "validated against ground truth."
 - **The source database is a hand-curated file.** 32 outlets, no update mechanism.
 - **Anonymous history is still `localStorage`.** Signing in gets you server-side, cross-device history; skip that and clearing the browser still clears the record, same as before accounts existed.
 - **Scraping fails on hard targets.** Paywalls, heavy JS, bot protection.
