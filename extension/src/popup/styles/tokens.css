@@ -1,26 +1,26 @@
 :root {
-  /* Instrument v2 — mirrors app/globals.css's light palette. The popup has
+  /* Soft rebrand — mirrors app/globals.css's light palette. The popup has
      no theme toggle, so only the light values are needed here. */
-  --ink: #232323;
-  --ink-2: rgba(35, 35, 35, 0.72);
-  --ink-3: rgba(35, 35, 35, 0.50);
-  --ink-4: #5B5A56;
-  --graphite: #333E48;
+  --ink: #034F46;
+  --ink-2: rgba(3, 79, 70, 0.76);
+  --ink-3: rgba(3, 79, 70, 0.52);
+  --ink-4: #6B7E78;
+  --graphite: #073E38;
 
   --bone: #FFFFEB;
-  --paper: #FFFFFF;
-  --mist: #EFEBE0;
-  --fog: #DEDEDE;
+  --paper: #FFFEF6;
+  --mist: #F7EFFF;
+  --fog: rgba(3, 79, 70, 0.16);
 
   /* Unlike app/globals.css, most of the popup's --ember usages are on light
      card backgrounds, so a direct swap works for those. The one exception
      (.q-dot in the dark shell-header) uses --lilac directly instead. */
   --ember: #034F46;
   --lilac: #F0D7FF;
-  --signal: #1A4D7A;
-  --deep: #000000;
-  --grey: #5B5A56;
-  --ghost: #DEDEDE;
+  --signal: #0B675B;
+  --deep: #034F46;
+  --grey: #6B7E78;
+  --ghost: rgba(3, 79, 70, 0.16);
   --accent: var(--ember);
 
   --verified: #2E7D5B;

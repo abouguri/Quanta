@@ -119,8 +119,8 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
 
         {/* Hero verdict */}
         <div style={{
-          borderTop: '1px solid var(--ink)',
-          borderBottom: '1px solid var(--ink)',
+          borderTop: '1px solid var(--ghost)',
+          borderBottom: '1px solid var(--ghost)',
           padding: '40px 0',
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) auto',
@@ -155,7 +155,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
         </div>
 
         {/* Readouts */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--ghost)', borderBottom: '1px solid var(--ink)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--ghost)', borderBottom: '1px solid var(--ghost)' }}>
           <Readout
             label={t('report.readoutStructural')}
             value={String(result.structural.score)}
@@ -206,7 +206,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
           {source ? (
             <SourceDossier source={source} domain={result.metadata.source || ''} />
           ) : (
-            <div style={{ border: '1px solid var(--ink)', padding: '20px 22px', background: 'var(--white)' }}>
+            <div style={{ border: '1px solid var(--ghost)', borderRadius: 26, padding: '20px 22px', background: 'var(--white)' }}>
               <p className="smcap" style={{ color: 'var(--grey)', margin: 0 }}>{t('report.sourceOnFile')}</p>
               <p style={{ fontFamily: 'var(--sans)', color: 'var(--ink-2)', marginTop: 10, fontSize: 15 }}>
                 {t('report.noSourceUrl')}
@@ -218,7 +218,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
 
       {/* Colophon */}
       <div style={{
-        borderTop: '1px solid var(--ink)',
+        borderTop: '1px solid var(--ghost)',
         paddingTop: 20,
         display: 'flex',
         justifyContent: 'space-between',
@@ -304,7 +304,7 @@ function SourceDossier({ source, domain }: { source: ReturnType<typeof getSource
   }
 
   return (
-    <div style={{ border: '1px solid var(--ink)', background: 'var(--white)', position: 'relative' }}>
+    <div style={{ border: '1px solid var(--ghost)', background: 'var(--white)', position: 'relative', borderRadius: 26, overflow: 'hidden', boxShadow: '0 18px 60px rgba(3,79,70,.10)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 18px', borderBottom: '1px solid var(--ghost)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
         <span>{t('report.sourceOnFile')}</span>
         <span>{t('report.dossierLabel')}</span>
@@ -328,7 +328,7 @@ function SourceDossier({ source, domain }: { source: ReturnType<typeof getSource
         </div>
         <div style={{ display: 'flex', gap: 2, marginTop: 10 }}>
           {([-2, -1, 0, 1, 2] as const).map(b => (
-            <div key={b} style={{ flex: 1, height: 20, border: '1px solid var(--ink)', background: b === biasIdx ? 'var(--ink)' : 'transparent' }} />
+            <div key={b} style={{ flex: 1, height: 20, border: '1px solid var(--ghost)', background: b === biasIdx ? 'var(--ink)' : 'transparent' }} />
           ))}
         </div>
         <div className="mono" style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--grey)', marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
@@ -388,7 +388,13 @@ function ClaimsSection({ claims, dbHits }: { claims: FactCheckResult[]; dbHits: 
   const [openClaim, setOpenClaim] = useState(0)
 
   return (
-    <section style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '80px 0' }}>
+    <section style={{
+      backgroundColor: 'var(--deep)',
+      backgroundImage: 'linear-gradient(90deg, rgba(240,215,255,.14) 0 7px, transparent 7px)',
+      backgroundSize: '58px 58px',
+      backgroundPosition: '22px 15px',
+      color: 'var(--paper)', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
+    }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 20, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
         <span>{t('report.ledgerTitle')}</span>
         <span style={{ color: '#7d7b74' }}>{t('report.claimsSummary', { n: claims.length, m: dbHits })}</span>
@@ -483,7 +489,7 @@ function StructuralFlagsSection({ flags, structuralScore }: { flags: StructuralF
       <div className="mono" style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 20 }}>
         {t('report.flagsTitle')}
       </div>
-      <div style={{ borderTop: '1px solid var(--ink)' }}>
+      <div style={{ borderTop: '1px solid var(--ghost)' }}>
         {sorted.map((flag, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 110px minmax(0,1fr) 50px', gap: 18, alignItems: 'baseline', padding: '20px 0', borderBottom: '1px dashed var(--ghost)' }}>
             <span className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', color: 'var(--grey)' }}>{String(i + 1).padStart(2, '0')}</span>

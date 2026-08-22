@@ -3,33 +3,33 @@
 @tailwind utilities;
 
 :root {
-  /* Quanta brand palette — Instrument v2 */
+  /* Quanta brand palette — soft rebrand: cream, dark teal, lilac */
   --bone:         #FFFFEB;
-  --paper:        #FFFFFF;
-  --mist:         #EFEBE0;
-  --fog:          #DEDEDE;
+  --paper:        #FFFEF6;
+  --mist:         #F7EFFF;
+  --fog:          rgba(3, 79, 70, 0.16);
 
-  --ink:          #232323;
-  --ink-2:        rgba(35, 35, 35, 0.72);
-  --ink-3:        rgba(35, 35, 35, 0.50);
-  --ink-4:        #5B5A56;
-  --graphite:     #333E48;
+  --ink:          #034F46;
+  --ink-2:        rgba(3, 79, 70, 0.76);
+  --ink-3:        rgba(3, 79, 70, 0.52);
+  --ink-4:        #6B7E78;
+  --graphite:     #073E38;
 
-  --signal:       #1A4D7A;
-  /* --ember is the identity color itself — used on light backgrounds and as
-     solid fills. --lilac exists because --ember is dark: everywhere it's
-     used against the fixed-black --deep panels (the nav pulse dot, the
-     signal field reading, claim-ledger toggles, FAQ numbers — 16 of 17
-     accent usages in this app) needs something bright instead, so --accent
-     points at --lilac, not --ember. Reach for --ember directly only on a
-     light background. */
+  --signal:       #0B675B;
+  /* --ember is the identity color itself — same value as --ink now, kept as
+     a distinct token because --accent-paper below still needs to name it
+     directly. --lilac exists because a dark-teal accent disappears against
+     the equally-dark-teal --deep panels (the nav pulse dot, the signal field
+     reading, claim-ledger toggles, FAQ numbers — 16 of 17 accent usages in
+     this app) needs something bright instead, so --accent points at --lilac,
+     not --ember. Reach for --ember directly only on a light background. */
   --ember:        #034F46;
   --lilac:        #F0D7FF;
   /* For the few spots that paint --ember directly onto a --paper/--bone/--mist
-     surface rather than the fixed-black --deep: those surfaces themselves flip
+     surface rather than the fixed-teal --deep: those surfaces themselves flip
      between light and dark, so the accent painted on them has to flip too, the
      same way --ink flips against --bone. Light mode keeps the dark teal
-     (legible on white paper); dark mode swaps to lilac (legible on the dark
+     (legible on cream paper); dark mode swaps to lilac (legible on the dark
      paper dark mode uses instead). */
   --accent-paper: var(--ember);
 
@@ -48,15 +48,15 @@
   --amber:        var(--ember);
   --stamp:        var(--disputed);
 
-  /* Instrument tokens — a fixed near-black "hardware panel" surface (nav,
+  /* Instrument tokens — a fixed dark-teal "hardware panel" surface (nav,
      dark hero blocks, footers) that does not swap with the theme, plus the
      mock's own naming so ported markup can read var(--grey)/var(--ghost)
      directly instead of the handoff aliases above. */
-  --deep:         #000000;
-  --grey:         #5B5A56;
+  --deep:         #034F46;
+  --grey:         #6B7E78;
   --mid:          #CBCBCB;
-  --ghost:        #DEDEDE;
-  --white:        #FFFFFF;
+  --ghost:        rgba(3, 79, 70, 0.16);
+  --white:        #FFFEF6;
   --accent:       var(--lilac);
   --contested:    var(--mixed);
   --unsupported:  var(--disputed);
@@ -87,18 +87,18 @@
  * no dark-specific code of its own.
  */
 .dark {
-  --bone:         #161616;
-  --paper:        #232323;
-  --mist:         #1C262D;
-  --fog:          #333330;
+  --bone:         #04211D;
+  --paper:        #06302B;
+  --mist:         #0A3C35;
+  --fog:          rgba(240, 215, 255, 0.20);
 
   --ink:          #FFFFEB;
   --ink-2:        rgba(255, 255, 235, 0.74);
   --ink-3:        rgba(255, 255, 235, 0.52);
-  --ink-4:        #A3A19B;
-  --graphite:     #C3CBD2;
+  --ink-4:        #9FB8B0;
+  --graphite:     #D8E6E1;
 
-  --signal:       #5C9DD6;
+  --signal:       #BBEAD9;
   /* Same identity color in both themes, same reasoning as :root above. */
   --ember:        #034F46;
   --lilac:        #F0D7FF;
@@ -106,26 +106,28 @@
      flip to the bright color — see the :root comment on --accent-paper. */
   --accent-paper: var(--lilac);
 
-  --verified:     #4FAE83;
-  --mixed:        #D8964E;
-  --disputed:     #E06B6B;
-  --unclear:      #9A9993;
+  --verified:     #6FC79B;
+  --mixed:        #E0A968;
+  --disputed:     #EC8686;
+  --unclear:      #9FB8B0;
 
   /* Same hues, inverted: dark low-chroma washes instead of pale ones. */
   --misleading:      #E08A5C;
-  --misleading-soft: #E09A6E;
+  --misleading-soft: #E0A968;
   --tint-verified:   oklch(0.27 0.04 150);
   --tint-disputed:   oklch(0.27 0.05 20);
   --tint-misleading: oklch(0.28 0.05 45);
   --tint-mixed:      oklch(0.28 0.04 80);
 
-  /* --deep stays pure black in both themes — it's the fixed instrument-panel
-     surface, not part of the light/dark swap. */
-  --grey:         #A3A19B;
-  --mid:          #3A3A38;
-  --ghost:        #333330;
-  --white:        #232323;
-  --unknown:      #9A9993;
+  /* --deep gets its own dark-mode value here (rather than staying fixed
+     across themes) so the "hardware panel" surface stays a shade darker
+     than --paper instead of collapsing into it. */
+  --deep:         #022F2A;
+  --grey:         #9FB8B0;
+  --mid:          #0A3C35;
+  --ghost:        rgba(240, 215, 255, 0.20);
+  --white:        #06302B;
+  --unknown:      #9FB8B0;
 
   color-scheme: dark;
 }

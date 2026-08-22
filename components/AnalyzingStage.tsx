@@ -33,7 +33,12 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
   const totalCount = steps.length || 1
 
   return (
-    <section className="animate-fadeIn" style={{ background: 'var(--deep)', color: 'var(--paper)', minHeight: '70vh', padding: '80px 0' }}>
+    <section className="animate-fadeIn" style={{
+      backgroundColor: 'var(--deep)',
+      backgroundImage: 'radial-gradient(circle at center, transparent 0 20px, rgba(240,215,255,0.10) 21px 26px, transparent 27px)',
+      backgroundSize: '76px 76px',
+      color: 'var(--paper)', minHeight: '70vh', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
+    }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 64, alignItems: 'start' }}>
         <div>
           <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
@@ -107,7 +112,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
           <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 14 }}>
             {t('analyzing.frames')}
           </div>
-          <div style={{ border: '1px solid rgba(255,255,255,0.18)', borderRadius: 4, padding: 16, fontFamily: 'var(--mono)', fontSize: 11, lineHeight: 2, color: '#e6e4de', minHeight: 300 }}>
+          <div style={{ border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, padding: 16, fontFamily: 'var(--mono)', fontSize: 11, lineHeight: 2, color: '#e6e4de', minHeight: 300 }}>
             {steps.map((s, i) => (
               <div key={s.step} className="animate-fadeIn">
                 <span style={{ color: '#7d7b74' }}>{String(i + 1).padStart(2, '0')}</span>{' '}

@@ -38,20 +38,27 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       maxWidth: 'calc(100vw - 28px)',
       background: 'var(--deep)',
       color: '#fff',
-      borderRadius: 8,
+      borderRadius: 20,
       overflow: 'hidden',
       boxShadow: '0 0 0 2px var(--bone), 0 4px 14px rgba(0,0,0,0.16)',
       width: 'fit-content',
     }}>
       <nav style={{ display: 'flex', gap: 2, padding: '6px 8px', alignItems: 'center' }}>
         <button onClick={onHome} title="Quanta" aria-label="Quanta — home" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 8px 5px 6px' }}>
-          <svg width="16" height="16" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="30" r="13" stroke="#FFFFEB" strokeWidth="4" fill="none" />
-            <circle cx="44" cy="42" r="4" fill="#F0D7FF" />
+          <svg width="20" height="20" viewBox="0 0 320 320" fill="none" aria-hidden="true">
+            <defs>
+              <filter id="fluffNav" x="-30%" y="-30%" width="160%" height="160%">
+                <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="3" seed="8" result="n" />
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="4" />
+              </filter>
+            </defs>
+            <circle cx="145" cy="142" r="92" fill="none" stroke="#FFFFEB" strokeWidth="50" filter="url(#fluffNav)" />
+            <path d="M176 177 C196 198 218 223 250 248" fill="none" stroke="#FFFFEB" strokeWidth="50" strokeLinecap="round" filter="url(#fluffNav)" />
           </svg>
+          <span style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.05em', color: '#FFFFEB', marginLeft: 7 }}>Quanta</span>
         </button>
         {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#FFFFEB', opacity: 0.72 }}>
+          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.72 }}>
             {label}
           </a>
         ))}
@@ -59,7 +66,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           onClick={onOpenHistory}
           title={t('nav.history')}
           aria-label={t('nav.history')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 4, color: '#FFFFEB', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 12, color: '#FFFFEB', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
         >
           <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
             <circle cx="10" cy="10" r="7.5" />
@@ -71,7 +78,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           <ThemeToggle />
         </div>
         <AccountMenu />
-        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 4, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
+        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 12, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
           {t('nav.installExtensionShort')}
         </a>
       </nav>
@@ -105,7 +112,7 @@ function AccountMenu() {
       <a
         href="/auth/sign-in"
         className="mono"
-        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#FFFFEB', opacity: 0.72 }}
+        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.72 }}
       >
         {t('nav.signIn')}
       </a>
@@ -132,7 +139,7 @@ function AccountMenu() {
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
           <div style={{
             position: 'absolute', top: 32, right: 0, zIndex: 61, minWidth: 180,
-            background: 'var(--deep)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 6,
+            background: 'var(--deep)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 16,
             boxShadow: '0 10px 30px rgba(0,0,0,0.32)', overflow: 'hidden',
           }}>
             <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.14)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: '#a3a19b', wordBreak: 'break-all' }}>
@@ -187,7 +194,7 @@ export function CostSection() {
   return (
     <section id="cost" className="q-anchor" style={{ padding: '96px 0' }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
-        <div style={{ background: 'var(--deep)', borderRadius: 8, padding: '26px 28px 22px' }}>
+        <div style={{ background: 'var(--deep)', borderRadius: 26, padding: '30px 32px 26px', boxShadow: '0 18px 60px rgba(3,79,70,.14)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
             <span>structural checks</span><span>severity</span>
           </div>
@@ -239,7 +246,7 @@ const CAPABILITIES: Array<[string, string, string]> = [
 
 export function SignalsSection() {
   return (
-    <section id="signals" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0' }}>
+    <section id="signals" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px' }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
         <div style={{ position: 'sticky', top: 120 }}>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
@@ -317,7 +324,7 @@ export function InspectorSection() {
           </div>
         </div>
 
-        <div style={{ border: '1px solid var(--ink)', borderRadius: 8, overflow: 'hidden', background: 'var(--white)' }}>
+        <div style={{ border: '1px solid var(--ghost)', borderRadius: 26, overflow: 'hidden', background: 'var(--white)', boxShadow: '0 18px 60px rgba(3,79,70,.10)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '240px minmax(0,1fr) 300px', minHeight: 360 }}>
             <div style={{ borderRight: '1px solid var(--ghost)', background: 'var(--bone)' }}>
               <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
@@ -361,7 +368,7 @@ export function InspectorSection() {
                 provenance
               </div>
               <div style={{ padding: 16 }}>
-                <div style={{ border: '1px solid var(--ink)', background: 'var(--white)', borderRadius: 4, padding: '14px 16px' }}>
+                <div style={{ border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 12, padding: '14px 16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: sel.tone }}>
                     <span>{sel.verdict}</span><span>{sel.confidence}</span>
                   </div>
@@ -407,7 +414,7 @@ const FAQ: Array<[string, string, string]> = [
 export function MethodSection() {
   const [open, setOpen] = useState(0)
   return (
-    <section id="method" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0' }}>
+    <section id="method" className="q-anchor" style={{ background: 'var(--deep)', color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px' }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
         <div>
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
@@ -463,10 +470,10 @@ export function AccessSection() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noreferrer" style={{ display: 'flex', gap: 2, textDecoration: 'none' }}>
-            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '8px 2px 2px 8px' }}>
+            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '999px 0 0 999px' }}>
               Install
             </span>
-            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '2px 8px 8px 2px' }}>
+            <span style={{ background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 20px', borderRadius: '0 999px 999px 0' }}>
               Extension
             </span>
           </a>

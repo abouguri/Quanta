@@ -27,7 +27,7 @@ export function ThemeToggle() {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 8,
+        borderRadius: 12,
         border: '0.5px solid var(--fog)',
         color: 'var(--ink-2)',
         background: 'transparent',

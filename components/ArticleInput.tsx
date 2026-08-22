@@ -70,7 +70,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
         </div>
 
         {tab === 'url' ? (
-          <div className="field" style={{ display: 'flex', border: '1px solid var(--ink)', background: 'var(--white)', borderRadius: 8, overflow: 'hidden' }}>
+          <div className="field" style={{ display: 'flex', border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 20, overflow: 'hidden' }}>
             <span style={{
               fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--grey)',
               padding: '0 16px', display: 'flex', alignItems: 'center', borderRight: '1px solid var(--ghost)',
@@ -97,7 +97,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
             </button>
           </div>
         ) : (
-          <div className="field" style={{ border: '1px solid var(--ink)', background: 'var(--white)' }}>
+          <div className="field" style={{ border: '1px solid var(--ghost)', background: 'var(--white)' }}>
             <textarea
               ref={inputRef as React.RefObject<HTMLTextAreaElement>}
               value={text}
@@ -141,7 +141,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
                 key={s.url}
                 type="button"
                 onClick={() => { setTab('url'); setUrl(s.url) }}
-                style={{ fontFamily: 'var(--mono)', fontSize: 12, background: 'transparent', border: '1px solid var(--ghost)', color: 'var(--ink)', padding: '6px 10px', borderRadius: 2, cursor: 'pointer' }}
+                style={{ fontFamily: 'var(--mono)', fontSize: 12, background: 'transparent', border: '1px solid var(--ghost)', color: 'var(--ink)', padding: '6px 10px', borderRadius: 999, cursor: 'pointer' }}
               >
                 {host}
               </button>
@@ -252,16 +252,22 @@ function SignalField() {
   const spread = scores.length ? `${Math.min(...scores)}–${Math.max(...scores)}` : null
 
   return (
-    <div style={{ background: 'var(--deep)', position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420, cursor: 'crosshair' }}>
+    <div style={{
+      backgroundColor: 'var(--deep)',
+      backgroundImage: 'radial-gradient(circle at center, transparent 0 20px, rgba(240,215,255,0.10) 21px 26px, transparent 27px)',
+      backgroundSize: '76px 76px',
+      position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420, cursor: 'crosshair',
+      borderRadius: 26, margin: '0 0 -1px',
+    }}>
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', height: '40%',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(230,162,60,0.10) 50%, transparent 100%)',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(240,215,255,0.12) 50%, transparent 100%)',
         animation: 'scanSweep 5s ease-in-out infinite',
       }} />
 
       <div style={{
         position: 'absolute', width: 520, height: 520, left: glowX, top: glowY, margin: '-260px 0 0 -260px',
-        pointerEvents: 'none', background: 'radial-gradient(circle, rgba(230,162,60,0.16) 0%, rgba(230,162,60,0.05) 38%, transparent 68%)',
+        pointerEvents: 'none', background: 'radial-gradient(circle, rgba(240,215,255,0.20) 0%, rgba(240,215,255,0.06) 38%, transparent 68%)',
       }} />
 
       <div style={{
@@ -296,7 +302,7 @@ function SignalField() {
 
         <div style={{
           transform: fieldNear, willChange: 'transform', margin: '28px 0', padding: '18px 22px 20px',
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.7) 62%, transparent 100%)',
+          background: 'linear-gradient(90deg, #0F0C08A5, #0F0C0800)',
           borderLeft: '1px solid var(--accent)', width: 'fit-content',
         }}>
           <div className="mono" style={{ fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>

@@ -11,7 +11,7 @@ export function LanguageSelector() {
   const { language, setLanguage } = useTranslation()
 
   return (
-    <div style={{ display: 'inline-flex', border: '0.5px solid var(--fog)', borderRadius: 8, overflow: 'hidden' }}>
+    <div style={{ display: 'inline-flex', border: '0.5px solid var(--fog)', borderRadius: 12, overflow: 'hidden' }}>
       {LANGUAGES.map(({ code, label }) => {
         const active = language === code
         return (
