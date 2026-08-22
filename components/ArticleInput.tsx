@@ -44,11 +44,11 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
     >
       <div style={{ padding: '24px 48px 40px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{
-          fontFamily: 'var(--sans)',
-          fontWeight: 400,
+          fontFamily: 'var(--display)',
+          fontWeight: 600,
           fontSize: 'clamp(40px, 5.2vw, 72px)',
           lineHeight: 1.04,
-          letterSpacing: '-0.025em',
+          letterSpacing: '-0.015em',
           margin: 0,
           color: 'var(--ink)',
         }}>

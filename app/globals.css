@@ -65,6 +65,12 @@
   --serif: "Source Serif 4", "Georgia", serif;
   --sans:  "Urbanist", "Inter", system-ui, -apple-system, Helvetica, sans-serif;
   --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  /* Reserved for the wordmark and the single biggest display moment per
+     screen (nav logo, hero H1) — the rounded, bulbous companion to the
+     fluffy Q mark. Section headings stay --sans at a heavier weight
+     instead; using --display everywhere would flatten the hierarchy it's
+     meant to create. */
+  --display: "Fredoka", var(--sans);
 
   /* Verdict tints — pale washes behind claim cards and severity chips. */
   --misleading:      oklch(0.52 0.19 35);

@@ -34,4 +34,6 @@
   --sans: "Urbanist", "Inter", system-ui, -apple-system, sans-serif;
   --serif: "Source Serif 4", Georgia, serif;
   --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  /* Same reservation as app/globals.css: the wordmark only. */
+  --display: "Fredoka", var(--sans);
 }

@@ -133,7 +133,7 @@ export function CredibilityReport({ result, currentUrl, onReset }: CredibilityRe
             </div>
             <h1 style={{
               fontFamily: 'var(--sans)',
-              fontWeight: 400,
+              fontWeight: 700,
               fontSize: 'clamp(32px, 4vw, 58px)',
               lineHeight: 1.05,
               letterSpacing: '-0.025em',

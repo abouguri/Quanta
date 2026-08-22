@@ -52,7 +52,7 @@ input, textarea { font: inherit; color: inherit; }
 }
 .wordmark {
   display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: -0.03em; text-transform: none;
   color: var(--bone);
 }
 .wordmark svg { display: block; }

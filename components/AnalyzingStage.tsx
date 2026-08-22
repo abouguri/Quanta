@@ -50,7 +50,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
 
           <h2 style={{
             fontFamily: 'var(--sans)',
-            fontWeight: 400,
+            fontWeight: 700,
             fontSize: 'clamp(32px, 4vw, 56px)',
             lineHeight: 1.06,
             letterSpacing: '-0.025em',

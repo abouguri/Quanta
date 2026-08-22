@@ -55,7 +55,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
             <circle cx="145" cy="142" r="92" fill="none" stroke="#FFFFEB" strokeWidth="50" filter="url(#fluffNav)" />
             <path d="M176 177 C196 198 218 223 250 248" fill="none" stroke="#FFFFEB" strokeWidth="50" strokeLinecap="round" filter="url(#fluffNav)" />
           </svg>
-          <span style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.05em', color: '#FFFFEB', marginLeft: 7 }}>Quanta</span>
+          <span style={{ fontFamily: 'var(--display)', fontWeight: 600, fontSize: 15, letterSpacing: '-0.03em', color: '#FFFFEB', marginLeft: 7 }}>Quanta</span>
         </button>
         {links.map(([label, href]) => (
           <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.72 }}>
@@ -213,7 +213,7 @@ export function CostSection() {
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
             / the cost of reading blind
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px', maxWidth: '22ch', color: 'var(--ink)' }}>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px', maxWidth: '22ch', color: 'var(--ink)' }}>
             Most of what fails an article is countable.
           </h2>
           <p style={{ fontSize: 18, lineHeight: 1.5, color: 'var(--grey)', maxWidth: '52ch', margin: '0 0 14px' }}>
@@ -252,7 +252,7 @@ export function SignalsSection() {
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
             / what the instrument reads
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
             Two passes.<br />One number.<br />All of it auditable.
           </h2>
         </div>
@@ -315,7 +315,7 @@ export function InspectorSection() {
             <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 16 }}>
               / evidence inspector
             </div>
-            <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0, maxWidth: '24ch', color: 'var(--ink)' }}>
+            <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0, maxWidth: '24ch', color: 'var(--ink)' }}>
               Click a claim. Watch where it came from.
             </h2>
           </div>
@@ -420,7 +420,7 @@ export function MethodSection() {
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
             / method &amp; limits
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
             What this can be wrong about.
           </h2>
           <p style={{ fontSize: 17, lineHeight: 1.55, color: '#a3a19b', maxWidth: '36ch', margin: 0 }}>
@@ -464,7 +464,7 @@ export function AccessSection() {
           <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 18 }}>
             / access
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 'clamp(34px,4.4vw,64px)', lineHeight: 1.02, letterSpacing: '-0.03em', margin: 0, maxWidth: '20ch', color: 'var(--ink)' }}>
+          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(34px,4.4vw,64px)', lineHeight: 1.02, letterSpacing: '-0.03em', margin: 0, maxWidth: '20ch', color: 'var(--ink)' }}>
             Three passes a day. No account.
           </h2>
         </div>
