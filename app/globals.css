@@ -295,6 +295,29 @@ input:focus, textarea:focus { outline: none; }
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+/* Q Wormhole — the concentric rings around the hero's confidence reading,
+   slowly resolving like layers of evidence converging on a number. */
+@keyframes wormholeSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+/* Citation Rain — evidence arriving on the analyzing screen. */
+@keyframes citationRain {
+  from { transform: translateY(-420px); }
+  to   { transform: translateY(420px); }
+}
+/* Source Constellation — the fact-check/search/model lookup chain, twinkling like a live graph. */
+@keyframes constellationPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+/* Confidence Topography — contour lines drifting, an uncertain terrain being measured. */
+@keyframes topographyFlow {
+  to { stroke-dashoffset: -160; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .q-wormhole, .q-rain-stroke, .q-constellation-node, .q-topo-line { animation: none !important; }
+}
 @keyframes blink {
   0%,  49% { opacity: 1; }
   50%, 100% { opacity: 0; }

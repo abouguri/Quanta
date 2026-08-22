@@ -230,6 +230,41 @@ function useCursorField() {
   return pos
 }
 
+const WORMHOLE_RINGS = [
+  { r: 132, w: 10, op: 0.30 },
+  { r: 88, w: 8, op: 0.20 },
+  { r: 52, w: 6, op: 0.14 },
+]
+
+/** Concentric Q-shaped rings (circle + comma tail) spinning slowly behind the confidence reading — evidence resolving into a number. */
+function QWormhole() {
+  return (
+    <div
+      className="q-wormhole"
+      aria-hidden="true"
+      style={{
+        position: 'absolute', left: '50%', top: '50%', width: 0, height: 0,
+        animation: 'wormholeSpin 70s linear infinite', pointerEvents: 'none',
+      }}
+    >
+      {WORMHOLE_RINGS.map((ring, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute', left: -ring.r, top: -ring.r, width: ring.r * 2, height: ring.r * 2,
+            borderRadius: '50%', border: `${ring.w}px solid var(--accent)`, opacity: ring.op,
+          }}
+        >
+          <span style={{
+            position: 'absolute', width: ring.r * 0.42, height: ring.r * 0.16, background: 'var(--accent)',
+            borderRadius: 999, right: -ring.r * 0.24, bottom: ring.r * 0.08, transform: 'rotate(44deg)',
+          }} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function SignalField() {
   const { t } = useTranslation()
   const { x, y } = useCursorField()
@@ -253,9 +288,7 @@ function SignalField() {
 
   return (
     <div style={{
-      backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
-      backgroundSize: '78px 78px',
+      background: 'var(--deep)',
       position: 'relative', overflow: 'hidden', padding: '24px 40px 40px', minHeight: 420, cursor: 'crosshair',
       borderRadius: 26, margin: '0 0 -1px',
     }}>
@@ -301,14 +334,16 @@ function SignalField() {
         </div>
 
         <div style={{
+          position: 'relative',
           transform: fieldNear, willChange: 'transform', margin: '28px 0', padding: '18px 22px 20px',
           background: 'linear-gradient(90deg, #0F0C08A5, #0F0C0800)',
           borderLeft: '1px solid var(--accent)', width: 'fit-content',
         }}>
-          <div className="mono" style={{ fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
+          <QWormhole />
+          <div className="mono" style={{ position: 'relative', fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
             {fieldReading}
           </div>
-          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#a3a19b', marginTop: 12 }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#a3a19b', marginTop: 12 }}>
             {fieldCaption}
           </div>
         </div>

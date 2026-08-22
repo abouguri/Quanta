@@ -15,6 +15,36 @@ interface Props {
   activeLabel: string
 }
 
+// left position, stroke width, animation duration and negative delay (so
+// strokes are already mid-fall on mount instead of bunching at the top)
+const RAIN_STROKES: Array<[string, number, number, number]> = [
+  ['4%', 72, 7, -1.2], ['12%', 38, 9, -4.5], ['21%', 96, 6.5, -3.1],
+  ['31%', 54, 8.5, -6.8], ['41%', 110, 7.5, -0.4], ['52%', 45, 10, -8.2],
+  ['9%', 30, 11, -5.6], ['63%', 66, 6, -2.3], ['74%', 80, 9.5, -7.1],
+  ['84%', 58, 8, -1.9], ['93%', 40, 7, -4.9], ['57%', 92, 10.5, -9.4],
+]
+
+/** Thin evidence strokes drifting down the analyzing panel — citations arriving, not a generic spinner. */
+function CitationRain() {
+  return (
+    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+      {RAIN_STROKES.map(([left, width, duration, delay], i) => (
+        <span
+          key={i}
+          className="q-rain-stroke"
+          style={{
+            position: 'absolute', left, top: '50%', width, height: 3, borderRadius: 999,
+            background: i % 2 === 0 ? 'var(--accent)' : '#FFFFEB',
+            opacity: i % 4 === 3 ? 0.16 : i % 2 === 0 ? 0.5 : 0.24,
+            animation: `citationRain ${duration}s linear infinite`,
+            animationDelay: `${delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function AnalyzingStage({ target, steps, activeLabel }: Props) {
   const { t } = useTranslation()
   const [creep, setCreep] = useState(0)
@@ -34,12 +64,12 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
 
   return (
     <section className="animate-fadeIn" style={{
-      backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
-      backgroundSize: '78px 78px',
+      position: 'relative', overflow: 'hidden',
+      background: 'var(--deep)',
       color: 'var(--paper)', minHeight: '70vh', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
     }}>
-      <div className="q-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 64, alignItems: 'start' }}>
+      <CitationRain />
+      <div className="q-container" style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 64, alignItems: 'start' }}>
         <div>
           <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
             {t('analyzing.nowReading')}

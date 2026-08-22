@@ -244,22 +244,50 @@ const CAPABILITIES: Array<[string, string, string]> = [
   ['009', 'Live streaming', 'Every pass streams over SSE as it completes — nothing waits behind a spinner.'],
 ]
 
+/** Fact-check-db → search → model, drawn as a small pulsing network graph — not a security wallpaper. */
+function SourceConstellation() {
+  const nodes = [
+    { cx: 40, cy: 170, r: 7, delay: '0s' },
+    { cx: 95, cy: 60, r: 10, delay: '.4s' },
+    { cx: 165, cy: 130, r: 6, delay: '.9s' },
+    { cx: 235, cy: 50, r: 8, delay: '1.3s' },
+    { cx: 300, cy: 145, r: 10, delay: '1.8s' },
+  ]
+  return (
+    <svg aria-hidden="true" viewBox="0 0 320 220" style={{ position: 'absolute', left: 0, top: 260, width: 300, height: 210, opacity: 0.9 }}>
+      <g stroke="#FFFFEB" strokeWidth="1" opacity=".22">
+        <path d="M40 170L95 60L165 130L235 50L300 145" fill="none" />
+        <path d="M95 60L235 50M165 130L300 145M40 170L165 130" fill="none" />
+      </g>
+      <g fill="var(--accent)" stroke="var(--deep)" strokeWidth="4">
+        {nodes.map((n, i) => (
+          <circle key={i} className="q-constellation-node" cx={n.cx} cy={n.cy} r={n.r}
+            style={{ animation: 'constellationPulse 3.2s ease-in-out infinite', animationDelay: n.delay }} />
+        ))}
+      </g>
+      <g fill="#FFFFEB" opacity=".7">
+        <circle cx="130" cy="30" r="2.5" /><circle cx="250" cy="135" r="3" />
+        <circle cx="185" cy="140" r="2" /><circle cx="55" cy="95" r="2.5" />
+      </g>
+    </svg>
+  )
+}
+
 export function SignalsSection() {
   return (
     <section id="signals" className="q-anchor" style={{
-      backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
-      backgroundSize: '78px 78px',
+      background: 'var(--deep)',
       color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
     }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
-        <div style={{ position: 'sticky', top: 120 }}>
-          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+        <div style={{ position: 'sticky', top: 120, minHeight: 480, overflow: 'hidden' }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
             / what the instrument reads
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
+          <h2 style={{ position: 'relative', fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
             Two passes.<br />One number.<br />All of it auditable.
           </h2>
+          <SourceConstellation />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'rgba(255,255,255,0.14)' }}>
           {CAPABILITIES.map(([num, name, detail]) => (
@@ -416,26 +444,45 @@ const FAQ: Array<[string, string, string]> = [
   ['Q.006', 'What does Quanta never do?', 'It never rates an outlet in place of the piece in front of you, never returns a number without the structural flags and claims that produced it, and never claims to be an oracle. Read the report, not just the score.'],
 ]
 
+/** Calm drifting contour lines behind the "what this can be wrong about" copy — uncertainty as terrain, not a warning icon. */
+function ConfidenceTopography() {
+  const lines = [
+    { d: 'M20 150c30-70 90-95 140-60 45 25 60 90 110 85', delay: '0s' },
+    { d: 'M10 165c35-95 100-120 155-70 50 45 55 130 130 115', delay: '-3s' },
+    { d: 'M0 178c40-110 110-140 170-80 55 60 50 150 145 130', delay: '-6s' },
+  ]
+  return (
+    <svg aria-hidden="true" viewBox="0 0 300 220" style={{ position: 'absolute', left: 0, top: 210, width: 300, height: 200, opacity: 0.85 }}>
+      <g fill="none" stroke="var(--accent)" strokeWidth="2" opacity=".22">
+        {lines.map((l, i) => (
+          <path key={i} className="q-topo-line" d={l.d} strokeDasharray="6 10"
+            style={{ animation: 'topographyFlow 14s linear infinite', animationDelay: l.delay }} />
+        ))}
+      </g>
+      <circle cx="160" cy="115" r="6" fill="var(--accent)" stroke="var(--deep)" strokeWidth="3" opacity=".8" />
+    </svg>
+  )
+}
+
 export function MethodSection() {
   const [open, setOpen] = useState(0)
   return (
     <section id="method" className="q-anchor" style={{
-      backgroundColor: 'var(--deep)',
-      backgroundImage: 'radial-gradient(circle at center, transparent 21px, rgba(240,215,255,.34) 22px, rgba(240,215,255,.34) 27px, transparent 28px)',
-      backgroundSize: '78px 78px',
+      background: 'var(--deep)',
       color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
     }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
-        <div>
-          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+        <div style={{ position: 'relative', minHeight: 420, overflow: 'hidden' }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
             / method &amp; limits
           </div>
-          <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
+          <h2 style={{ position: 'relative', fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
             What this can be wrong about.
           </h2>
-          <p style={{ fontSize: 17, lineHeight: 1.55, color: '#a3a19b', maxWidth: '36ch', margin: 0 }}>
+          <p style={{ position: 'relative', fontSize: 17, lineHeight: 1.55, color: '#a3a19b', maxWidth: '36ch', margin: 0 }}>
             A credibility instrument that hides its limits is just another confident voice. These are ours, in plain words.
           </p>
+          <ConfidenceTopography />
         </div>
         <div>
           {FAQ.map(([num, question, answer], i) => (
