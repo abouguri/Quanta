@@ -7,12 +7,16 @@
   --ink-4: #5B5A56;
   --graphite: #333E48;
 
-  --bone: #F1EEE7;
+  --bone: #FFFFEB;
   --paper: #FFFFFF;
   --mist: #EFEBE0;
   --fog: #DEDEDE;
 
-  --ember: #E6A23C;
+  /* Unlike app/globals.css, most of the popup's --ember usages are on light
+     card backgrounds, so a direct swap works for those. The one exception
+     (.q-dot in the dark shell-header) uses --lilac directly instead. */
+  --ember: #034F46;
+  --lilac: #F0D7FF;
   --signal: #1A4D7A;
   --deep: #000000;
   --grey: #5B5A56;

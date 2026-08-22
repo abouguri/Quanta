@@ -46,12 +46,12 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       <nav style={{ display: 'flex', gap: 2, padding: '6px 8px', alignItems: 'center' }}>
         <button onClick={onHome} title="Quanta" aria-label="Quanta — home" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 8px 5px 6px' }}>
           <svg width="16" height="16" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="30" r="13" stroke="#F1EEE7" strokeWidth="4" fill="none" />
-            <circle cx="44" cy="42" r="4" fill="#E6A23C" />
+            <circle cx="32" cy="30" r="13" stroke="#FFFFEB" strokeWidth="4" fill="none" />
+            <circle cx="44" cy="42" r="4" fill="#F0D7FF" />
           </svg>
         </button>
         {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}>
+          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#FFFFEB', opacity: 0.72 }}>
             {label}
           </a>
         ))}
@@ -59,7 +59,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           onClick={onOpenHistory}
           title={t('nav.history')}
           aria-label={t('nav.history')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 4, color: '#F1EEE7', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 4, color: '#FFFFEB', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
         >
           <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
             <circle cx="10" cy="10" r="7.5" />
@@ -105,7 +105,7 @@ function AccountMenu() {
       <a
         href="/auth/sign-in"
         className="mono"
-        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#F1EEE7', opacity: 0.72 }}
+        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 4, color: '#FFFFEB', opacity: 0.72 }}
       >
         {t('nav.signIn')}
       </a>
@@ -121,7 +121,7 @@ function AccountMenu() {
         title={profile?.email ?? user.email ?? undefined}
         style={{
           width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(255,255,255,0.14)', color: '#F1EEE7', border: 0, cursor: 'pointer',
+          background: 'rgba(255,255,255,0.14)', color: '#FFFFEB', border: 0, cursor: 'pointer',
           fontFamily: 'var(--mono)', fontSize: 11,
         }}
       >
@@ -141,7 +141,7 @@ function AccountMenu() {
             <a
               href="/account"
               className="mono"
-              style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#F1EEE7' }}
+              style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB' }}
             >
               {t('nav.account')}
             </a>
@@ -158,7 +158,7 @@ function AccountMenu() {
               <button
                 type="submit"
                 className="mono"
-                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#F1EEE7', background: 'transparent', border: 0, cursor: 'pointer' }}
+                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB', background: 'transparent', border: 0, cursor: 'pointer' }}
               >
                 {t('nav.signOut')}
               </button>

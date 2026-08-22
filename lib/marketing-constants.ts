@@ -18,8 +18,12 @@ export const TONE_LABEL = {
 
 export const COLORS = {
   'ink-navy': '#232323',
-  bone: '#F1EEE7',
-  ember: '#E6A23C',
+  bone: '#FFFFEB',
+  // ember is the identity color -- dark, so only legible on a light
+  // background. lilac is its bright counterpart for the few spots on this
+  // page with a dark (ink-navy) background instead, e.g. Methodology.
+  ember: '#034F46',
+  lilac: '#F0D7FF',
   paper: '#FFFFFF',
   mist: '#EFEBE0',
   fog: '#DEDEDE',

@@ -4,7 +4,7 @@
 
 :root {
   /* Quanta brand palette — Instrument v2 */
-  --bone:         #F1EEE7;
+  --bone:         #FFFFEB;
   --paper:        #FFFFFF;
   --mist:         #EFEBE0;
   --fog:          #DEDEDE;
@@ -16,7 +16,22 @@
   --graphite:     #333E48;
 
   --signal:       #1A4D7A;
-  --ember:        #E6A23C;
+  /* --ember is the identity color itself — used on light backgrounds and as
+     solid fills. --lilac exists because --ember is dark: everywhere it's
+     used against the fixed-black --deep panels (the nav pulse dot, the
+     signal field reading, claim-ledger toggles, FAQ numbers — 16 of 17
+     accent usages in this app) needs something bright instead, so --accent
+     points at --lilac, not --ember. Reach for --ember directly only on a
+     light background. */
+  --ember:        #034F46;
+  --lilac:        #F0D7FF;
+  /* For the few spots that paint --ember directly onto a --paper/--bone/--mist
+     surface rather than the fixed-black --deep: those surfaces themselves flip
+     between light and dark, so the accent painted on them has to flip too, the
+     same way --ink flips against --bone. Light mode keeps the dark teal
+     (legible on white paper); dark mode swaps to lilac (legible on the dark
+     paper dark mode uses instead). */
+  --accent-paper: var(--ember);
 
   /* Signal colors (credibility) */
   --verified:     #2E7D5B;
@@ -42,7 +57,7 @@
   --mid:          #CBCBCB;
   --ghost:        #DEDEDE;
   --white:        #FFFFFF;
-  --accent:       var(--ember);
+  --accent:       var(--lilac);
   --contested:    var(--mixed);
   --unsupported:  var(--disputed);
   --unknown:      #8A8985;
@@ -77,14 +92,19 @@
   --mist:         #1C262D;
   --fog:          #333330;
 
-  --ink:          #F1EEE7;
-  --ink-2:        rgba(241, 238, 231, 0.74);
-  --ink-3:        rgba(241, 238, 231, 0.52);
+  --ink:          #FFFFEB;
+  --ink-2:        rgba(255, 255, 235, 0.74);
+  --ink-3:        rgba(255, 255, 235, 0.52);
   --ink-4:        #A3A19B;
   --graphite:     #C3CBD2;
 
   --signal:       #5C9DD6;
-  --ember:        #E6A23C;
+  /* Same identity color in both themes, same reasoning as :root above. */
+  --ember:        #034F46;
+  --lilac:        #F0D7FF;
+  /* --paper/--bone/--mist are dark here, so the direct-on-paper accent has to
+     flip to the bright color — see the :root comment on --accent-paper. */
+  --accent-paper: var(--lilac);
 
   --verified:     #4FAE83;
   --mixed:        #D8964E;
@@ -154,7 +174,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
-.q-dot { color: var(--ember); }
+.q-dot { color: var(--accent-paper); }
 .q-anchor { scroll-margin-top: 96px; }
 
 @keyframes qpulse {

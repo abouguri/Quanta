@@ -40,7 +40,7 @@ input, textarea { font: inherit; color: inherit; }
   letter-spacing: 0.16em;
   color: var(--ink-4);
 }
-.q-dot { color: var(--ember); }
+.q-dot { color: var(--lilac); } /* sits in the dark shell-header — needs the bright accent, not the dark one */
 
 /* ============ Shell ============ */
 .shell { display: flex; flex-direction: column; min-height: 560px; }

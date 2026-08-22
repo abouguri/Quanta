@@ -324,7 +324,7 @@ export function Methodology() {
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: `0 ${SPACING[10]}` }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: SPACING[20], alignItems: 'start' }}>
           <div>
-            <div style={{ fontFamily: FONTS.sans, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: COLORS.ember }}>
+            <div style={{ fontFamily: FONTS.sans, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.16em', color: COLORS.lilac }}>
               ● Methodology
             </div>
             <h2 style={{
@@ -337,7 +337,7 @@ export function Methodology() {
               fontWeight: 500,
             }}>
               Show the work
-              <span style={{ color: COLORS.ember }}>—</span> every time.
+              <span style={{ color: COLORS.lilac }}>—</span> every time.
             </h2>
             <p style={{
               marginTop: SPACING[8],
@@ -366,7 +366,7 @@ export function Methodology() {
                   padding: `${SPACING[4]} 0`,
                   borderTop: '0.5px solid #1F3D5A',
                 }}>
-                  <span style={{ color: COLORS.ember, fontFamily: FONTS.mono, fontSize: 12, letterSpacing: '0.04em' }}>→</span>
+                  <span style={{ color: COLORS.lilac, fontFamily: FONTS.mono, fontSize: 12, letterSpacing: '0.04em' }}>→</span>
                   <div>
                     <div style={{ fontWeight: 500, fontSize: 16, color: COLORS.bone }}>
                       {t}
@@ -392,7 +392,7 @@ export function Methodology() {
               <span style={{ fontFamily: FONTS.mono, fontSize: '11px', color: '#A6B3C4', textTransform: 'uppercase', letterSpacing: '0.18em' }}>
                 Methodology / Framing
               </span>
-              <span style={{ fontFamily: FONTS.mono, fontSize: '10px', color: COLORS.ember }}>
+              <span style={{ fontFamily: FONTS.mono, fontSize: '10px', color: COLORS.lilac }}>
                 v 1.4.0
               </span>
             </div>
@@ -423,14 +423,14 @@ export function Methodology() {
                 { code: 'F-04', name: 'Hedging language', w: 82 },
               ].map((r) => (
                 <div key={r.code} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr 40px', gap: SPACING[4], alignItems: 'center' }}>
-                  <span style={{ fontFamily: FONTS.mono, fontSize: '11px', color: COLORS.ember }}>
+                  <span style={{ fontFamily: FONTS.mono, fontSize: '11px', color: COLORS.lilac }}>
                     {r.code}
                   </span>
                   <span style={{ fontSize: '13px', color: COLORS.bone }}>
                     {r.name}
                   </span>
                   <div style={{ height: 3, background: '#1F3D5A', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${r.w}%`, height: '100%', background: COLORS.ember }} />
+                    <div style={{ width: `${r.w}%`, height: '100%', background: COLORS.lilac }} />
                   </div>
                   <span style={{ fontFamily: FONTS.mono, fontSize: '12px', color: COLORS.bone, textAlign: 'right' }}>
                     {r.w}
@@ -446,7 +446,7 @@ export function Methodology() {
               border: '0.5px solid rgba(232,163,61,0.4)',
               borderRadius: '8px',
             }}>
-              <div style={{ fontFamily: FONTS.mono, fontSize: '10px', color: COLORS.ember, textTransform: 'uppercase', letterSpacing: '0.18em' }}>
+              <div style={{ fontFamily: FONTS.mono, fontSize: '10px', color: COLORS.lilac, textTransform: 'uppercase', letterSpacing: '0.18em' }}>
                 Weighting
               </div>
               <p style={{ margin: `${SPACING[1]} 0 0`, fontSize: '13px', color: '#CFCFC2', lineHeight: 1.55 }}>
@@ -464,7 +464,7 @@ export function Methodology() {
         right: 0,
         bottom: 0,
         height: 1,
-        background: `linear-gradient(90deg, transparent, ${COLORS.ember}, transparent)`,
+        background: `linear-gradient(90deg, transparent, ${COLORS.lilac}, transparent)`,
         opacity: 0.6,
       }} />
     </section>

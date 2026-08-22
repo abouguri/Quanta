@@ -70,7 +70,7 @@ export function AnalysisHistory({ onSelect, currentUrl, refreshKey, open, onClos
         }}
       >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
-        <p className="smcap" style={{ color: 'var(--accent)', margin: 0 }}>{t('history.title')}</p>
+        <p className="smcap" style={{ color: 'var(--accent-paper)', margin: 0 }}>{t('history.title')}</p>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           {mounted && history.length > 0 && (
             <button
