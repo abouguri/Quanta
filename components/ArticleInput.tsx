@@ -21,9 +21,19 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  const prevTab = useRef(tab)
 
+  // Only steal focus on an explicit tab switch, not on initial mount — auto-
+  // focusing on load would skip a keyboard user straight past the skip link
+  // and the entire nav to land mid-page. Comparing against the previous tab
+  // (rather than a "ran once" flag) keeps this correct under React Strict
+  // Mode's double-invoked effects in dev, which would otherwise defeat a
+  // simple first-render guard.
   useEffect(() => {
-    inputRef.current?.focus()
+    if (prevTab.current !== tab) {
+      inputRef.current?.focus()
+    }
+    prevTab.current = tab
   }, [tab])
 
   const ready = tab === 'url' ? url.trim().length > 6 : text.trim().length > 100
@@ -39,10 +49,10 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
 
   return (
     <header
-      className="animate-fadeUp"
-      style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 0, borderBottom: '1px solid var(--ghost)' }}
+      className="animate-fadeUp q-hero"
+      style={{ borderBottom: '1px solid var(--ghost)' }}
     >
-      <div style={{ padding: '24px 48px 40px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="q-hero-copy" style={{ padding: '24px 48px 40px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{
           fontFamily: 'var(--display)',
           fontWeight: 600,
@@ -64,29 +74,47 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
           {t('input.heroSubtitle')}
         </p>
 
-        <div style={{ display: 'flex', gap: 4, marginTop: 34, marginBottom: 12 }}>
-          <TabBtn active={tab === 'url'} onClick={() => setTab('url')}>{t('input.urlTab')}</TabBtn>
-          <TabBtn active={tab === 'text'} onClick={() => setTab('text')}>{t('input.textTab')}</TabBtn>
+        <div
+          role="tablist"
+          aria-label={t('input.tabsLabel')}
+          onKeyDown={e => {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+            e.preventDefault()
+            const next = tab === 'url' ? 'text' : 'url'
+            setTab(next)
+            document.getElementById(next === 'url' ? 'tab-url' : 'tab-text')?.focus()
+          }}
+          style={{ display: 'flex', gap: 4, marginTop: 34, marginBottom: 12 }}
+        >
+          <TabBtn id="tab-url" controls="panel-url" active={tab === 'url'} onClick={() => setTab('url')}>{t('input.urlTab')}</TabBtn>
+          <TabBtn id="tab-text" controls="panel-text" active={tab === 'text'} onClick={() => setTab('text')}>{t('input.textTab')}</TabBtn>
         </div>
 
         {tab === 'url' ? (
-          <div className="field" style={{ display: 'flex', border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 20, overflow: 'hidden' }}>
-            <span style={{
-              fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--grey)',
+          <div id="panel-url" role="tabpanel" aria-labelledby="tab-url" className="field q-url-row" style={{ display: 'flex', flexWrap: 'wrap', border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 20, overflow: 'hidden' }}>
+            <label htmlFor="article-url" className="q-visually-hidden">{t('input.urlLabel')}</label>
+            <span aria-hidden="true" style={{
+              fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--grey)',
               padding: '0 16px', display: 'flex', alignItems: 'center', borderRight: '1px solid var(--ghost)',
             }}>
               {t('input.urlPrefix')}
             </span>
             <input
+              id="article-url"
+              name="url"
               ref={inputRef as React.RefObject<HTMLInputElement>}
               value={url}
               onChange={e => setUrl(e.target.value)}
               onKeyDown={handleKey}
               placeholder="https://"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              autoCapitalize="off"
               spellCheck={false}
-              style={{ flex: 1, minWidth: 0, border: 0, outline: 'none', background: 'transparent', padding: '18px 16px', fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink)' }}
+              style={{ flex: 1, minWidth: 160, border: 0, outline: 'none', background: 'transparent', padding: '18px 16px', fontFamily: 'var(--mono)', fontSize: 14, color: 'var(--ink)' }}
             />
-            <button onClick={submit} disabled={!ready} style={{ display: 'flex', gap: 2, border: 0, padding: 0, background: 'transparent', cursor: ready ? 'pointer' : 'not-allowed' }}>
+            <button onClick={submit} disabled={!ready} className="q-url-submit" style={{ display: 'flex', gap: 2, border: 0, padding: 0, background: 'transparent', cursor: ready ? 'pointer' : 'not-allowed' }}>
               <span style={{ background: ready ? 'var(--ink)' : 'var(--ghost)', color: ready ? 'var(--paper)' : 'var(--grey)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '16px 18px' }}>
                 {t('input.submitButton')}
               </span>
@@ -96,9 +124,18 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
               </span>
             </button>
           </div>
-        ) : (
-          <div className="field" style={{ border: '1px solid var(--ghost)', background: 'var(--white)' }}>
+        ) : null}
+        {tab === 'url' && !ready && (
+          <div aria-live="polite" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', letterSpacing: '0.06em', marginTop: 8 }}>
+            {t('input.urlHint')}
+          </div>
+        )}
+        {tab === 'text' ? (
+          <div id="panel-text" role="tabpanel" aria-labelledby="tab-text" className="field" style={{ border: '1px solid var(--ghost)', background: 'var(--white)' }}>
+            <label htmlFor="article-text" className="q-visually-hidden">{t('input.textLabel')}</label>
             <textarea
+              id="article-text"
+              name="text"
               ref={inputRef as React.RefObject<HTMLTextAreaElement>}
               value={text}
               onChange={e => setText(e.target.value)}
@@ -106,9 +143,11 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
               rows={7}
               style={{ width: '100%', border: 0, background: 'transparent', padding: 18, fontSize: 14, fontFamily: 'var(--mono)', color: 'var(--ink)', resize: 'vertical', lineHeight: 1.55 }}
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: '1px solid var(--ghost)', fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--grey)', letterSpacing: '0.1em' }}>
-              <span>
-                {text.length} {t('input.charactersLabel').toUpperCase()}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderTop: '1px solid var(--ghost)', fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', letterSpacing: '0.1em' }}>
+              <span aria-live="polite">
+                {text.length < 100
+                  ? t('input.charCountMin', { n: text.length })
+                  : t('input.charCountReady', { n: text.length })}
                 {text.length > 0 && text.length < 100 && (
                   <span style={{ color: 'var(--unsupported)', marginLeft: 10 }}>{t('input.charsNeedMore', { n: 100 - text.length })}</span>
                 )}
@@ -127,10 +166,10 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
               </button>
             </div>
           </div>
-        )}
+        ) : null}
 
         <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grey)', textTransform: 'uppercase', letterSpacing: '0.18em', marginRight: 4 }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--grey)', textTransform: 'uppercase', letterSpacing: '0.18em', marginRight: 4 }}>
             {t('input.tryOneOf')}
           </span>
           {SAMPLE_URLS.map(s => {
@@ -141,6 +180,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
                 key={s.url}
                 type="button"
                 onClick={() => { setTab('url'); setUrl(s.url) }}
+                className="q-tap-target-sm"
                 style={{ fontFamily: 'var(--mono)', fontSize: 12, background: 'transparent', border: '1px solid var(--ghost)', color: 'var(--ink)', padding: '6px 10px', borderRadius: 999, cursor: 'pointer' }}
               >
                 {host}
@@ -149,7 +189,7 @@ export function ArticleInput({ onSubmit }: ArticleInputProps) {
           })}
         </div>
 
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--grey)', marginTop: 30, lineHeight: 2 }}>
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--grey)', marginTop: 30, lineHeight: 2 }}>
           {t('input.statsLine')}<br />
           {t('input.quotaLine')}
           <span style={{ display: 'inline-block', width: 8, height: '1.05em', background: 'currentColor', verticalAlign: -2, marginLeft: 4, animation: 'blink 0.9s steps(1) infinite' }} />
@@ -187,9 +227,9 @@ const FIELD_WORDS_NEAR: Array<[string, 'verified' | 'contested' | 'unsupported']
 ]
 
 const FIELD_WORD_TONE: Record<(typeof FIELD_WORDS_NEAR)[number][1], string> = {
-  verified: 'rgba(79,174,131,0.55)',
-  contested: 'rgba(216,150,78,0.55)',
-  unsupported: 'rgba(224,107,107,0.55)',
+  verified: 'var(--verified-on-deep)',
+  contested: 'var(--mixed-on-deep)',
+  unsupported: 'var(--disputed-on-deep)',
 }
 
 /** Lerps toward the cursor position (as viewport fractions), idle at center until the pointer moves. */
@@ -303,20 +343,21 @@ function SignalField() {
         pointerEvents: 'none', background: 'radial-gradient(circle, rgba(240,215,255,0.20) 0%, rgba(240,215,255,0.06) 38%, transparent 68%)',
       }} />
 
-      <div style={{
-        position: 'absolute', inset: '-12% -8%', pointerEvents: 'none', transform: fieldFar, willChange: 'transform',
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: '-4% 3%', pointerEvents: 'none', transform: fieldFar, willChange: 'transform',
         display: 'flex', flexWrap: 'wrap', gap: '18px 26px', alignContent: 'center', justifyContent: 'center',
       }}>
         {FIELD_WORDS_FAR.map(w => (
-          <span key={w} style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(241,238,231,0.09)', whiteSpace: 'nowrap' }}>
+          <span key={w} style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(241,238,231,0.09)', whiteSpace: 'nowrap' }}>
             {w}
           </span>
         ))}
       </div>
 
-      <div style={{
-        position: 'absolute', inset: '52% -4% -6% -4%', pointerEvents: 'none', transform: fieldNear, willChange: 'transform',
-        display: 'flex', flexWrap: 'wrap', gap: '16px 22px', alignContent: 'flex-end', justifyContent: 'center',
+      {/* stops short of the bottom (56px) so the corpus stats/hint line below always has its own clear row instead of the field bleeding into it */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: '52% 3% 56px 3%', pointerEvents: 'none', transform: fieldNear, willChange: 'transform',
+        display: 'flex', flexWrap: 'wrap', gap: '16px 22px', alignContent: 'flex-end', justifyContent: 'center', overflow: 'hidden',
       }}>
         {FIELD_WORDS_NEAR.map(([w, tone]) => (
           <span key={w} style={{ fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: FIELD_WORD_TONE[tone], whiteSpace: 'nowrap' }}>
@@ -329,26 +370,26 @@ function SignalField() {
       <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'linear-gradient(180deg, transparent, rgba(241,238,231,0.28), transparent)', transform: crosshairX, pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 420 }}>
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74' }}>
+        <div className="mono" style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
           {t('input.signalPanelTitle')}
         </div>
 
         <div style={{
           position: 'relative',
           transform: fieldNear, willChange: 'transform', margin: '28px 0', padding: '18px 22px 20px',
-          background: 'linear-gradient(90deg, #0F0C08A5, #0F0C0800)',
+          background: 'rgba(15,12,8,0.92)',
           borderLeft: '1px solid var(--accent)', width: 'fit-content',
         }}>
           <QWormhole />
           <div className="mono" style={{ position: 'relative', fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
             {fieldReading}
           </div>
-          <div className="mono" style={{ position: 'relative', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#a3a19b', marginTop: 12 }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--on-deep-2)', marginTop: 12 }}>
             {fieldCaption}
           </div>
         </div>
 
-        <div style={{ paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
+        <div style={{ paddingTop: 16, borderTop: '1px dashed rgba(255,255,255,0.22)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
           {median !== null
             ? t('input.signalPanelStats', { median, spread: spread ?? '—' })
             : t('input.signalPanelStatsEmpty')}
@@ -359,9 +400,14 @@ function SignalField() {
   )
 }
 
-function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabBtn({ id, controls, active, onClick, children }: { id: string; controls: string; active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
+      id={id}
+      role="tab"
+      aria-selected={active}
+      aria-controls={controls}
+      tabIndex={active ? 0 : -1}
       onClick={onClick}
       style={{
         padding: '8px 14px 9px',

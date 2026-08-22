@@ -21,6 +21,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      className="q-tap-target"
       style={{
         width: BOX,
         height: BOX,
@@ -28,8 +29,8 @@ export function ThemeToggle() {
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 12,
-        border: '0.5px solid var(--fog)',
-        color: 'var(--ink-2)',
+        border: '0.5px solid rgba(255,255,255,0.24)',
+        color: 'var(--on-deep)',
         background: 'transparent',
         cursor: 'pointer',
       }}

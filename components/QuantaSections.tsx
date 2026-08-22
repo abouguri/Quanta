@@ -16,7 +16,7 @@ const WIRE: string[] = [
   'claims verified against Google Fact Check Tools first',
   'no match → Brave Search over known fact-check domains',
   'still no match → model, labelled, uncertainty-first',
-  '10 passes / 24h per IP · no account',
+  '10 web passes / 24h per IP · no account',
 ]
 
 export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpenHistory: () => void }) {
@@ -30,7 +30,7 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
   const wire = [...WIRE, ...WIRE]
 
   return (
-    <div style={{
+    <div className="q-on-deep" style={{
       position: 'sticky',
       top: 14,
       zIndex: 50,
@@ -42,9 +42,11 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
       overflow: 'hidden',
       boxShadow: '0 0 0 2px var(--bone), 0 4px 14px rgba(0,0,0,0.16)',
       width: 'fit-content',
+      minWidth: 0,
     }}>
-      <nav style={{ display: 'flex', gap: 2, padding: '6px 8px', alignItems: 'center' }}>
-        <button onClick={onHome} title="Quanta" aria-label="Quanta — home" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 8px 5px 6px' }}>
+      <nav className="q-nav-row" style={{ display: 'flex', gap: 2, padding: '6px 8px', alignItems: 'center', minWidth: 0, overflowX: 'auto' }}>
+        {/* dir="ltr" — brand marks don't mirror; without this the Q flips to the wrong side of the wordmark under dir="rtl" */}
+        <button onClick={onHome} title="Quanta" aria-label="Quanta — home" dir="ltr" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 0, cursor: 'pointer', padding: '5px 8px 5px 6px', flexShrink: 0 }}>
           <svg width="20" height="20" viewBox="0 0 320 320" fill="none" aria-hidden="true">
             <defs>
               <filter id="fluffNav" x="-30%" y="-30%" width="160%" height="160%">
@@ -57,28 +59,31 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           </svg>
           <span style={{ fontFamily: 'var(--display)', fontWeight: 600, fontSize: 15, letterSpacing: '-0.03em', color: '#FFFFEB', marginLeft: 7 }}>Quanta</span>
         </button>
-        {links.map(([label, href]) => (
-          <a key={label} href={href} className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.72 }}>
-            {label}
-          </a>
-        ))}
+        <div className="q-nav-links" style={{ display: 'contents' }}>
+          {links.map(([label, href]) => (
+            <a key={label} href={href} className="mono" style={{ fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.85, flexShrink: 0 }}>
+              {label}
+            </a>
+          ))}
+        </div>
         <button
           onClick={onOpenHistory}
           title={t('nav.history')}
           aria-label={t('nav.history')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 12, color: '#FFFFEB', opacity: 0.72, background: 'transparent', border: 0, cursor: 'pointer' }}
+          className="q-tap-target"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 12, color: '#FFFFEB', opacity: 0.85, background: 'transparent', border: 0, cursor: 'pointer', flexShrink: 0 }}
         >
           <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
             <circle cx="10" cy="10" r="7.5" />
             <path d="M10 6v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 2, flexShrink: 0 }}>
           <LanguageSelector />
           <ThemeToggle />
         </div>
         <AccountMenu />
-        <a href="#access" className="mono" style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 12, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap' }}>
+        <a href="#access" className="mono q-tap-target" style={{ fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 12, border: 0, cursor: 'pointer', background: 'var(--accent)', color: '#000', marginLeft: 4, whiteSpace: 'nowrap', flexShrink: 0 }}>
           {t('nav.installExtensionShort')}
         </a>
       </nav>
@@ -86,10 +91,10 @@ export function QuantaNav({ onHome, onOpenHistory }: { onHome: () => void; onOpe
           marquee this wide would otherwise inflate the pill's own
           fit-content width and leave the compact nav row sitting
           left-aligned inside a bar sized for the ticker instead of it. */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', position: 'relative', height: 21, overflow: 'hidden' }}>
+      <div dir="ltr" style={{ borderTop: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.06)', position: 'relative', height: 21, overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, display: 'flex', width: 'max-content', animation: 'ticker 26s linear infinite' }}>
           {wire.map((w, i) => (
-            <span key={i} className="mono" style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#cbcbcb', whiteSpace: 'nowrap' }}>
+            <span key={i} className="mono" style={{ fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 18px', color: '#e4eae6', whiteSpace: 'nowrap' }}>
               {w}
             </span>
           ))}
@@ -112,7 +117,7 @@ function AccountMenu() {
       <a
         href="/auth/sign-in"
         className="mono"
-        style={{ fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.72 }}
+        style={{ fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '5px 7px', borderRadius: 12, color: '#FFFFEB', opacity: 0.85 }}
       >
         {t('nav.signIn')}
       </a>
@@ -126,10 +131,13 @@ function AccountMenu() {
       <button
         onClick={() => setOpen(o => !o)}
         title={profile?.email ?? user.email ?? undefined}
+        aria-label={profile?.email ?? user.email ?? t('nav.account')}
+        aria-expanded={open}
+        className="q-tap-target"
         style={{
           width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(255,255,255,0.14)', color: '#FFFFEB', border: 0, cursor: 'pointer',
-          fontFamily: 'var(--mono)', fontSize: 11,
+          fontFamily: 'var(--mono)', fontSize: 12,
         }}
       >
         {initial}
@@ -142,13 +150,13 @@ function AccountMenu() {
             background: 'var(--deep)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 16,
             boxShadow: '0 10px 30px rgba(0,0,0,0.32)', overflow: 'hidden',
           }}>
-            <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.14)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: '#a3a19b', wordBreak: 'break-all' }}>
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.14)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: 'var(--on-deep-2)', wordBreak: 'break-all' }}>
               {profile?.email ?? user.email}
             </div>
             <a
               href="/account"
               className="mono"
-              style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB' }}
+              style={{ display: 'block', padding: '10px 14px', fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB' }}
             >
               {t('nav.account')}
             </a>
@@ -156,7 +164,7 @@ function AccountMenu() {
               <a
                 href="/account"
                 className="mono"
-                style={{ display: 'block', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)' }}
+                style={{ display: 'block', padding: '10px 14px', fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent)' }}
               >
                 {t('nav.upgrade')}
               </a>
@@ -165,7 +173,7 @@ function AccountMenu() {
               <button
                 type="submit"
                 className="mono"
-                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB', background: 'transparent', border: 0, cursor: 'pointer' }}
+                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px', fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#FFFFEB', background: 'transparent', border: 0, cursor: 'pointer' }}
               >
                 {t('nav.signOut')}
               </button>
@@ -195,14 +203,14 @@ export function CostSection() {
     <section id="cost" className="q-anchor" style={{ padding: '96px 0' }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
         <div style={{ background: 'var(--deep)', borderRadius: 26, padding: '30px 32px 26px', boxShadow: '0 18px 60px rgba(3,79,70,.14)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--on-deep-3)', paddingBottom: 14, borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
             <span>structural checks</span><span>severity</span>
           </div>
           {INVENTORY.map(([num, label, sev]) => (
             <div key={num} style={{ display: 'grid', gridTemplateColumns: '44px 1fr 74px', gap: 14, alignItems: 'baseline', padding: '11px 0', borderBottom: '1px dashed rgba(255,255,255,0.16)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.04em', color: '#e6e4de' }}>
-              <span style={{ color: '#7d7b74' }}>{num}</span>
+              <span style={{ color: 'var(--on-deep-3)' }}>{num}</span>
               <span>{label}</span>
-              <span style={{ textAlign: 'right', color: sev === 'high' ? 'var(--unsupported)' : 'var(--contested)', textTransform: 'uppercase' }}>{sev}</span>
+              <span style={{ textAlign: 'right', color: sev === 'high' ? 'var(--disputed-on-deep)' : 'var(--mixed-on-deep)', textTransform: 'uppercase' }}>{sev}</span>
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 16, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#fff' }}>
@@ -277,11 +285,11 @@ export function SignalsSection() {
   return (
     <section id="signals" className="q-anchor" style={{
       background: 'var(--deep)',
-      color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
+      color: 'var(--on-deep)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
     }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'start' }}>
         <div style={{ position: 'sticky', top: 120, minHeight: 480, overflow: 'hidden' }}>
-          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--on-deep-3)', marginBottom: 18 }}>
             / what the instrument reads
           </div>
           <h2 style={{ position: 'relative', fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: 0 }}>
@@ -293,7 +301,7 @@ export function SignalsSection() {
           {CAPABILITIES.map(([num, name, detail]) => (
             <div key={num} style={{ background: 'var(--deep)', padding: '26px 22px 30px' }}>
               <div className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{name}</div>
-              <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: '#a3a19b' }}>{detail}</p>
+              <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: 'var(--on-deep-2)' }}>{detail}</p>
             </div>
           ))}
         </div>
@@ -352,7 +360,7 @@ export function InspectorSection() {
               Click a claim. Watch where it came from.
             </h2>
           </div>
-          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+          <div className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)' }}>
             worked example · not a live analysis
           </div>
         </div>
@@ -360,13 +368,14 @@ export function InspectorSection() {
         <div style={{ border: '1px solid var(--ghost)', borderRadius: 26, overflow: 'hidden', background: 'var(--white)', boxShadow: '0 18px 60px rgba(3,79,70,.10)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '240px minmax(0,1fr) 300px', minHeight: 360 }}>
             <div style={{ borderRight: '1px solid var(--ghost)', background: 'var(--bone)' }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
+              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
                 claim tree
               </div>
               {DEMO_CLAIMS.map((c, i) => (
                 <button
                   key={i}
                   onClick={() => setSelected(i)}
+                  aria-pressed={i === selected}
                   style={{
                     width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '16px 1fr', gap: 10,
                     alignItems: 'start', padding: '12px 16px', border: 0, borderBottom: '1px solid var(--ghost)',
@@ -375,7 +384,7 @@ export function InspectorSection() {
                 >
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.tone, marginTop: 5 }} />
                   <span>
-                    <span className="mono" style={{ display: 'block', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+                    <span className="mono" style={{ display: 'block', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
                       claim {i + 1} · {c.verdict}
                     </span>
                     <span style={{ display: 'block', fontSize: 13, lineHeight: 1.35, color: 'var(--ink)', marginTop: 4 }}>{c.short}</span>
@@ -385,7 +394,7 @@ export function InspectorSection() {
             </div>
 
             <div style={{ padding: '22px 26px', borderRight: '1px solid var(--ghost)' }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 14 }}>
+              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', marginBottom: 14 }}>
                 article · selected claim highlighted
               </div>
               <p style={{ fontSize: 17, lineHeight: 1.62, margin: '0 0 14px', color: 'var(--ink)' }}>
@@ -397,22 +406,22 @@ export function InspectorSection() {
             </div>
 
             <div style={{ background: 'var(--bone)' }}>
-              <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
+              <div className="mono" style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)', padding: '12px 16px', borderBottom: '1px solid var(--ghost)' }}>
                 provenance
               </div>
               <div style={{ padding: 16 }}>
                 <div style={{ border: '1px solid var(--ghost)', background: 'var(--white)', borderRadius: 12, padding: '14px 16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: sel.tone }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: sel.tone }}>
                     <span>{sel.verdict}</span><span>{sel.confidence}</span>
                   </div>
-                  <div style={{ marginTop: 10, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--grey)' }}>
+                  <div style={{ marginTop: 10, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: 'var(--grey)' }}>
                     {sel.provenance}
                   </div>
-                  <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.08em', color: sel.tone }}>
+                  <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.08em', color: sel.tone }}>
                     {sel.publisher}
                   </div>
                 </div>
-                <div style={{ marginTop: 14, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)', lineHeight: 1.9 }}>
+                <div style={{ marginTop: 14, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--grey)', lineHeight: 1.9 }}>
                   Lookup order<br />
                   01 google fact check tools<br />
                   02 brave search · known domains<br />
@@ -421,7 +430,7 @@ export function InspectorSection() {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 20px', background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 20px', background: 'var(--ink)', color: 'var(--bone)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
             <span>engine v2 · gpt-oss-120b · groq</span>
             <span>{DEMO_CLAIMS.length} claims shown</span>
           </div>
@@ -469,17 +478,17 @@ export function MethodSection() {
   return (
     <section id="method" className="q-anchor" style={{
       background: 'var(--deep)',
-      color: 'var(--paper)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
+      color: 'var(--on-deep)', padding: '96px 0', borderRadius: 36, margin: '0 14px',
     }}>
       <div className="q-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 64, alignItems: 'start' }}>
         <div style={{ position: 'relative', minHeight: 420, overflow: 'hidden' }}>
-          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 18 }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--on-deep-3)', marginBottom: 18 }}>
             / method &amp; limits
           </div>
           <h2 style={{ position: 'relative', fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(30px,3.2vw,46px)', lineHeight: 1.08, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
             What this can be wrong about.
           </h2>
-          <p style={{ position: 'relative', fontSize: 17, lineHeight: 1.55, color: '#a3a19b', maxWidth: '36ch', margin: 0 }}>
+          <p style={{ position: 'relative', fontSize: 17, lineHeight: 1.55, color: 'var(--on-deep-2)', maxWidth: '36ch', margin: 0 }}>
             A credibility instrument that hides its limits is just another confident voice. These are ours, in plain words.
           </p>
           <ConfidenceTopography />
@@ -488,17 +497,27 @@ export function MethodSection() {
           {FAQ.map(([num, question, answer], i) => (
             <div key={num} style={{ borderBottom: '1px dashed rgba(255,255,255,0.22)' }}>
               <button
+                id={`faq-q-${i}`}
                 onClick={() => setOpen(open === i ? -1 : i)}
-                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, padding: '20px 0', background: 'transparent', border: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--paper)' }}
+                aria-expanded={open === i}
+                aria-controls={`faq-a-${i}`}
+                className="q-on-deep"
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, padding: '20px 0', background: 'transparent', border: 0, cursor: 'pointer', textAlign: 'left', color: 'var(--on-deep)' }}
               >
                 <span className="mono" style={{ fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   <span style={{ color: 'var(--accent)', marginRight: 14 }}>{num}</span>{question}
                 </span>
-                <span className="mono" style={{ fontSize: 16, color: 'var(--accent)' }}>{open === i ? '−' : '+'}</span>
+                <span className="mono" aria-hidden="true" style={{ fontSize: 16, color: 'var(--accent)' }}>{open === i ? '−' : '+'}</span>
               </button>
-              <div style={{ display: 'grid', gridTemplateRows: open === i ? '1fr' : '0fr', transition: 'grid-template-rows 200ms cubic-bezier(0,0,.2,1)' }}>
+              <div
+                id={`faq-a-${i}`}
+                role="region"
+                aria-labelledby={`faq-q-${i}`}
+                aria-hidden={open !== i}
+                style={{ display: 'grid', gridTemplateRows: open === i ? '1fr' : '0fr', transition: 'grid-template-rows 200ms cubic-bezier(0,0,.2,1)' }}
+              >
                 <div style={{ overflow: 'hidden' }}>
-                  <p style={{ margin: '0 0 22px', fontSize: 16, lineHeight: 1.6, color: '#a3a19b', maxWidth: '70ch' }}>{answer}</p>
+                  <p style={{ margin: '0 0 22px', fontSize: 16, lineHeight: 1.6, color: 'var(--on-deep-2)', maxWidth: '70ch' }}>{answer}</p>
                 </div>
               </div>
             </div>
@@ -522,7 +541,7 @@ export function AccessSection() {
             / access
           </div>
           <h2 style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 'clamp(34px,4.4vw,64px)', lineHeight: 1.02, letterSpacing: '-0.03em', margin: 0, maxWidth: '20ch', color: 'var(--ink)' }}>
-            Three passes a day. No account.
+            Three passes a day on the extension. No account.
           </h2>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
@@ -534,15 +553,15 @@ export function AccessSection() {
               Extension
             </span>
           </a>
-          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+          <span className="mono" style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
             chrome mv3 · readability · sse
           </span>
         </div>
       </div>
-      <div className="q-container" style={{ marginTop: 64, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ghost)', paddingTop: 22, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
+      <footer className="q-container" style={{ marginTop: 64, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ghost)', paddingTop: 22, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--grey)' }}>
         <span>Quanta · engine v2</span>
         <span>Truth, measured</span>
-      </div>
+      </footer>
     </section>
   )
 }

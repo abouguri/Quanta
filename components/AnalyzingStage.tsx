@@ -66,7 +66,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
     <section className="animate-fadeIn" style={{
       position: 'relative', overflow: 'hidden',
       background: 'var(--deep)',
-      color: 'var(--paper)', minHeight: '70vh', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
+      color: 'var(--on-deep)', minHeight: '70vh', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
     }}>
       <CitationRain />
       <div className="q-container" style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 64, alignItems: 'start' }}>
@@ -74,7 +74,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
           <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
             {t('analyzing.nowReading')}
           </div>
-          <div className="mono" style={{ fontSize: 13, color: '#a3a19b', wordBreak: 'break-all' }}>
+          <div className="mono" style={{ fontSize: 13, color: 'var(--on-deep-2)', wordBreak: 'break-all' }}>
             {target}
           </div>
 
@@ -96,7 +96,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
               return (
                 <div key={s.step} style={{ borderTop: '1px dashed rgba(255,255,255,0.22)', padding: '16px 0' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                    <span style={{ color: '#7d7b74' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ color: 'var(--on-deep-3)' }}>{String(i + 1).padStart(2, '0')}</span>
                     <span style={{ color: s.done ? 'var(--verified)' : 'var(--paper)' }}>{s.label}</span>
                     <span style={{ flex: 1, borderBottom: '1px dotted rgba(255,255,255,0.24)', height: 1, alignSelf: 'center' }} />
                     <span style={{ color: s.done ? 'var(--verified)' : 'var(--accent)' }}>
@@ -118,7 +118,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
             {steps.length === 0 && (
               <div style={{ borderTop: '1px dashed rgba(255,255,255,0.22)', padding: '16px 0' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                  <span style={{ color: '#7d7b74' }}>01</span>
+                  <span style={{ color: 'var(--on-deep-3)' }}>01</span>
                   <span>{t('analyzing.pass01')}</span>
                   <span style={{ flex: 1, borderBottom: '1px dotted rgba(255,255,255,0.24)', height: 1, alignSelf: 'center' }} />
                   <span style={{ color: 'var(--accent)' }}>{t('analyzing.working')}</span>
@@ -130,7 +130,7 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
             )}
           </div>
 
-          <div style={{ marginTop: 28, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
+          <div style={{ marginTop: 28, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
             {doneCount}/{totalCount} {t('analyzing.passes')}
             {doneCount === totalCount && totalCount > 1 && (
               <span style={{ marginLeft: 16, color: 'var(--verified)' }}>{t('analyzing.waitingResults')}</span>
@@ -139,19 +139,19 @@ export function AnalyzingStage({ target, steps, activeLabel }: Props) {
         </div>
 
         <div>
-          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#7d7b74', marginBottom: 14 }}>
+          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--on-deep-3)', marginBottom: 14 }}>
             {t('analyzing.frames')}
           </div>
           <div style={{ border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, padding: 16, fontFamily: 'var(--mono)', fontSize: 11, lineHeight: 2, color: '#e6e4de', minHeight: 300 }}>
             {steps.map((s, i) => (
               <div key={s.step} className="animate-fadeIn">
-                <span style={{ color: '#7d7b74' }}>{String(i + 1).padStart(2, '0')}</span>{' '}
+                <span style={{ color: 'var(--on-deep-3)' }}>{String(i + 1).padStart(2, '0')}</span>{' '}
                 <span style={{ color: s.done ? 'var(--verified)' : 'var(--accent)' }}>{s.step}</span> {s.label}
               </div>
             ))}
-            {steps.length === 0 && <span style={{ color: '#7d7b74' }}>{t('analyzing.queued')}…</span>}
+            {steps.length === 0 && <span style={{ color: 'var(--on-deep-3)' }}>{t('analyzing.queued')}…</span>}
           </div>
-          <div style={{ marginTop: 16, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
+          <div style={{ marginTop: 16, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
             {t('analyzing.doNotRefresh')}
           </div>
         </div>

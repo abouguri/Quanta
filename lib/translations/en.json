@@ -8,17 +8,23 @@
     "urlPrefix": "URL ›",
     "charsNeedMore": "— NEED {n} MORE",
     "charsReady": "— READY",
-    "heroLine1": "Truth!",
+    "heroLine1": "Truth,",
     "heroLine2": "measured.",
     "heroSubtitle": "Paste a URL. Quanta pulls the checkable claims, looks each one up against independent fact-checkers, measures the page's own structure, and streams back a 0–100 report that shows its work.",
     "submitButtonNow": "Now",
     "tryOneOf": "Try",
     "statsLine": "2 scoring passes · 3-tier claim lookup (db → search → model)",
-    "quotaLine": "10 passes / 24h per IP · no account · history stored locally only",
+    "quotaLine": "10 web passes / 24h per IP · no account · history stored locally only",
     "signalPanelTitle": "Signal field · live corpus",
     "signalPanelStats": "Median {median} · range {spread} · this browser only",
     "signalPanelStatsEmpty": "No local history yet",
-    "signalPanelHint": "move the cursor to sweep the field"
+    "signalPanelHint": "move the cursor to sweep the field",
+    "urlLabel": "Article URL",
+    "textLabel": "Article text",
+    "tabsLabel": "Input method",
+    "charCountMin": "{n} / 100 characters minimum",
+    "charCountReady": "{n} characters",
+    "urlHint": "Paste a link to an article to start"
   },
   "analyzing": {
     "nowReading": "Now reading",
@@ -121,6 +127,9 @@
     "failed": "Failed to copy"
   },
   "source": {},
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
   "nav": {
     "cost": "Cost",
     "signals": "Signals",

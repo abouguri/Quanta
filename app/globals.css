@@ -12,7 +12,7 @@
   --ink:          #034F46;
   --ink-2:        rgba(3, 79, 70, 0.76);
   --ink-3:        rgba(3, 79, 70, 0.52);
-  --ink-4:        #6B7E78;
+  --ink-4:        #55655F;
   --graphite:     #073E38;
 
   --signal:       #0B675B;
@@ -32,6 +32,18 @@
      (legible on cream paper); dark mode swaps to lilac (legible on the dark
      paper dark mode uses instead). */
   --accent-paper: var(--ember);
+
+  /* Text painted on --deep. --deep is a fixed hardware-panel surface — it
+     does not invert the way --ink/--paper do between themes — so text on
+     it needs its own fixed-light tokens instead of var(--paper)/var(--ink-4),
+     which flip dark in dark mode and go invisible on a panel that's already
+     dark in both themes. Same value in :root and .dark on purpose. */
+  --on-deep:           #FFFFEB;
+  --on-deep-2:         #C9D6CF;
+  --on-deep-3:         #AFC2BA;
+  --disputed-on-deep:  #F2A0A0;
+  --mixed-on-deep:     #E6B45C;
+  --verified-on-deep:  #7FD6A9;
 
   /* Signal colors (credibility) */
   --verified:     #2E7D5B;
@@ -53,7 +65,7 @@
      mock's own naming so ported markup can read var(--grey)/var(--ghost)
      directly instead of the handoff aliases above. */
   --deep:         #034F46;
-  --grey:         #6B7E78;
+  --grey:         var(--ink-4);
   --mid:          #CBCBCB;
   --ghost:        rgba(3, 79, 70, 0.16);
   --white:        #FFFEF6;
@@ -82,6 +94,12 @@
 
   --rule:     1px solid var(--fog);
   --rule-ink: 1px solid var(--ink);
+
+  /* var(--ink) already flips light/dark correctly against the page
+     background in both themes; --deep-surface controls (nav, FAQ, claim
+     ledger) override this locally via .q-on-deep, since --deep doesn't
+     invert the same way and an --ink ring would vanish against it. */
+  --focus: var(--ink);
 
   color-scheme: light;
 }
@@ -129,7 +147,7 @@
      across themes) so the "hardware panel" surface stays a shade darker
      than --paper instead of collapsing into it. */
   --deep:         #022F2A;
-  --grey:         #9FB8B0;
+  --grey:         var(--ink-4);
   --mid:          #0A3C35;
   --ghost:        rgba(240, 215, 255, 0.20);
   --white:        #06302B;
@@ -185,6 +203,75 @@
 .q-dot { color: var(--accent-paper); }
 .q-anchor { scroll-margin-top: 96px; }
 
+/* Expand the tap target without changing the visible control size — the
+   compact nav stays compact, but the hit area clears WCAG 2.5.8's 24px
+   floor (and gets close to the 44px platform guidance) either way. */
+.q-tap-target { position: relative; }
+.q-tap-target::after { content: ''; position: absolute; inset: -11px; }
+.q-tap-target-sm { position: relative; }
+.q-tap-target-sm::after { content: ''; position: absolute; inset: -6px; }
+
+/* Nav — collapse the section-jump links below ~700px; they duplicate
+   what scrolling already does, and removing them is what keeps the pill
+   from forcing the whole document to scroll sideways on a phone. */
+@media (max-width: 700px) {
+  .q-nav-links { display: none !important; }
+}
+
+.q-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.q-skip-link {
+  position: absolute;
+  top: -100px;
+  left: 14px;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 150ms ease-out;
+}
+.q-skip-link:focus {
+  top: 14px;
+}
+
+/* Hero — a two-column layout only earns its keep once there's room for
+   both the input and the decorative signal field; below that it's the
+   32px-wide URL field this rule exists to prevent. */
+.q-hero {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 0;
+}
+.q-hero-copy {
+  padding: 24px 48px 40px 0;
+}
+@media (max-width: 900px) {
+  .q-hero { grid-template-columns: 1fr; }
+  .q-hero-copy { padding: 24px 0 32px; }
+}
+
+/* Once the URL row wraps (finding 02's fix — flex-wrap on .q-url-row),
+   give the Analyze button its own full-width row instead of leaving it
+   left-aligned under the input. */
+@media (max-width: 480px) {
+  .q-url-row { border-radius: 20px; }
+  .q-url-submit { width: 100%; }
+  .q-url-submit > span { flex: 1; justify-content: center; display: flex; }
+}
+
 @keyframes qpulse {
   0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
   50%      { transform: scaleY(1);   opacity: 1; }
@@ -221,6 +308,23 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 input, textarea { font: inherit; color: inherit; }
 a, button { transition: opacity 150ms ease-out, color 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out; }
 input:focus, textarea:focus { outline: none; }
+
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Controls that sit on a --deep panel: an --ink ring is the same color as
+   the panel in light mode, so it needs the fixed-bright accent instead. */
+.q-on-deep :focus-visible,
+.q-on-deep:focus-visible {
+  outline-color: var(--lilac);
+}
+
+::placeholder {
+  color: var(--ink-4);
+  opacity: 1;
+}
 
 /* Utility classes */
 .smcap {
@@ -315,9 +419,6 @@ input:focus, textarea:focus { outline: none; }
 @keyframes topographyFlow {
   to { stroke-dashoffset: -160; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .q-wormhole, .q-rain-stroke, .q-constellation-node, .q-topo-line { animation: none !important; }
-}
 @keyframes blink {
   0%,  49% { opacity: 1; }
   50%, 100% { opacity: 0; }
@@ -375,3 +476,17 @@ html {
 html::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
 ::-webkit-scrollbar { display: none; }
+
+/* A stray absolutely-positioned or unclamped-width element pushing the
+   document wider than the viewport is a bug, not a feature — this is a
+   safety net, not a substitute for fixing the element that does it. */
+html, body { overflow-x: clip; max-width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

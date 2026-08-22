@@ -53,7 +53,7 @@ export function ClaimCard({ result, index, open, onToggle }: ClaimCardProps) {
           color: 'var(--paper)',
         }}
       >
-        <span className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', color: '#7d7b74' }}>
+        <span className="mono" style={{ fontSize: 12, letterSpacing: '0.14em', color: 'var(--on-deep-3)' }}>
           {String(index + 1).padStart(3, '0')}
         </span>
         <span className="mono" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: cfg.tone, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -61,7 +61,7 @@ export function ClaimCard({ result, index, open, onToggle }: ClaimCardProps) {
           {t(cfg.labelKey)}
         </span>
         <span style={{ fontSize: 17, lineHeight: 1.4 }}>{result.claim.text}</span>
-        <span className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74' }}>
+        <span className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)' }}>
           {t(SOURCE_KEY[result.source])}
         </span>
         <span className="mono" style={{ fontSize: 14, color: 'var(--accent)', textAlign: 'right' }}>{open ? '−' : '+'}</span>
@@ -70,13 +70,13 @@ export function ClaimCard({ result, index, open, onToggle }: ClaimCardProps) {
       <div style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr', transition: 'grid-template-rows 200ms cubic-bezier(0,0,.2,1)' }}>
         <div style={{ overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '176px minmax(0,1fr)', gap: 20, padding: '0 0 24px' }}>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7d7b74', lineHeight: 2 }}>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--on-deep-3)', lineHeight: 2 }}>
               <div>{t(CONFIDENCE_KEY[result.confidence])}</div>
               {result.claim.claimant && <div>{result.claim.claimant}</div>}
               <div>{result.claim.topic}</div>
             </div>
             <div>
-              <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: '#a3a19b', maxWidth: '76ch' }}>{result.summary}</p>
+              <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: 'var(--on-deep-2)', maxWidth: '76ch' }}>{result.summary}</p>
               {result.factCheckUrl ? (
                 <a
                   href={result.factCheckUrl}
@@ -89,7 +89,7 @@ export function ClaimCard({ result, index, open, onToggle }: ClaimCardProps) {
                   {result.factCheckRating ? ` · "${result.factCheckRating}"` : ''} ↗
                 </a>
               ) : (
-                <div className="mono" style={{ marginTop: 12, fontSize: 11, letterSpacing: '0.1em', color: '#7d7b74' }}>
+                <div className="mono" style={{ marginTop: 12, fontSize: 11, letterSpacing: '0.1em', color: 'var(--on-deep-3)' }}>
                   {t('claim.noExternalSource')}
                 </div>
               )}

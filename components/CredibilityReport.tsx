@@ -399,11 +399,11 @@ function ClaimsSection({ claims, dbHits }: { claims: FactCheckResult[]; dbHits: 
         'linear-gradient(90deg, rgba(255,255,235,.09) 1px, transparent 1px)',
       ].join(', '),
       backgroundSize: 'auto, auto, auto, auto, 40px 40px, 40px 40px',
-      color: 'var(--paper)', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
+      color: 'var(--on-deep)', padding: '80px 0', margin: '24px 14px 0', borderRadius: 36,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 20, fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
         <span>{t('report.ledgerTitle')}</span>
-        <span style={{ color: '#7d7b74' }}>{t('report.claimsSummary', { n: claims.length, m: dbHits })}</span>
+        <span style={{ color: 'var(--on-deep-3)' }}>{t('report.claimsSummary', { n: claims.length, m: dbHits })}</span>
       </div>
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.24)' }}>
         {claims.map((c, i) => (

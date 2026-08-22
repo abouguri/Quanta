@@ -162,6 +162,7 @@ function HomeInner() {
 
   return (
     <div id="app" dir={language === 'ar' ? 'rtl' : 'ltr'} style={{ background: 'var(--bone)', minHeight: '100vh' }}>
+      <a href="#main" className="q-skip-link">{t('a11y.skipToContent')}</a>
       <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 14px 0' }}>
         <QuantaNav onHome={handleReset} onOpenHistory={() => setHistoryOpen(true)} />
       </div>
@@ -173,6 +174,8 @@ function HomeInner() {
         currentUrl={currentUrl}
         refreshKey={historyRefreshKey}
       />
+
+      <main id="main">
 
       {failure && (
         <div className="q-container" style={{ paddingTop: 24 }}>
@@ -216,6 +219,7 @@ function HomeInner() {
           <AccessSection />
         </>
       )}
+      </main>
     </div>
   )
 }

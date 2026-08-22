@@ -11,7 +11,7 @@ export function LanguageSelector() {
   const { language, setLanguage } = useTranslation()
 
   return (
-    <div style={{ display: 'inline-flex', border: '0.5px solid var(--fog)', borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ display: 'inline-flex', border: '0.5px solid rgba(255,255,255,0.24)', borderRadius: 12, overflow: 'hidden' }}>
       {LANGUAGES.map(({ code, label }) => {
         const active = language === code
         return (
@@ -20,6 +20,7 @@ export function LanguageSelector() {
             onClick={() => setLanguage(code)}
             aria-pressed={active}
             title={code === 'en' ? 'English' : 'العربية'}
+            className="q-tap-target-sm"
             style={{
               fontFamily: 'var(--mono)',
               fontSize: 10,
@@ -27,8 +28,8 @@ export function LanguageSelector() {
               padding: '0 7px',
               height: 24,
               cursor: 'pointer',
-              background: active ? 'var(--ink)' : 'transparent',
-              color: active ? 'var(--bone)' : 'var(--ink-3)',
+              background: active ? 'rgba(255,255,255,0.16)' : 'transparent',
+              color: active ? 'var(--on-deep)' : 'rgba(255,255,235,0.6)',
             }}
           >
             {label}
