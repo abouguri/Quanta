@@ -393,7 +393,7 @@ function SignalField() {
           border: '1px solid var(--accent)', width: 'fit-content',
         }}>
           <QWormhole />
-          <div className="mono" style={{ position: 'relative', fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: 'var(--accent)' }}>
+          <div className="mono" style={{ position: 'relative', fontSize: 'clamp(48px,7vw,104px)', lineHeight: 0.92, letterSpacing: '-0.04em', color: FIELD_WORD_TONE[band], transition: 'color 180ms ease' }}>
             {fieldReading}
           </div>
           <div className="mono" style={{ position: 'relative', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--on-deep-2)', marginTop: 12 }}>
