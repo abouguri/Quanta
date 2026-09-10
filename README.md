@@ -25,7 +25,7 @@
 
 ![The Quanta home screen — URL input beside a cursor-tracked signal field](docs/screenshots/app-input.png)
 
-<div align="center"><sub>Soft rebrand: cream, dark teal and lilac, with a fluffy Fredoka wordmark. The right-hand panel is a real thing, not decoration — move the cursor and it samples a reading, and the structural/claims sub-scores it prints are computed from the same 0.3/0.7 formula the report uses, not made up. The numbers streaming past it are the same illustrative vocabulary as the "Try" links below the input, not live telemetry.</sub></div>
+<div align="center"><sub>Soft rebrand: cream, dark teal and lilac, with a fluffy Fredoka wordmark. Move the cursor over the page and the right-hand panel samples a reading, colored red below 45, amber from 45 to 74, and green from 75 upward. The structural/claims sub-scores it prints are computed from the same 0.3/0.7 formula the report uses, not made up. The numbers streaming past it are the same illustrative vocabulary as the "Try" links below the input, not live telemetry.</sub></div>
 
 ---
 
@@ -47,6 +47,8 @@ The score is arithmetic over those verdicts, not a vibe. You can read the formul
 
 ## See it work
 
+Screenshots are captured from the current app and built extension. Analysis and extension states use fixed illustrative fixtures for reproducible previews; they are not live fact-check results. Capture script: [`scripts/capture-readme.cjs`](scripts/capture-readme.cjs).
+
 ### 1 · Paste a URL or the article text
 
 The nav's history button opens the archive — every pass you've run. No account needed; it's kept in `localStorage` and never leaves the browser. Sign in and the same archive moves server-side instead, so it follows you across devices — see [Accounts & billing](#accounts--billing).
@@ -55,15 +57,15 @@ The nav's history button opens the archive — every pass you've run. No account
 
 The API is a **Server-Sent Events** stream, so the UI names each step as the server reaches it, and mirrors the raw frames on the right. Nothing is a fake progress bar — each line there is a frame that actually arrived off the wire.
 
-![Streaming analysis, live SSE frames on the right](docs/screenshots/analyzing.png)
+![Analysis loading state, with the SSE panel on the right](docs/screenshots/analyzing.png)
 
 ### 3 · Read the verdict
 
-A live BBC piece on a festival cancellation in Tigray, scored 90/100 — "reliable," one structural flag (no byline), five claims checked and none of them pre-existing in a fact-check database, so every verdict below is a labelled AI assessment.
+A sample solar-energy report demonstrates a high score of 93/100, one structural flag for a missing byline, and five claims with explicitly labelled model assessments.
 
-![Credibility report for a live BBC article](docs/screenshots/report-high.png)
+![High-scoring sample report](docs/screenshots/report-high.png)
 
-Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text and the structural score collapses to 40 — four flags, −60 — and this time the overall follows it down to 52, "questionable," because two of the three claims came back confidently *false*. Compare that against the dark-mode run below, where the claims pass is what saves an otherwise-similar structural score from collapsing further: same shape of penalty, opposite direction, because the formula doesn't know which way a given article will break — only the two passes, weighted 30/70, arithmetic all the way down.
+A sensational sample contrasts this with a score of 52/100, a structural score of 40, four flags, and two false claims alongside one unverified claim.
 
 ![Credibility report for a low-quality pasted article](docs/screenshots/report-low.png)
 
@@ -73,7 +75,7 @@ Run the same pipeline over an anonymous, ALL-CAPS, exclamation-heavy pasted text
 
 The claim ledger is an accordion, not a card grid — click a row and it opens in place. Each one carries a verdict, a confidence, and either a publisher link or an honest `No external source found` when the assessment came from the model instead.
 
-![Claim ledger for the BBC article — three verified, two unverified](docs/screenshots/claims.png)
+![Sample claim ledger — three verified, two unverified](docs/screenshots/claims.png)
 
 ### 5 · Structural signals, computed not guessed
 
@@ -81,9 +83,9 @@ The claim ledger is an accordion, not a card grid — click a row and it opens i
 
 ### 6 · In the dark
 
-The whole interface is painted from CSS custom properties, so dark mode is a token swap in one stylesheet rather than a second set of components — including the fixed dark-teal instrument panels (nav, claim ledger), which stay a "hardware panel" surface in *both* themes on purpose while everything else — paper, ink, the accent color itself — flips. This run pastes in a paragraph of common health and election misinformation and shows two real fact-check-database hits: FactCheck.org rated both the vaccine-microchip and stolen-election claims "False," which is why they're marked `FACT-CHECK DATABASE` instead of the model's own assessment — the third claim, about 5G and coronavirus, had no database match and fell through to a labelled AI assessment instead.
+Dark mode uses the same components with a different CSS token palette. Here is the low-scoring sample in the current dark theme.
 
-![The report in dark mode, with two real fact-check-database matches](docs/screenshots/report-dark.png)
+![Low-scoring sample report in dark mode](docs/screenshots/report-dark.png)
 
 ### 7 · Source dossier
 
@@ -310,6 +312,6 @@ This is a working prototype, not a finished product. Where it falls short:
 
 Built with Next.js, TypeScript and Groq · MIT licensed
 
-<sub>Every report screenshot above is a real analysis of a live article or a real pasted text, captured from the running app.</sub>
+<sub>Screenshots show the running UI with illustrative analysis fixtures. No sample verdict is presented as a live fact-check.</sub>
 
 </div>

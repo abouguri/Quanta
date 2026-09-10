@@ -5,7 +5,7 @@ import { TranslationProvider } from '@/lib/i18n'
 import { AuthProvider } from '@/lib/supabase/auth-context'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://factnews-six.vercel.app'
-const TITLE = 'Quanta — Truth, measured.'
+const TITLE = 'Quanta | Truth, measured.'
 const DESCRIPTION = 'The credibility instrument for the internet. Measure bias, evidence, and source reliability for any news article — and see the work.'
 
 export const metadata: Metadata = {
